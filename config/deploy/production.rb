@@ -2,7 +2,7 @@
 # ======================
 # Defines a single server with a list of roles and multiple properties.
 # You can define all roles on a single server, or split them:
-set :branch, 'develop3.0'
+set :branch, 'develop'
 
 server "opentour.emory.edu", user: "deploy", roles: %w{app db web}, primary: :my_value
 # server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value

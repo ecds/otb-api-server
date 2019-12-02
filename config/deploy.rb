@@ -3,14 +3,14 @@
 # config valid for current version and patch releases of Capistrano
 lock '~> 3.11.0'
 
-set :application, 'OpenTourBuilder-Server'
-set :repo_url, 'git@github.com:ecds/OpenTourBuilder-Server.git'
+set :application, 'otb-api-server'
+set :repo_url, 'git@github.com:ecds/otb-api-server.git'
 
 # Default branch is :master
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
 
 # Default deploy_to directory is /var/www/my_app_name
-set :deploy_to, '/data/OpenTourBuilder-Server'
+set :deploy_to, '/data/otb-api-server'
 
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh

@@ -57,6 +57,8 @@ class TourSet < ApplicationRecord
     end
 
     def create_defaults
+      Apartment::Tenant.reset
+      themes = Theme.all.collect(&:title)
       Apartment::Tenant.switch! subdir
       Mode.create([
         { title: 'BICYCLING', icon: 'bicycle' },
@@ -64,10 +66,8 @@ class TourSet < ApplicationRecord
         { title: 'TRANSIT', icon: 'subway' },
         { title: 'WALKING', icon: 'walking' }
       ])
-      Theme.create([
-        { title: 'dark' },
-        { title: 'default' }
-      ])
+      themes.each do |t|
+      Theme.create(title: t)
     end
 
     def drop_tenant

@@ -10,7 +10,7 @@ module V3
     # GET /tour_sets
     def index
       @tour_sets = []
-      if params[:subdir]
+      if params[:subdir] && params[:subdir] != 'public'
         @tour_sets = TourSet.find_by(subdir: params[:subdir])
       elsif current_user.super
         @tour_sets = TourSet.all

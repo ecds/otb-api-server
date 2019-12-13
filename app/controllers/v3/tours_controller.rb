@@ -9,7 +9,7 @@ class V3::ToursController < V3Controller
   # GET /tours
   def index
     @tours = if (params[:slug])
-      Slug.find_by(slug: params[:slug]).tour
+      tour_by_slug(params[:slug])
     elsif (current_user.current_tenant_admin?)
       Tour.all
     elsif (current_user.id)
@@ -17,21 +17,24 @@ class V3::ToursController < V3Controller
     else
       Tour.published
     end
-
-    render json: @tours,
-            include: [
-              'tour_stops',
-              'stops',
-              'stops.media',
-              'stops.stop_media',
-              'mode',
-              'modes',
-              'theme',
-              'media',
-              'tour_media',
-              'flat_pages',
-              'tour_flat_pages'
-            ]
+    if @tours.nil?
+      render json: { error: '404: Tour not found' }, status: :not_found
+    else
+      render json: @tours,
+              include: [
+                'tour_stops',
+                'stops',
+                'stops.media',
+                'stops.stop_media',
+                'mode',
+                'modes',
+                'theme',
+                'media',
+                'tour_media',
+                'flat_pages',
+                'tour_flat_pages'
+              ]
+    end
   end
 
   # GET /tours/1
@@ -92,8 +95,38 @@ class V3::ToursController < V3Controller
                     :title, :description,
                     :is_geo, :modes, :published, :theme_id,
                     :mode, :meta_description, :stops,
-                    :media, :authors, :flat_pages, :map_type
+                    :media, :authors, :flat_pages, :map_type,
+                    :theme
                 ]
             )
       end
+
+      def tour_by_slug(slug)
+        tour = Slug.find_by(slug: params[:slug]).tour
+        if tour.published || current_user.current_tenant_admin? || current_user.tours.include?(tour)
+          tour
+        else
+          nil
+        end
+      end
 end
+
+# TourSet.all.each do |ts|
+#   Apartment::Tenant.switch! ts.subdir
+#   default = Theme.find(1)
+#   default.title = 'default'
+#   default.save
+#   old = Theme.where.not(id: 1)
+#   old.each { |o| o.delete }
+#   ActiveRecord::Base.connection.reset_pk_sequence!('themes')
+#   themes = ["blue", "atl", "red", "dark-blue", "purple", "green", "orange", "dark-green", "austrian", "emory", "gsu", "gatech", "uga", "ksu"]
+#   themes.each { |t| Theme.create(title: t)}
+# end
+  
+# TourSet.all.each do |ts|
+#   Apartment::Tenant.switch! ts.subdir
+#   Tour.all.each do |t|
+#     t.theme = Theme.find(1)
+#     t.save
+#   end
+# end

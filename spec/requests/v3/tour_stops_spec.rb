@@ -64,9 +64,8 @@ RSpec.describe 'V3::Stops API' do
     context 'get stop with duplicate title/slug in correct tour' do
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour1.id}" }
       it 'is true' do
-        expect(json['id'].to_i).to eq(tour1.stops.first.id)
-        expect(json['attributes']['title']).to eq(tour1.stops.first.title)
-        expect(json['relationships']['tours']['data'][0]['id'].to_i).to eq(tour1.id)
+        expect(json['relationships']['stop']['data']['id'].to_i).to eq(tour1.stops.order(created_at: :desc).first.id)
+        expect(json['relationships']['tour']['data']['id'].to_i).to eq(tour1.id)
       end
     end
 
@@ -74,9 +73,8 @@ RSpec.describe 'V3::Stops API' do
     context 'get stop with duplicate title/slug in correct tour' do
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour2.id}" }
       it 'is true' do
-        expect(json['id'].to_i).to eq(tour2.stops.first.id)
-        expect(json['attributes']['title']).to eq(tour2.stops.first.title)
-        expect(json['relationships']['tours']['data'][0]['id'].to_i).to eq(tour2.id)
+        expect(json['relationships']['stop']['data']['id'].to_i).to eq(tour2.stops.order(created_at: :desc).first.id)
+        expect(json['relationships']['tour']['data']['id'].to_i).to eq(tour2.id)
       end
     end
 

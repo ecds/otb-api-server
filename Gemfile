@@ -42,6 +42,9 @@ gem 'youtube_rails'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 gem 'rack-cors'
 
+# TODO: should probably only require this for :test
+gem 'faker', git: 'https://github.com/stympy/faker.git', branch: 'master'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   # gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -65,7 +68,6 @@ end
 group :test do
   gem 'factory_bot_rails'
   gem 'shoulda-matchers', git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
-  gem 'faker', git: 'https://github.com/stympy/faker.git', branch: 'master'
   gem 'database_cleaner'
 end
 

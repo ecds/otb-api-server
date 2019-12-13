@@ -78,15 +78,17 @@ RSpec.describe 'V3::Tours', type: :request do
 
   describe 'GET /:tenant/:tour_slug' do
     let!(:tour) { Tour.last }
+    let!(:original_title) { tour.title }
     let!(:original_slug) { Tour.last.slug }
     let!(:new_title) { Faker::TvShows::RickAndMorty.character }
 
     context 'get tour after title change' do
-
       before {
         tour.title = new_title
+        tour.published = true
         tour.save
       }
+
       before { get "/#{Apartment::Tenant.current}/tours?slug=#{new_title.parameterize}" }
 
       it 'gets same tour with new slug' do
@@ -98,6 +100,9 @@ RSpec.describe 'V3::Tours', type: :request do
 
     context 'get tour by old slug' do
       before {
+        tour.title = original_title
+        tour.published = true
+        tour.save
         tour.title = new_title
         tour.save
       }
@@ -107,6 +112,18 @@ RSpec.describe 'V3::Tours', type: :request do
         expect(response).to have_http_status(200)
         expect(attributes['slug']).to eq(new_title.parameterize)
         expect(json['id']).to eq(tour.id.to_s)
+      end
+    end
+
+    context 'get nothing if tour is unpublished and no user' do
+      before {
+        tour.published = false
+        tour.save
+        get "/#{Apartment::Tenant.current}/tours?slug=#{tour.slug}"
+      }
+
+      it 'returns nothing' do
+        expect(response).to have_http_status(404)
       end
     end
   end

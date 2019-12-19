@@ -59,6 +59,17 @@ RSpec.describe 'V3::Media', type: :request do
         # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('d611e4f4ae5afd08029feeed4cd1a207')
       end
     end
+
+    context 'create invaild is unprocessable' do
+      before {
+        invalid_attributes = valid_attributes
+        invalid_attributes[:data][:attributes].delete('video')
+        post "/#{Apartment::Tenant.current}/media", params: invalid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" } 
+      }
+      it 'return 422' do
+        expect(response).to have_http_status(422)
+      end
+    end
   end
 
   describe 'POST /media with YouTube url' do
@@ -138,6 +149,68 @@ RSpec.describe 'V3::Media', type: :request do
     it 'creates image from Vimeo embed iframe' do
       expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/207218603.jpg")
       # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('8b0e9ee26c8ca72b9b6f243a6995341a')
+    end
+  end
+
+  describe 'PUT /media/<id>' do
+    let(:valid_attributes) do
+      factory_to_json_api(FactoryBot.build(:medium, video: '98660979'))
+    end
+
+    context 'update with valid data' do
+      before {
+        valid_attributes[:data][:attributes]['id'] = Medium.first.id
+        put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
+      }
+  
+      it 'updates image' do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'update unauthenticated' do
+      before {
+        valid_attributes[:data][:attributes]['id'] = Medium.first.id
+        put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes
+      }
+  
+      it 'updates image' do
+        expect(response).to have_http_status(401)
+      end
+    end
+
+    context 'update with invalid data' do
+      before {
+        valid_attributes[:data][:attributes]['id'] = Medium.first.id
+        valid_attributes[:data][:attributes].delete('video')
+        put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
+      }
+  
+      it 'returns unprocessable' do
+        expect(response).to have_http_status(422)
+      end
+    end
+  end
+
+  describe 'DELETE /media/<id>' do
+    context 'delete while authenticated' do
+      before {
+        delete "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
+      }
+
+      it 'deletes midum' do
+        expect(response).to have_http_status(204)
+      end
+    end
+
+    context 'delte unauthenticated' do
+      before {
+        delete "/#{Apartment::Tenant.current}/media/#{Medium.first.id}"
+      }
+
+      it 'is unauthorized' do
+        expect(response).to have_http_status(401)
+      end
     end
   end
 

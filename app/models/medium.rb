@@ -4,13 +4,15 @@
 class Medium < ApplicationRecord
   include VideoProps
   include Rails.application.routes.url_helpers
-  before_save :props, if: :video?
+  before_validation :props, if: :video?
 
   mount_uploader :original_image, MediumUploader
   has_many :stop_media
   has_many :stops, through: :stop_media
   has_many :tour_media
   has_many :tours, through: :tour_media
+
+  validates_presence_of :original_image
 
   attr_accessor :insecure
 
@@ -64,12 +66,10 @@ class Medium < ApplicationRecord
   def insecure
     "#{ENV['INSECURE_IMAGE_BASE_URL']}#{self.desktop}"
   end
-end
 
-# <img data-src="https://images.unsplash.com/photo-1522201949034-507737bce479?fit=crop&w=650&h=433&q=80"
-#      data-srcset="https://images.unsplash.com/photo-1522201949034-507737bce479?fit=crop&w=650&h=433&q=80 650w,
-#                   https://images.unsplash.com/photo-1522201949034-507737bce479?fit=crop&w=1300&h=866&q=80 1300w"
-#      sizes="(min-width: 650px) 650px, 100vw" width="650" height="433" alt="" uk-img><img data-src="https://images.unsplash.com/photo-1522201949034-507737bce479?fit=crop&w=650&h=433&q=80"
-#      data-srcset="https://images.unsplash.com/photo-1522201949034-507737bce479?fit=crop&w=650&h=433&q=80 650w,
-#                   https://images.unsplash.com/photo-1522201949034-507737bce479?fit=crop&w=1300&h=866&q=80 1300w"
-#      sizes="(min-width: 650px) 650px, 100vw" width="650" height="433" alt="" uk-img>
+  private
+
+    def has_image
+      original_image.present? || remote_original_image_url.present?
+    end
+end

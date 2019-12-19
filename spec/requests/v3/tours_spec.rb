@@ -3,14 +3,15 @@
 require 'rails_helper'
 
 RSpec.describe 'V3::Tours', type: :request do
+  before {
+    set = TourSet.all.order(Arel.sql('random()')).first.subdir
+    Apartment::Tenant.switch! set
+    Tour.first.update_attribute(:published, true)
+  }
 
   describe 'GET /atlanta/tours unauthenticated' do
     before {
-      set = TourSet.all.order(Arel.sql('random()')).first.subdir
-      Apartment::Tenant.switch! set
-      Tour.first.update_attribute(:published, true)
-      count = Tour.published.count
-      get "/#{set}/tours"
+      get "/#{Apartment::Tenant.current}/tours"
     }
 
     it 'returns only published tours' do
@@ -22,35 +23,19 @@ RSpec.describe 'V3::Tours', type: :request do
     end
   end
 
-  # TODO Figure out how to test the number of tours a person should get if they are an author
-  # plus any published tours. There will likely be overlap. It's Friday, late, and I'm le tired.
-  # describe 'GET /atlanta/tours authenticated' do
-  #   before { Apartment::Tenant.switch! TourSet.all.order(Arel.sql('random()')).first.subdir }
-  #   before {
-  #     Tour.where(published: false).limit(2).each do |t|
-  #       t.update_attribute(:authors, [User.first])
-  #     end
-  #   }
-  #   before { get "/#{Apartment::Tenant.current}/tours", headers: { Authorization: "Bearer #{User.second.login.oauth2_token}" } }
-
-  #   it 'returns all tours' do
-  #     expect(json.size).to eq([User.first.tours.length, Tour.published.length].max)
-  #   end
-  # end
-
   # Test suite for GET /atlanta/tours/:id
   describe 'GET /atlanta/tours/:id' do
-    before { get "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}" }
+    before { get "/#{Apartment::Tenant.current}/tours/#{Tour.published.last.id}" }
 
     context 'when the record exists' do
       it 'returns the tour' do
         expect(json).not_to be_empty
-        expect(json['id']).to eq(Tour.last.id.to_s)
+        expect(json['id']).to eq(Tour.published.last.id.to_s)
       end
 
       it 'has five stops' do
-        expect(relationships['tour_stops']['data'].size).to eq(Tour.last.stops.length)
-        expect(relationships['stops']['data'].size).to eq(Tour.last.tour_stops.length)
+        expect(relationships['tour_stops']['data'].size).to eq(Tour.published.last.tour_stops.length)
+        expect(relationships['stops']['data'].size).to eq(Tour.published.last.stops.length)
       end
 
       it 'returns status code 200' do
@@ -77,9 +62,9 @@ RSpec.describe 'V3::Tours', type: :request do
   end
 
   describe 'GET /:tenant/:tour_slug' do
-    let!(:tour) { Tour.last }
+    let!(:tour) { Tour.published.last }
     let!(:original_title) { tour.title }
-    let!(:original_slug) { Tour.last.slug }
+    let!(:original_slug) { tour.slug }
     let!(:new_title) { Faker::TvShows::RickAndMorty.character }
 
     context 'get tour after title change' do
@@ -206,6 +191,41 @@ RSpec.describe 'V3::Tours', type: :request do
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)
+    end
+  end
+  
+  describe 'Get /<tenant>/tours authenticated' do
+    context 'tour set adim gets all the tours for that set' do
+      before {
+        user = User.last
+        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        get "/#{Apartment::Tenant.current}/tours", headers: { Authorization: "Bearer #{user.login.oauth2_token}" }
+      }
+
+      it 'returns all the tours in the set' do
+        expect(json.size).to eq(Tour.count)
+      end
+    end
+
+    context 'get tours as tour author' do
+      before {
+        user = User.first
+        user.super = false
+        user.tour_sets = []
+        user.tours = []
+        user.save
+        user.tours << Tour.first
+        Tour.all.each do |t|
+          t.published = false
+          t.save
+        end
+        get "/#{Apartment::Tenant.current}/tours", headers: { Authorization: "Bearer #{user.login.oauth2_token}" }
+      }
+
+      it 'only returns tours user can edit' do
+        expect(json.size).to eq(1)
+        expect(json.size).not_to eq(Tour.count)
+      end
     end
   end
 end

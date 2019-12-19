@@ -61,6 +61,13 @@ RSpec.describe 'V3::FlatPages', type: :request do
         expect(response).to have_http_status(201)
       end
     end
+
+    context 'create without valid params' do
+      before { post "/#{Apartment::Tenant.current}/flat-pages", params: {foo: 'bar'}, headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" } }
+      it 'returns unprocessable entity' do
+        expect(response).to have_http_status(422)
+      end
+    end
   end
     
   describe 'PUT /tenant/flat-pages/<id>' do
@@ -78,6 +85,17 @@ RSpec.describe 'V3::FlatPages', type: :request do
         expect(response).to have_http_status(200)
       end
     end
+
+    context 'update without valid params' do
+      before {
+        invalid_attributes = {data: {type: 'flat_pages', attributes: {title: nil}}}
+        put "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.last.id}", params: invalid_attributes, headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" }
+      }
+      it 'returns unprocessable entity' do
+        expect(response).to have_http_status(422)
+      end
+    end
+
   end
 
   describe 'DELETE /tenant/flat-pages/<id>' do

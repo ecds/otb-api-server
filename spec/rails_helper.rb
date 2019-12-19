@@ -49,8 +49,8 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
   config.before(:suite) do
-    DatabaseCleaner.clean_with(:truncation, except: [:modes, :roles])
-    DatabaseCleaner.strategy = :transaction
+    # DatabaseCleaner.clean_with(:truncation, except: [:modes, :roles])
+    # DatabaseCleaner.strategy = :transaction
     # Truncating doesn't drop schemas, ensure we're clean here, app *may not* exist
     # begin
     #   Apartment::Tenant.drop('atlanta')
@@ -62,16 +62,18 @@ RSpec.configure do |config|
     load Rails.root + 'db/seeds.rb'
   end
 
+  # config.use_transactional_fixtures = true
+
   # start the transaction strategy as examples are run
   config.around(:each) do |example|
-    DatabaseCleaner.cleaning do
+    # DatabaseCleaner.cleaning do
       example.run
-    end
+    # end
   end
 
   config.before(:each) do
     # Start transaction for this test
-    DatabaseCleaner.start
+    # DatabaseCleaner.start
     # Switch into the default tenant
     Apartment::Tenant.switch! TourSet.all.order(Arel.sql('random()')).first.subdir
     # host! 'atlanta.lvh.me'
@@ -80,9 +82,9 @@ RSpec.configure do |config|
 
   config.after(:each) do
     # Reset tentant back to `public`
-    Apartment::Tenant.reset
+    # Apartment::Tenant.reset
     # Rollback transaction
-    DatabaseCleaner.clean
+    # DatabaseCleaner.clean
   end
 
   # RSpec Rails can automatically mix in different behaviours to your tests

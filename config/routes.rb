@@ -18,7 +18,7 @@ Rails.application.routes.draw do
     end
     scope module: :v3, constraints: ApiVersion.new('v3', true) do
       resources :users
-      resources :modes
+      resources :modes, only: [:index]
       resources :tour_sets, path: 'tour-sets'
       resources :tour_set_admins, path: 'tour-set-users'
       resources :tour_collections, path: 'tour-collections'

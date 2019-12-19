@@ -67,7 +67,8 @@ class TourSet < ApplicationRecord
         { title: 'WALKING', icon: 'walking' }
       ])
       themes.each do |t|
-      Theme.create(title: t)
+        Theme.create(title: t)
+      end
     end
 
     def drop_tenant

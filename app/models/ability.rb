@@ -15,7 +15,7 @@ class Ability
     can :read, Medium
     can :read, FlatPage
     can [:read], TourSet
-    return unless user.present?
+    return unless user.id.present?
     can [:read, :edit, :update], Tour
     can [:manage], TourMedium
     can [:manage], Medium

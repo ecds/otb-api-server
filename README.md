@@ -16,7 +16,7 @@ The OpenTourBuilder API server provides a multi-tenant REST API for geographic t
 
 ## Build Status
 
-Waiting to see how this will work with submodules.
+[![Build Status](https://travis-ci.com/ecds/otb-api-server.svg?branch=develop)](https://travis-ci.com/ecds/otb-api-server)
 
 ## Installation
 
@@ -40,7 +40,7 @@ bundle exec puma -b 'ssl://0.0.0.0:3000?key=<path to key>&cert=<path to cert>
 
 ## Running tests
 
-TODO: Add test coverage
+[![Coverage Status](https://coveralls.io/repos/github/ecds/otb-api-server/badge.svg?branch=develop)](https://coveralls.io/github/ecds/otb-api-server?branch=develop)
 
 ~~~bash
 bundle exec rspec ./spec

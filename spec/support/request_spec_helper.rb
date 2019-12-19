@@ -19,6 +19,10 @@ module RequestSpecHelper
     json['relationships']
   end
 
+  def included
+    JSON.parse(response.body)['included']
+  end
+
   def hash_to_json_api(model, attributes)
     {
         data: {

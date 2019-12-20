@@ -10,6 +10,19 @@ RSpec.describe 'V3::StopMedia', type: :request do
   let!(:login) { create(:login, user: user) }
   let(:headers) { { Authorization: "Bearer #{login.oauth2_token}" } }
 
+  describe 'GET /stop-media' do
+    context 'gets all stop media' do
+      before {
+        get "/#{Apartment::Tenant.current}/stop-media"
+      }
+
+      it 'returns all stop media' do
+        expect(response).to have_http_status(200)
+        expect(json.size).to eq(StopMedium.count)
+      end
+    end
+  end
+
   describe 'POST /stop-media' do
     context 'add media to stop with specific position' do
       let(:valid_attributes) do

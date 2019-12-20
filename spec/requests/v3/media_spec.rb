@@ -154,11 +154,12 @@ RSpec.describe 'V3::Media', type: :request do
 
   describe 'PUT /media/<id>' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: '98660979'))
+      factory_to_json_api(FactoryBot.build(:medium, remote_original_image_url: nil))
     end
 
     context 'update with valid data' do
       before {
+        valid_attributes[:data][:attributes]['original_image'] = Rack::Test::UploadedFile.new(Rails.root.join('spec/factories/test.jpg'), 'image/jpg')
         valid_attributes[:data][:attributes]['id'] = Medium.first.id
         put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
       }

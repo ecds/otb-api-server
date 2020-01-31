@@ -6,21 +6,40 @@ require 'rails_helper'
 RSpec.describe 'V3::Stops API' do
   # Initialize the test data
   let!(:login) { User.find_by(super: true).login }
-  # let!(:tour) { Tour.last }
-  # let!(:stops) { Tour.last.stops }
-  # let(:id) { Stop.first.id }
 
   # Test suite for GET /stops
   describe 'GET /stops' do
-    before { get "/#{Apartment::Tenant.current}/stops" }
-
     context 'when stops exist' do
+      
+      before { get "/#{Apartment::Tenant.current}/stops" }
+      
       it 'returns status code 200' do
         expect(response).to have_http_status(200)
       end
 
       it 'returns all tour stops' do
         expect(json.size).to eq(Stop.count)
+      end
+    end
+
+    context 'returns stops not associated with given tour' do
+      before {
+        get "/#{Apartment::Tenant.current}/stops?tour_id=#{Tour.last.id}"
+      }
+
+      it 'returns stops not part of given tour' do
+        expect(json.size).to eq(Stop.not_in_tour(Tour.last.id).count)
+      end
+    end
+
+    context 'get stop by slug and tour' do
+      before {
+        get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Stop.first.slug}&tour=#{Stop.first.tours.first.id}"
+      }
+
+      it 'returns stop in tour with slug' do
+        expect(json['id']).to eq(Stop.first.id.to_s)
+        expect(relationships['tour']['data']['id']).to eq(Stop.first.tours.first.id.to_s)
       end
     end
   end

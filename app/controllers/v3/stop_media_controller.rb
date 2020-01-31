@@ -9,7 +9,6 @@ class V3::StopMediaController < V3Controller
     else
       StopMedium.all
     end
-
     render json: @stop_media
   end
 

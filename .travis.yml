@@ -18,6 +18,7 @@ before_install:
   - cp config/secrets.yml.dist config/secrets.yml
   - gem install bundler
 before_script:
+  - sudo service postgresql restart
   - psql -c 'create database travis_ci_test;' -U postgres
 script:
   - bundle install

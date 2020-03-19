@@ -398,35 +398,35 @@ end
 # end
 
 
-file = File.read('vienna.json')
-d = JSON.parse(file)
+# file = File.read('vienna.json')
+# d = JSON.parse(file)
 
-d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
-  stop = Stop.find_or_create_by(title: s['fields']['name'])
-  stop = Stop.find_or_create_by(title: s['fields']['name'])
-  stop.title = s['fields']['name']
-  stop.description = s['fields']['description']
-  stop.lat = s['fields']['lat']
-  stop.lng = s['fields']['lng']
-  # stop.address
-  stop.metadescription = s['fields']['metadescription']
-  stop.article_link = s['fields']['article_link']
-  stop.parking_lat = s['fields']['park_lat']
-  stop.parking_lng = s['fields']['park_lng']
-  stop.direction_intro = s['fields']['directions_intro']
-  stop.direction_notes = s['fields']['directions_notes']
-  stop.tours = [Tour.find_by(title: s['fields']['tour'])]
-  stop.save
-end
+# d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
+#   stop = Stop.find_or_create_by(title: s['fields']['name'])
+#   stop = Stop.find_or_create_by(title: s['fields']['name'])
+#   stop.title = s['fields']['name']
+#   stop.description = s['fields']['description']
+#   stop.lat = s['fields']['lat']
+#   stop.lng = s['fields']['lng']
+#   # stop.address
+#   stop.metadescription = s['fields']['metadescription']
+#   stop.article_link = s['fields']['article_link']
+#   stop.parking_lat = s['fields']['park_lat']
+#   stop.parking_lng = s['fields']['park_lng']
+#   stop.direction_intro = s['fields']['directions_intro']
+#   stop.direction_notes = s['fields']['directions_notes']
+#   stop.tours = [Tour.find_by(title: s['fields']['tour'])]
+#   stop.save
+# end
 
-file = File.read('vienna.json')
-d = JSON.parse(file)
-d.select { |d1| d1['model'] === 'tour.tourmedia' }.each do |s|
-  medium = Medium.new
-  medium.title = s['fields']['title']
-  medium.caption = s['fields']['caption']
-  p "Fetching #{s['fields']['image']}"
-  medium.remote_original_image_url = s['fields']['image']
-  medium.save
-  Tour.find_by(title: s['fields']['tour']).media = [medium]
-end
+# file = File.read('vienna.json')
+# d = JSON.parse(file)
+# d.select { |d1| d1['model'] === 'tour.tourmedia' }.each do |s|
+#   medium = Medium.new
+#   medium.title = s['fields']['title']
+#   medium.caption = s['fields']['caption']
+#   p "Fetching #{s['fields']['image']}"
+#   medium.remote_original_image_url = s['fields']['image']
+#   medium.save
+#   Tour.find_by(title: s['fields']['tour']).media = [medium]
+# end

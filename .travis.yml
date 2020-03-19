@@ -15,6 +15,10 @@ before_install:
   - cp config/database.yml.travis config/database.yml
   - cp config/secrets.yml.dist config/secrets.yml
   - gem install bundler
+before_script:
+  - psql --version
+  - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
 script:
   - bundle install
   - bundle exec rake db:drop

@@ -27,8 +27,8 @@ namespace :ImportOTB1 do
 
     # Create New TourSet
     p "Createing #{options[:set]}"
-    tour_set = TourSet.create(name: options[:set])
-
+    # tour_set = TourSet.create(name: options[:set])
+    tour_set = TourSet.find_by(name: options[:set])
     p "Switching to #{tour_set.subdir}"
     # Switch to TourSet
     Apartment::Tenant.switch! tour_set.subdir
@@ -43,17 +43,17 @@ namespace :ImportOTB1 do
     # end
 
     # create the themes
-    Theme.create(title: 'default')
-    Theme.create(title: 'dark')
-    Theme.create(title: 'blu')
+    # Theme.create(title: 'default')
+    # Theme.create(title: 'dark')
+    # Theme.create(title: 'blue')
 
     # Create Tours
     p 'Creating tours'
     tour = nil
     d.select { |d1| d1['model'] === 'tour.tour' }.each do |t|
       p t['fields']['name']
-      tour = Tour.new
-      tour.title = t['fields']['name']
+      tour = Tour.find_or_create_by(title: t['fields']['name'])
+      # tour.title = t['fields']['name']
       tour.description = t['fields']['description']
       tour.meta_description = t['fields']['metadescription']
       tour.published = t['fields']['published']
@@ -87,22 +87,21 @@ namespace :ImportOTB1 do
         end
 
       else
-        p s['fields']['name']
-        stop = Stop.new
+        p s['fields']['name']        
+        stop = Stop.find_or_create_by(title: s['fields']['name'])
         stop.title = s['fields']['name']
-        v3_stop.description = ['fields']['description']
-        v3_stop.lat = ['fields']['lat']
-        v3_stop.lng = ['fields']['lng']
+        stop.description = s['fields']['description']
+        stop.lat = s['fields']['lat']
+        stop.lng = s['fields']['lng']
         # stop.address
-        v3_stop.metadescription = ['fields']['metadescription']
-        v3_stop.article_link = ['fields']['article_link']
-        v3_stop.parking_lat = ['fields']['park_lat']
-        v3_stop.parking_lng = ['fields']['park_lng']
-        v3_stop.direction_intro = ['fields']['directions_intro']
-        v3_stop.direction_notes = ['fields']['directions_notes']
+        stop.metadescription = s['fields']['metadescription']
+        stop.article_link = s['fields']['article_link']
+        stop.parking_lat = s['fields']['park_lat']
+        stop.parking_lng = s['fields']['park_lng']
+        stop.direction_intro = s['fields']['directions_intro']
+        stop.direction_notes = s['fields']['directions_notes']
         stop.tours = [tour]
         stop.save
-
         if s['fields']['video_embed']
           medium = Medium.new
           medium.video = s['fields']['video_embed']
@@ -239,7 +238,7 @@ namespace :ImportOTB1 do
     tour = Tour.new
     tour.title = d['data']['attributes']['title']
     tour.description = d['data']['attributes']['description']
-    tour.meta_description = d['data']['attributes']['metadescription']
+    tour.metadescription = d['data']['attributes']['metadescription']
     tour.published = d['data']['attributes']['published']
     tour.is_geo = d['data']['attributes']['is_geo'] || true
     tour.theme = Theme.first
@@ -397,3 +396,37 @@ end
 #     end
 #   end
 # end
+
+
+file = File.read('vienna.json')
+d = JSON.parse(file)
+
+d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
+  stop = Stop.find_or_create_by(title: s['fields']['name'])
+  stop = Stop.find_or_create_by(title: s['fields']['name'])
+  stop.title = s['fields']['name']
+  stop.description = s['fields']['description']
+  stop.lat = s['fields']['lat']
+  stop.lng = s['fields']['lng']
+  # stop.address
+  stop.metadescription = s['fields']['metadescription']
+  stop.article_link = s['fields']['article_link']
+  stop.parking_lat = s['fields']['park_lat']
+  stop.parking_lng = s['fields']['park_lng']
+  stop.direction_intro = s['fields']['directions_intro']
+  stop.direction_notes = s['fields']['directions_notes']
+  stop.tours = [Tour.find_by(title: s['fields']['tour'])]
+  stop.save
+end
+
+file = File.read('vienna.json')
+d = JSON.parse(file)
+d.select { |d1| d1['model'] === 'tour.tourmedia' }.each do |s|
+  medium = Medium.new
+  medium.title = s['fields']['title']
+  medium.caption = s['fields']['caption']
+  p "Fetching #{s['fields']['image']}"
+  medium.remote_original_image_url = s['fields']['image']
+  medium.save
+  Tour.find_by(title: s['fields']['tour']).media = [medium]
+end

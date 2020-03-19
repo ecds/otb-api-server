@@ -5,6 +5,7 @@ class Ability
 
   def initialize(user)
     can :read, Tour, published: true
+    can :read, Slug, published: true
     can :read, Theme
     can :read, Mode
     can :read, TourMode

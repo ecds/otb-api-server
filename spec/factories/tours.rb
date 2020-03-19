@@ -3,9 +3,9 @@
 # spec/factories/tours.rb
 FactoryBot.define do
   factory :tour do
-    title { Faker::TvShows::RickAndMorty.unique.character }
+    title { Faker::Name.unique.name }
     description { "<p>#{Faker::TvShows::RickAndMorty.quote}</p><p>#{Faker::TvShows::RickAndMorty.quote}</p><p>#{Faker::TvShows::RickAndMorty.quote}</p>" }
-    published { Faker::Boolean.boolean(0.5) }
+    published { Faker::Boolean.boolean(true_ratio: 0.5) }
     theme { Theme.create! }
     mode { Mode.create! }
 

@@ -6,10 +6,10 @@ FactoryBot.define do
     sequence :title do |s|
       "#{Faker::Movies::HitchhikersGuideToTheGalaxy.planet}#{s}"
     end
-    description { Faker::Hipster.paragraph(2, true, 4) }
+    description { Faker::Hipster.paragraph(sentence_count: 2, supplemental: true, random_sentences_to_add: 4) }
     lat { Faker::Address.latitude }
     lng { Faker::Address.longitude }
-    created_at { Faker::Number.number(10) }
+    created_at { Faker::Number.number(digits: 10) }
 
     factory :stop_with_media do
       transient do

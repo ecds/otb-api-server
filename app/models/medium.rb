@@ -6,7 +6,7 @@ class Medium < ApplicationRecord
   include Rails.application.routes.url_helpers
   before_validation :props, if: :video?
 
-  mount_uploader :original_image, MediumUploader
+  mount_base64_uploader :original_image, MediumUploader
   has_many :stop_media
   has_many :stops, through: :stop_media
   has_many :tour_media
@@ -67,9 +67,16 @@ class Medium < ApplicationRecord
     "#{ENV['INSECURE_IMAGE_BASE_URL']}#{self.desktop}"
   end
 
-  private
-
-    def has_image
-      original_image.present? || remote_original_image_url.present?
+  def base64
+    if self.original_image.file && File.file?(self.original_image.file.path)
+      return Base64.encode64(self.original_image.file.read)
     end
+    nil
+  end
+
+  # private
+
+  #   def has_image
+  #     original_image.present? || remote_original_image_url.present?
+  #   end
 end

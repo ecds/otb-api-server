@@ -18,7 +18,7 @@ gem 'apartment'
 gem 'active_model_serializers', '~> 0.10.0.rc3'
 gem 'acts-as-taggable-on', '~> 5.0'
 # Use Puma as the app server
-gem 'puma', '~> 3.12'
+gem 'puma', '~> 4.3.0'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '~> 3.0'
 gem "actionview", ">= 5.2.2.1"
@@ -33,6 +33,7 @@ gem 'cancancan', '~> 2.0'
 # Active Storage will land in 5.2
 gem 'carrierwave', '~> 1.0'
 gem 'mini_magick'
+gem 'carrierwave-base64'
 
 # Vidoe provider APIs
 gem 'vimeo'

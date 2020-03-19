@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 Yt.configure do |config|
-  config.api_key = 'AIzaSyCjSl_aNiDsWnNNdS6iSJ5JVklP1vmtcek'
+  config.api_key = 'AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s'
 end

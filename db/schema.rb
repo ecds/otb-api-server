@@ -10,10 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_03_31_182510) do
+ActiveRecord::Schema.define(version: 2020_02_13_152142) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pgcrypto"
   enable_extension "plpgsql"
+  enable_extension "uuid-ossp"
 
   create_table "flat_pages", force: :cascade do |t|
     t.string "title"
@@ -100,7 +102,7 @@ ActiveRecord::Schema.define(version: 2019_03_31_182510) do
   create_table "stops", force: :cascade do |t|
     t.string "title"
     t.text "description"
-    t.string "metadescription", limit: 500
+    t.string "meta_description", limit: 500
     t.string "article_link"
     t.string "video_embed"
     t.string "video_poster"

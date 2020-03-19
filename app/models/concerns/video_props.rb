@@ -19,7 +19,6 @@ module VideoProps
     elsif self.is_youtube(medium)
       medium.provider = 'youtube'
       medium.video = youtube_id(medium)
-      Yt.configuration.api_key = 'AIzaSyCjSl_aNiDsWnNNdS6iSJ5JVklP1vmtcek'
       metadata = Yt::Video.new(id: medium.video)
       medium.remote_original_image_url = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
       begin
@@ -46,11 +45,17 @@ module VideoProps
 
 
   def self.is_youtube(medium)
+    if medium.provider == 'vimeo'
+      return false
+    end
     # FIXME Youtube is always going to return 200
     (medium.video.include? 'youtube.com') || (medium.video.include? 'youtu.be') || (!medium.video.include?('iframe') && HTTParty.get("https://www.youtube.com/watch?v=#{medium.video}").code == 200)
   end
 
   def self.is_vimeo(medium)
+    if medium.provider == 'youtube'
+      return false
+    end
     (medium.video.include? 'vimeo') || (!medium.video.include?('iframe') && HTTParty.get("https://vimeo.com/#{medium.video}").code == 200)
   end
 
@@ -78,6 +83,6 @@ module VideoProps
     if data['thumbnail_url']
       return data['thumbnail_url'].gsub(/\d\d\dx\d\d\d/, '640x480')
     end
-    Faker::Placeholdit.image('640x480')
+    Faker::Placeholdit.image(size: '640x480')
   end
 end

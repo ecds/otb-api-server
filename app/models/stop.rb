@@ -68,7 +68,7 @@ class Stop < ApplicationRecord
   private
 
     def default_values
-      self.metadescription ||= HtmlSaintizer.accessable_truncated(self.description)
+      self.meta_description ||= HtmlSaintizer.accessable_truncated(self.description)
     end
 
     def ensure_slug

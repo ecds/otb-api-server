@@ -4,12 +4,18 @@
 # module V3
 class V3::ToursController < V3Controller
   before_action :set_tour, only: [:show, :update, :destroy]
-  authorize_resource
+  # authorize_resource
+  load_and_authorize_resource
 
   # GET /tours
   def index
     @tours = if (params[:slug])
-      tour_by_slug(params[:slug])
+      tour = Slug.find_by(slug: params[:slug]).tour
+      if tour.published || current_user.current_tenant_admin?
+        tour
+      else
+        nil
+      end
     elsif (current_user.current_tenant_admin?)
       Tour.all
     elsif (current_user.id)
@@ -17,8 +23,9 @@ class V3::ToursController < V3Controller
     else
       Tour.published
     end
+
     if @tours.nil?
-      render json: { error: '404: Tour not found' }, status: :not_found
+      render json: {error: "not-found"}.to_json, status: 404
     else
       render json: @tours,
               include: [
@@ -35,6 +42,7 @@ class V3::ToursController < V3Controller
                 'tour_flat_pages'
               ]
     end
+
   end
 
   # GET /tours/1
@@ -97,36 +105,7 @@ class V3::ToursController < V3Controller
                     :mode, :meta_description, :stops,
                     :media, :authors, :flat_pages, :map_type,
                     :theme
-                ]
+	        ]
             )
       end
-
-      def tour_by_slug(slug)
-        tour = Slug.find_by(slug: params[:slug]).tour
-        if tour.published || current_user.current_tenant_admin? || current_user.tours.include?(tour)
-          tour
-        else
-          nil
-        end
-      end
 end
-
-# TourSet.all.each do |ts|
-#   Apartment::Tenant.switch! ts.subdir
-#   default = Theme.find(1)
-#   default.title = 'default'
-#   default.save
-#   old = Theme.where.not(id: 1)
-#   old.each { |o| o.delete }
-#   ActiveRecord::Base.connection.reset_pk_sequence!('themes')
-#   themes = ["blue", "atl", "red", "dark-blue", "purple", "green", "orange", "dark-green", "austrian", "emory", "gsu", "gatech", "uga", "ksu"]
-#   themes.each { |t| Theme.create(title: t)}
-# end
-  
-# TourSet.all.each do |ts|
-#   Apartment::Tenant.switch! ts.subdir
-#   Tour.all.each do |t|
-#     t.theme = Theme.find(1)
-#     t.save
-#   end
-# end

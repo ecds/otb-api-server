@@ -8,5 +8,5 @@ config/initializers/auth.rb
 public/uploads/
 .vscode
 *.env*
-
+.ruby-version
 

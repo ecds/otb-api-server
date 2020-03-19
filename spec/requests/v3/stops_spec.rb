@@ -57,8 +57,8 @@ RSpec.describe 'V3::Stops API' do
         expect(json['id']).to eq(Stop.first.id.to_s)
       end
 
-      it 'has a metadescription based on description truncated and sanitized' do
-        expect(attributes['metadescription']).not_to include('<p>')
+      it 'has a meta_description based on description truncated and sanitized' do
+        expect(attributes['meta_description']).not_to include('<p>')
       end
     end
 

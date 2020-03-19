@@ -41,7 +41,7 @@ module V3
 
     # PATCH/PUT /media/1
     def update
-      if @medium.update(medium_params)
+      if @medium.update(update_medium_params)
         render json: @medium
       else
         render json: @medium.errors, status: :unprocessable_entity
@@ -53,7 +53,7 @@ module V3
       @medium.destroy
     end
 
-    private
+    # private
       # Use callbacks to share common setup or constraints between actions.
       def set_medium
         @medium = Medium.find(params[:id])
@@ -68,5 +68,10 @@ module V3
             ]
         )
       end
+
+      def update_medium_params
+        self.medium_params.except(:original_image)
+      end
+
   end
 end

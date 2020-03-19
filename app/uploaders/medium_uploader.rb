@@ -63,6 +63,8 @@ class MediumUploader < CarrierWave::Uploader::Base
   def filename
     if model.video.present?
       "#{model.video}.jpg"
+    elsif defined?(original_filname) && original_filename.starts_with?('original_image')
+      "#{DateTime.now.strftime('%Q')[0..8]}.#{file.extension}"
     else
       @filename
     end

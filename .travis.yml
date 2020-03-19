@@ -1,19 +1,17 @@
-sudo: false
 language: ruby
 rvm:
   - 2.5.1
-addons:
-  postgresql: "10"
-  apt:
-    packages:
-    - postgresql-10
-    - postgresql-client-10
-env:
-  global:
-  - PGPORT=5433
 services:
   - postgresql
 before_install:
+  - sudo /etc/init.d/postgresql stop
+  - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key
+    add -
+  - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
+    9.5" >> /etc/apt/sources.list.d/postgresql.list'
+  - sudo apt-get update
+  - sudo apt-get install postgresql-11.2
+  - sudo /etc/init.d/postgresql start
   - cp config/database.yml.travis config/database.yml
   - cp config/secrets.yml.dist config/secrets.yml
   - gem install bundler

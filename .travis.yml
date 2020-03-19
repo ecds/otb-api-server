@@ -1,7 +1,7 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.4.1
+  - 2.5.1
 addons:
   postgresql: "11.2"
 services:
@@ -14,7 +14,7 @@ before_install:
   - sudo service postgresql restart 11 
   - cp config/database.yml.travis config/database.yml
   - cp config/secrets.yml.dist config/secrets.yml
-  - gem install bundler:2.0.1
+  - gem install bundler
 script:
   - bundle install
   - bundle exec rake db:drop

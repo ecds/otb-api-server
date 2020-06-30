@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'faker'
 
 module VideoProps
   extend ActiveSupport::Concern
@@ -13,19 +12,20 @@ module VideoProps
       medium.title = metadata['title']
       medium.caption = metadata['description']
       image = metadata['thumbnail_url']
-      medium.remote_original_image_url = vimeo_image(medium)
+      medium.remote_original_image_url = metadata['thumbnail_url']
       medium.embed = "<iframe title='#{metadata['title']}' src='https://player.vimeo.com/video/#{medium.video}' frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>"
 
     elsif self.is_youtube(medium)
       medium.provider = 'youtube'
       medium.video = youtube_id(medium)
-      metadata = Yt::Video.new(id: medium.video)
-      medium.remote_original_image_url = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
       begin
+        metadata = Yt::Video.new(id: medium.video)
         medium.title = metadata.title
         medium.caption = metadata.description
+        medium.remote_original_image_url = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
         medium.embed = %Q[<iframe title="#{metadata.title}" src='https://www.youtube.com/embed/#{medium.video}' frameborder='0' allowfullscreen>]
       rescue Yt::Errors::NoItems
+        p '!!!!!!!!!!!!!! NO ITEMS !!!!!!!!!!!!!!!!!!!!'
         medium.provider = nil
         medium.video = nil
       end
@@ -76,13 +76,5 @@ module VideoProps
       /\d{7,10}/.match(medium.video)[0]
       # /https?:\/\/{?:www\.}?vimeo.com\/{?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/.match(medium.video)[0]
     end
-  end
-
-  def self.vimeo_image(medium)
-    data = HTTParty.get("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/#{medium.video}")
-    if data['thumbnail_url']
-      return data['thumbnail_url'].gsub(/\d\d\dx\d\d\d/, '640x480')
-    end
-    Faker::Placeholdit.image(size: '640x480')
   end
 end

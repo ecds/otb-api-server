@@ -75,9 +75,70 @@ RSpec.configure do |config|
     # Start transaction for this test
     # DatabaseCleaner.start
     # Switch into the default tenant
-    Apartment::Tenant.switch! TourSet.all.order(Arel.sql('random()')).first.subdir
+    Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
     # host! 'atlanta.lvh.me'
     # load Rails.root + 'db/seeds.rb'
+    stub_request(:any, 'https://placehold.it/300x300.png')
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/300x300.png'), status: 200)
+
+    stub_request(:get, 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/310645255')
+      .to_return(
+        body: "{ title: 'CycloramaBattleSites.org Stop 2', thumbnail_url: 'https://placehold.it/300x300.png' }",
+        status: 200
+      )
+
+    stub_request(:get, 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/video/310645255')
+      .with(
+        headers: {
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent': 'Ruby'
+        }
+      )
+      .to_return(
+        status: 200,
+        body: '{ "title": "CycloramaBattleSites.org Stop 2", "thumbnail_url": "https://placehold.it/300x300.png" }',
+        headers: { 'content-type': 'application/json' }
+      )
+
+    stub_request(:get, 'https://vimeo.com/310645255')
+      .to_return(
+        status: 200
+      )
+
+    stub_request(:get, 'https://youtu.be/F9ULbmCvmxY')
+      .to_return(
+        status: 200
+      )
+
+    stub_request(:get, 'https://img.youtube.com/vi/F9ULbmCvmxY/0.jpg')
+      .to_return(
+        body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
+        status: 200
+      )
+
+    stub_request(
+      :get,
+      'https://www.googleapis.com/youtube/v3/videos?id=F9ULbmCvmxY&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet'
+    )
+    .to_return(
+      status: 200,
+      body: '{"items": [{ "id": "F9ULbmCvmxY",  "snippet": { "title": "Goodie Mob - Black Ice (Sky High) ft. OutKast", "description": "Music video by Goodie Mob feat. OutKast performing Black Ice (Sky High). (C) 1998 LaFace Records LLC" }}] }',
+      headers: { 'content-type': 'application/json' }
+    )
+
+    stub_request(:get, 'https://www.youtube.com/watch?v=F9ULbmCvmxY')
+      .to_return(status: 200, body: '', headers: {})
+
+    stub_request(:get, 'https://vimeo.com/F9ULbmCvmxY')
+      .to_return(status: 404, body: '', headers: {})
+
+    stub_request(:get, 'https://vimeo.com/https://youtu.be/F9ULbmCvmxY')
+      .to_return(status: 404, body: '', headers: {})
+
+    stub_request(:get, 'https://vimeo.com/https://www.youtube.com/watch?v=F9ULbmCvmxY')
+      .to_return(status: 404, body: '', headers: {})
+
   end
 
   config.after(:each) do
@@ -114,5 +175,9 @@ RSpec.configure do |config|
       FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/test/[^.]*"])
       FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/tmp/test/[^.]*"])
     end
+  end
+
+  config.after(:suite) do
+    TourSet.all.each { |ts| ts.destroy }
   end
 end

@@ -11,7 +11,7 @@ RSpec.describe 'V3::Media', type: :request do
   let!(:login) { create(:login, user: user) }
   let(:headers) { { Authorization: "Bearer #{login.oauth2_token}" } }
 
-  
+
   describe 'GET /media' do
     it 'media has all versions' do
       get "/#{Apartment::Tenant.current}/media/#{medium_id}"
@@ -24,29 +24,33 @@ RSpec.describe 'V3::Media', type: :request do
       expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('cd98598f356f0afa5cc6d3002627b719')
     end
   end
-  
-  # describe 'POST /media with local file handel' do
-  #   let(:valid_attributes) do
-  #     # factory_to_json_api(FactoryBot.build(:medium, original_image: File.open("#{Rails.root}/spec/support/images/otblogo.png", 'r')))
-  #     factory_to_json_api(FactoryBot.build(:medium, remote_original_image_url: Faker::Placeholdit.image))
-  #   end
 
-  #   before { get "/#{Apartment::Tenant.current}/media", params: valid_attributes }
-
-  #   it 'uploads from local file handel' do
-  #     p valid_attributes
-  #     expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/otblogo.png")
-  #     expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('4cb687e488c9ade8effc63817bb92c48')
-  #   end
-  # end
-
-  describe 'POST /media' do
-    # before { Apartment::Tenant.switch! 'atlanta' }
+  describe 'POST /media with local file handel' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: 'https://youtu.be/lVehcuJXe6I'))
+      factory_to_json_api(
+        FactoryBot.build(:medium)
+      )
     end
 
-    before { Apartment::Tenant.switch! TourSet.all.order(Arel.sql('random()')).first.subdir }
+    before {
+      valid_attributes[:data][:attributes]['original_image'] = Rack::Test::UploadedFile.new(Rails.root.join('spec/factories/images/otblogo.png'), 'image/png')
+      User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
+    }
+
+    it 'uploads from local file handel' do
+      expect(response).to have_http_status(201)
+      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/otblogo.png")
+      expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('4cb687e488c9ade8effc63817bb92c48')
+    end
+  end
+
+  describe 'POST /media' do
+    let(:valid_attributes) do
+      factory_to_json_api(FactoryBot.build(:medium, video: 'https://youtu.be/F9ULbmCvmxY'))
+    end
+
+    before { Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir }
     before { User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current) }
 
     before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" } }
@@ -55,72 +59,86 @@ RSpec.describe 'V3::Media', type: :request do
       it 'creates image from YouTube' do
         expect(User.last.current_tenant_admin?).to eq(true)
         expect(response).to have_http_status(201)
-        expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/lVehcuJXe6I.jpg")
-        # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('d611e4f4ae5afd08029feeed4cd1a207')
+        expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/F9ULbmCvmxY.jpg")
       end
     end
+  end
 
+  describe 'POST /media invalid' do
+    let(:valid_attributes) do
+      factory_to_json_api(FactoryBot.build(:medium, video: 'https://youtu.be/F9ULbmCvmxY'))
+    end
+
+    before {
+      invalid_attributes = valid_attributes
+      invalid_attributes[:data][:attributes].delete('video')
+      post "/#{Apartment::Tenant.current}/media", params: invalid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
+    }
     context 'create invaild is unprocessable' do
-      before {
-        invalid_attributes = valid_attributes
-        invalid_attributes[:data][:attributes].delete('video')
-        post "/#{Apartment::Tenant.current}/media", params: invalid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" } 
-      }
       it 'return 422' do
         expect(response).to have_http_status(422)
       end
     end
+  end
+
+  describe 'POST /media with base64' do
 
     context 'Upload image as base64 string' do
       let(:base64_request) do
         factory_to_json_api(FactoryBot.build(:medium, remote_original_image_url: nil))
       end
 
-      
       before {
         base64_request[:data][:attributes][:original_image] = File.read('spec/factories/base64_image.txt')
         post "/#{Apartment::Tenant.current}/media", params: base64_request, headers: headers
       }
-  
+
       it 'returns created' do
         expect(response).to have_http_status(201)
       end
-    end  
+    end
   end
 
   describe 'POST /media with YouTube url' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: 'https://www.youtube.com/watch?v=0yPagRrAgIU', tours: [tour]))
+      factory_to_json_api(FactoryBot.build(:medium, video: 'https://www.youtube.com/watch?v=F9ULbmCvmxY', tours: [tour]))
     end
 
     before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers }
 
-    # TODO: Fix this test!
-    # it 'creates image from YouTube url' do
-    #   expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/0yPagRrAgIU.jpg")
-    #   # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('e46304e85b7be7fd9183b4384b2e447f')
-    # end
+    it 'creates image from YouTube url' do
+      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/F9ULbmCvmxY.jpg")
+      # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('e46304e85b7be7fd9183b4384b2e447f')
+    end
   end
 
   describe 'POST /media with YouTube id' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: 'KiuEFG0ZBd8'))
+      factory_to_json_api(FactoryBot.build(:medium, video: 'F9ULbmCvmxY'))
     end
 
     before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers }
 
     it 'creates image from YouTube id' do
-      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/KiuEFG0ZBd8.jpg")
-      expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('9c19a34f02114d5919eb10b61c562b4b')
+      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/F9ULbmCvmxY.jpg")
+      expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('e2b22110134014b8bfcd2f05ebffdffd')
     end
   end
 
   describe 'POST /media with YouTube embed code' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: '<iframe width="560" height="315" src="https://www.youtube.com/embed/F9ULbmCvmxY" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>'))
+      factory_to_json_api(
+        FactoryBot.build(
+          :medium,
+          video: '<iframe width="560" height="315" src="https://www.youtube.com/embed/F9ULbmCvmxY" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+          original_image: nil
+        )
+      )
     end
 
-    before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers }
+    before {
+      post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers
+    }
 
     it 'creates image from YouTube embed code' do
       expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/F9ULbmCvmxY.jpg")
@@ -130,41 +148,41 @@ RSpec.describe 'V3::Media', type: :request do
 
   describe 'POST /media with Vimeo url' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: 'https://vimeo.com/65107797'))
+      factory_to_json_api(FactoryBot.build(:medium, video: 'https://vimeo.com/310645255'))
     end
 
     before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers }
 
     it 'creates image from Vimeo url' do
-      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/65107797.jpg")
+      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/310645255.jpg")
       # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('c1d74a506d83a46144f7fd089bedacbb')
     end
   end
 
   describe 'POST /media with Vimeo id' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: '98660979'))
+      factory_to_json_api(FactoryBot.build(:medium, video: '310645255'))
     end
 
     before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers }
 
-    # FIXME For some reason, this test always fails on Travis ¯\_(ツ)_/¯
+    # FIXME: For some reason, this test always fails on Travis ¯\_(ツ)_/¯
     it 'creates image from Vimeo id' do
-      # expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/98660979.jpg")
-      # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('22297cf0bd54d077c7d0c9e3e65c7e16')
+      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/310645255.jpg")
     end
   end
 
   describe 'POST /media with Vimeo iframe code' do
     let(:valid_attributes) do
-      factory_to_json_api(FactoryBot.build(:medium, video: '<iframe src="https://player.vimeo.com/video/207218603" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe><p><a href="https://vimeo.com/207218603">Migos - What The Price</a> from <a href="https://vimeo.com/cr8tiverow">CR8TIVE ROW</a> on <a href="https://vimeo.com">Vimeo</a>.</p>'))
+      factory_to_json_api(FactoryBot.build(:medium, video: '<iframe src="https://player.vimeo.com/video/310645255" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe><p><a href="https://vimeo.com/310645255">Migos - What The Price</a> from <a href="https://vimeo.com/cr8tiverow">CR8TIVE ROW</a> on <a href="https://vimeo.com">Vimeo</a>.</p>'))
     end
 
-    before { post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers }
+    before {
+      post "/#{Apartment::Tenant.current}/media", params: valid_attributes, headers: headers
+    }
 
     it 'creates image from Vimeo embed iframe' do
-      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/207218603.jpg")
-      # expect(Digest::MD5.hexdigest(File.read("#{Rails.root}/public#{attributes['original_image']['url']}"))).to eq('8b0e9ee26c8ca72b9b6f243a6995341a')
+      expect(attributes['original_image']['url']).to eq("/uploads/#{Apartment::Tenant.current}/310645255.jpg")
     end
   end
 
@@ -179,7 +197,7 @@ RSpec.describe 'V3::Media', type: :request do
         valid_attributes[:data][:attributes]['id'] = Medium.first.id
         put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
       }
-  
+
       it 'updates image' do
         expect(response).to have_http_status(200)
       end
@@ -190,23 +208,11 @@ RSpec.describe 'V3::Media', type: :request do
         valid_attributes[:data][:attributes]['id'] = Medium.first.id
         put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes
       }
-  
+
       it 'updates image' do
         expect(response).to have_http_status(401)
       end
     end
-
-    # context 'update with invalid data' do
-    #   before {
-    #     valid_attributes[:data][:attributes]['id'] = Medium.first.id
-    #     valid_attributes[:data][:attributes].delete('video')
-    #     put "/#{Apartment::Tenant.current}/media/#{Medium.first.id}", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" }
-    #   }
-  
-    #   it 'returns unprocessable' do
-    #     expect(response).to have_http_status(422)
-    #   end
-    # end
   end
 
   describe 'DELETE /media/<id>' do

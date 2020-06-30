@@ -14,9 +14,9 @@ Style/AndOr:
 
 # Do not use braces for hash literals when they are the last argument of a
 # method call.
-Style/BracesAroundHashParameters:
-  Enabled: true
-  EnforcedStyle: context_dependent
+# Style/BracesAroundHashParameters:
+#   Enabled: true
+#   EnforcedStyle: context_dependent
 
 # Align `when` with `case`.
 Layout/CaseIndentation:
@@ -114,7 +114,7 @@ Style/StringLiterals:
   EnforcedStyle: single_quotes
 
 # Detect hard tabs, no hard tabs.
-Layout/Tab:
+Layout/IndentationStyle:
   Enabled: true
 
 # Blank lines should not have any spaces.

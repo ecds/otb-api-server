@@ -12,6 +12,7 @@ end
 gem 'rails', '~> 5.2.0'
 gem "rack", ">= 2.0.6"
 gem 'pg'
+gem 'mysql2'
 # Multitenancy for Rails and ActiveRecord
 gem 'apartment'
 # For JSONAPI responses
@@ -63,14 +64,15 @@ group :development do
   gem 'capistrano-rbenv', '~> 2.0'
   gem 'capistrano-passenger'
 end
-  
-  gem "factory_bot"
+
 
 group :test do
+  gem "factory_bot"
   gem 'factory_bot_rails'
   gem 'shoulda-matchers', git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
   gem 'database_cleaner'
   gem 'coveralls', require: false
+  gem 'webmock'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

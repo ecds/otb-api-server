@@ -13,13 +13,13 @@
 ActiveRecord::Schema.define(version: 2020_02_13_152142) do
 
   # These are extensions that must be enabled in order to support this database
-  enable_extension "pgcrypto"
-  enable_extension "plpgsql"
-  enable_extension "uuid-ossp"
+  # enable_extension "pgcrypto"
+  # enable_extension "plpgsql"
+  # enable_extension "uuid-ossp"
 
   create_table "flat_pages", force: :cascade do |t|
     t.string "title"
-    t.string "content"
+    t.text "content"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "position"
@@ -67,7 +67,7 @@ ActiveRecord::Schema.define(version: 2020_02_13_152142) do
     t.string "title"
   end
 
-  create_table "slugs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "slugs", force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
     t.datetime "created_at", null: false
@@ -106,10 +106,10 @@ ActiveRecord::Schema.define(version: 2020_02_13_152142) do
     t.string "article_link"
     t.string "video_embed"
     t.string "video_poster"
-    t.decimal "lat", precision: 100, scale: 8
-    t.decimal "lng", precision: 100, scale: 8
-    t.decimal "parking_lat", precision: 100, scale: 8
-    t.decimal "parking_lng", precision: 100, scale: 8
+    t.decimal "lat", precision: 65, scale: 8
+    t.decimal "lng", precision: 65, scale: 8
+    t.decimal "parking_lat", precision: 65, scale: 8
+    t.decimal "parking_lng", precision: 65, scale: 8
     t.text "direction_intro"
     t.text "direction_notes"
     t.datetime "created_at", null: false
@@ -227,8 +227,8 @@ ActiveRecord::Schema.define(version: 2020_02_13_152142) do
 
   create_table "tour_tags", force: :cascade do |t|
     t.string "title"
-    t.decimal "lat", precision: 100, scale: 8
-    t.decimal "lng", precision: 100, scale: 8
+    t.decimal "lat", precision: 65, scale: 8
+    t.decimal "lng", precision: 65, scale: 8
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -243,9 +243,9 @@ ActiveRecord::Schema.define(version: 2020_02_13_152142) do
     t.bigint "theme_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "mode_id"
+    t.bigint "mode_id"
     t.integer "position"
-    t.integer "splash_image_medium_id"
+    t.bigint "splash_image_medium_id"
     t.string "meta_description"
     t.bigint "medium_id"
     t.string "map_type"

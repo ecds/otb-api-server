@@ -1,5 +1,13 @@
-test:
+postgres: &postgres
   adapter: postgresql
-  database: travis_ci_test
   username: postgres
   schema_search_path: "public,shared_extensions"
+
+mysql: &mysql
+  adapter: mysql2
+  username: root
+
+test:
+  database: otb_test
+  host: localhost
+  <<: *<%= ENV['DB'] || "postgres" %>

@@ -1,18 +1,25 @@
 language: ruby
 rvm:
   - 2.6.3
+
 services:
   - postgresql
+  - mysql
+
 before_install:
-  - sudo apt-get -y install postgresql postgresql-contrib libpq-dev
-  - sudo /etc/init.d/postgresql start
-  - sudo -u postgres createuser -s postgres
   - cp config/database.yml.travis config/database.yml
   - cp config/secrets.yml.dist config/secrets.yml
   - gem install bundler
+
+env:
+  - DB=mysql
+  - DB=postgresql
+
 before_script:
   - sudo service postgresql restart
-  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql -c 'create database otb_test;' -U postgres
+  - mysql -e 'create database otb_test'
+
 script:
   - bundle install
   - bundle exec rake db:drop

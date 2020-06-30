@@ -10,6 +10,7 @@ RSpec.describe 'V3::StopMedia', type: :request do
   let!(:login) { create(:login, user: user) }
   let(:headers) { { Authorization: "Bearer #{login.oauth2_token}" } }
 
+
   describe 'GET /stop-media' do
     context 'gets all stop media' do
       before {
@@ -143,7 +144,7 @@ RSpec.describe 'V3::StopMedia', type: :request do
       before {
         delete "/#{Apartment::Tenant.current}/stop-media/#{stop_medium_id}", headers: headers
       }
-  
+
       it 'deletes stop medium' do
         expect(response).to have_http_status(204)
         expect { Medium.find(medium_id) }.to raise_error(ActiveRecord::RecordNotFound)
@@ -154,7 +155,7 @@ RSpec.describe 'V3::StopMedia', type: :request do
       before {
         delete "/#{Apartment::Tenant.current}/stop-media/#{StopMedium.last.id}"
       }
-  
+
       it 'deletes stop medium' do
         expect(response).to have_http_status(401)
       end

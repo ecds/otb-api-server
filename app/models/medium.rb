@@ -4,7 +4,7 @@
 class Medium < ApplicationRecord
   include VideoProps
   include Rails.application.routes.url_helpers
-  before_validation :props, if: :video?
+  before_validation :props
 
   mount_base64_uploader :original_image, MediumUploader
   has_many :stop_media
@@ -28,6 +28,8 @@ class Medium < ApplicationRecord
 
 
   def props
+    return if self.video.nil? || self.video.empty?
+
     VideoProps.props(self)
   end
 

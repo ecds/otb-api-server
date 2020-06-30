@@ -63,8 +63,8 @@ TourSet.all.each do |ts|
   Apartment::Tenant.reset
 end
 
-User.where(super: false).order(Arel.sql('random()')).limit(6).each do |u|
-  u.tour_sets << TourSet.all.order(Arel.sql('random()')).limit(1).first
+User.where(super: false).limit(6).each do |u|
+  u.tour_sets << TourSet.find(TourSet.pluck(:id).sample)
   u.tour_set_admins.each do |ur|
     ur.role = Role.find_by(title: 'Tour Admin')
     ur.save
@@ -75,8 +75,12 @@ end
 User.all.each do |u|
   next if u.super
   next if u.tours.present?
-  u.tours = Tour.all.order(Arel.sql('random()')).limit(Random.new.rand(2..3))
+  # u.tours = Tour.all.order(Arel.sql('random()')).limit(Random.new.rand(2..3))
+  Random.new.rand(2..3).times do
+    Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
+    u.tours << Tour.find(Tour.pluck(:id).sample)
+  end
   u.save
 end
 
-User.all.order(Arel.sql('random()')).first.update_attribute(:super, true)
+User.find(User.pluck(:id).sample).update_attribute(:super, true)

@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'V3::Tours', type: :request do
   before {
-    set = TourSet.all.order(Arel.sql('random()')).first.subdir
+    set = TourSet.find(TourSet.pluck(:id).sample).subdir
     Apartment::Tenant.switch! set
     Tour.first.update_attribute(:published, true)
   }
@@ -119,7 +119,7 @@ RSpec.describe 'V3::Tours', type: :request do
     let(:valid_attributes) do
       factory_to_json_api(FactoryBot.build(:tour, title: 'Learn Elm', published: true))
     end
-    before { Apartment::Tenant.switch! TourSet.all.order(Arel.sql('random()')).first.subdir }
+    before { Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir }
 
     context 'when the post is valid and authenticated as non-tour set admin' do
       before { User.last.update_attribute(:super, false) }
@@ -193,7 +193,7 @@ RSpec.describe 'V3::Tours', type: :request do
       expect(response).to have_http_status(204)
     end
   end
-  
+
   describe 'Get /<tenant>/tours authenticated' do
     context 'tour set adim gets all the tours for that set' do
       before {

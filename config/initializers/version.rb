@@ -1,5 +1,5 @@
 module OpenTourApi
   class Application
-    VERSION = '3.0.1rc'
+    VERSION = '3.0'
   end
 end

@@ -23,7 +23,7 @@ module V3
             properties: {
               title: stop.title,
               description: stop.description,
-              images: stop.media.map(&:mobile).map { |m| "#{request.protocol}#{request.host}/#{m}" }
+              images: stop.media.map(&:desktop).map { |m| "#{request.protocol}#{request.host}/#{m}" }
             }
         }
       end

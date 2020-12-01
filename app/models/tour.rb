@@ -46,12 +46,12 @@ class Tour < ApplicationRecord
     Apartment::Tenant.current.titleize
   end
 
-  def external_url
-    if Apartment::Tenant.current == 'public'
-      return nil
-    end
-    TourSet.find_by(subdir: Apartment::Tenant.current).external_url
-  end
+  # def external_url
+  #   if Apartment::Tenant.current == 'public'
+  #     return nil
+  #   end
+  #   TourSet.find_by(subdir: Apartment::Tenant.current).external_url
+  # end
 
   def theme_title
     theme.title

@@ -23,9 +23,8 @@ module VideoProps
         medium.title = metadata.title
         medium.caption = metadata.description
         medium.remote_original_image_url = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
-        medium.embed = %Q[<iframe title="#{metadata.title}" src='https://www.youtube.com/embed/#{medium.video}' frameborder='0' allowfullscreen>]
+        medium.embed = %Q[<iframe title="#{metadata.title}" src='https://www.youtube.com/embed/#{medium.video}?enablejsapi=1' frameborder='0' allowfullscreen>]
       rescue Yt::Errors::NoItems
-        p '!!!!!!!!!!!!!! NO ITEMS !!!!!!!!!!!!!!!!!!!!'
         medium.provider = nil
         medium.video = nil
       end

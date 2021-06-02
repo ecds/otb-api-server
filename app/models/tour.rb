@@ -5,7 +5,7 @@ class Tour < ApplicationRecord
   include HtmlSaintizer
   has_many :tour_stops, autosave: true, dependent: :destroy
   has_many :stops, -> { distinct }, through: :tour_stops
-  has_many :tour_modes
+  has_many :tour_modes, autosave: true, dependent: :destroy
   has_many :modes, through: :tour_modes
   belongs_to :mode, default: -> { Mode.last }
   has_many :tour_media

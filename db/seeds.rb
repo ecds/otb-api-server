@@ -47,8 +47,8 @@ Role.create!(
 
 4.times do
   # User.create(display_name: Faker::Movies::Lebowski)
-  FactoryBot.create(:login)
-  Login.last.user.update_attribute(:display_name, Faker::Movies::Lebowski)
+  FactoryBot.create(:user)
+  # Login.last.user.update_attribute(:display_name, Faker::Movies::Lebowski)
 end
 
 TourSet.all.each do |ts|
@@ -73,6 +73,7 @@ User.where(super: false).limit(6).each do |u|
 end
 
 User.all.each do |u|
+  FactoryBot.create(:login, who: u.email, user_id: u.id, provider: 'earth')
   next if u.super
   next if u.tours.present?
   # u.tours = Tour.all.order(Arel.sql('random()')).limit(Random.new.rand(2..3))

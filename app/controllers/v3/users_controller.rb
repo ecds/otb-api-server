@@ -2,22 +2,22 @@
 
 # app/controllers/v3/users_controller.rb
 module V3
+  #
+  # Endpoints for User Model
+  #
   class UsersController < V3Controller
     before_action :set_user, only: [:show, :update, :destroy]
     before_action :authenticate!, only: :me
     authorize_resource
 
     # GET /users
-    # def index
-    #   @users = User.all
-
-    #   render json: @users
-    # end
     def index
-      if current_user.present? && params['me']
-        render json: current_user, include: ['tours', 'tour_sets', 'login']
-      elsif current_user.current_tenant_admin?
-        render json: User.all
+      if current_user.present?
+        if params['me']
+          render json: current_user, include: ['tours', 'tour_sets']
+        elsif current_user.current_tenant_admin?
+          render json: User.all
+        end
       else
         render json: { message: 'You are not autorized to to view this resource.' }.to_json, status: 401
       end

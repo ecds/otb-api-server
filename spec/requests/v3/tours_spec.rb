@@ -122,9 +122,12 @@ RSpec.describe 'V3::Tours', type: :request do
     before { Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir }
 
     context 'when the post is valid and authenticated as non-tour set admin' do
-      before { User.last.update_attribute(:super, false) }
-      before { User.last.update_attribute(:tour_sets, []) }
-      before { post "/#{Apartment::Tenant.current}/tours", params: valid_attributes, headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" } }
+      before {
+        User.last.update_attribute(:super, false)
+        User.last.update_attribute(:tour_sets, [])
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
+        post "/#{Apartment::Tenant.current}/tours", params: valid_attributes
+      }
 
       it 'returns status code 401' do
         expect(response).to have_http_status(401)
@@ -132,8 +135,11 @@ RSpec.describe 'V3::Tours', type: :request do
     end
 
     context 'when created by tour set admin' do
-      before { User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current) }
-      before { post "/#{Apartment::Tenant.current}/tours", params: valid_attributes, headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" } }
+      before {
+        User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
+        post "/#{Apartment::Tenant.current}/tours", params: valid_attributes
+      }
       it 'creates a tour' do
         expect(attributes['title']).to eq('Learn Elm')
       end
@@ -150,7 +156,8 @@ RSpec.describe 'V3::Tours', type: :request do
       before {
         # Tour.create!(published: true)
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
-        post "/#{Apartment::Tenant.current}/tours", params: invalid_attributes, headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" }
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
+        post "/#{Apartment::Tenant.current}/tours", params: invalid_attributes
       }
 
       it 'returns status code 201' do
@@ -170,7 +177,10 @@ RSpec.describe 'V3::Tours', type: :request do
     end
 
     context 'when the record exists' do
-      before { put "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}", params: valid_attributes, headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" } }
+      before {
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
+        put "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}", params: valid_attributes
+      }
 
       it 'updates the record' do
         expect(json).not_to be_empty
@@ -185,9 +195,12 @@ RSpec.describe 'V3::Tours', type: :request do
 
   # Test suite for DELETE /atlanta/tours/:id
   describe 'DELETE /atlanta/tours/:id' do
-    before { Tour.create! }
-    before { User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current) }
-    before { delete "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}", headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" } }
+    before {
+      Tour.create!
+      User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
+      delete "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}"
+    }
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)
@@ -197,9 +210,9 @@ RSpec.describe 'V3::Tours', type: :request do
   describe 'Get /<tenant>/tours authenticated' do
     context 'tour set adim gets all the tours for that set' do
       before {
-        user = User.last
-        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
-        get "/#{Apartment::Tenant.current}/tours", headers: { Authorization: "Bearer #{user.login.oauth2_token}" }
+        User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
+        get "/#{Apartment::Tenant.current}/tours"
       }
 
       it 'returns all the tours in the set' do
@@ -210,16 +223,19 @@ RSpec.describe 'V3::Tours', type: :request do
     context 'get tours as tour author' do
       before {
         user = User.first
-        user.super = false
-        user.tour_sets = []
-        user.tours = []
+        login = EcdsRailsAuthEngine::Login.find_by(user_id: user.id)
+        user.update(super: false, tour_sets: [], tours: [])
+        # user.super = false
+        # user.tour_sets = []
+        # user.tours = []
         user.save
         user.tours << Tour.first
         Tour.all.each do |t|
           t.published = false
           t.save
         end
-        get "/#{Apartment::Tenant.current}/tours", headers: { Authorization: "Bearer #{user.login.oauth2_token}" }
+        cookies['auth'] = login.token
+        get "/#{Apartment::Tenant.current}/tours"
       }
 
       it 'only returns tours user can edit' do

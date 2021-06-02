@@ -3,7 +3,7 @@
 # spec/factories/users.rb
 FactoryBot.define do
   factory :user do
-    login { create(:login) }
+    email { Faker::Internet.email }
     # tour_sets { TourSet.where(subdir: 'atlanta') }
   end
 end

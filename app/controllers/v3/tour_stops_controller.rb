@@ -47,7 +47,10 @@ class V3::TourStopsController < V3Controller
 
   # DELETE /stops/1
   def destroy
-    @tour_stop.destroy
+    if @tour_stop
+      @tour_stop.destroy
+    end
+    head :no_content
   end
 
     private
@@ -63,6 +66,6 @@ class V3::TourStopsController < V3Controller
       end
 
       def set_tour_stop
-        @tour_stop = TourStop.find_by!(id: params[:id])
+        @tour_stop = TourStop.find_by(id: params[:id])
       end
 end

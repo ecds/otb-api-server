@@ -1,16 +1,11 @@
 # frozen_string_literal: true
 
 # spec/factories/login.rb
-FactoryBot.define do
-  factory :login do
-    identification { Faker::Internet.email }
-    oauth2_token { Faker::Omniauth.google[:credentials][:token] }
-    uid { Faker::Number.number }
-    provider { 'google' }
+require 'faker'
+require 'jwt'
 
-    after(:create) do |login|
-      login.user.display_name = Faker::Name.name
-      login.user.save
-    end
+FactoryBot.define do
+  factory :login, class: EcdsRailsAuthEngine::Login do
+    token { JWT.encode(Faker::Beer.style, Faker::Address.zip, 'HS256') }
   end
 end

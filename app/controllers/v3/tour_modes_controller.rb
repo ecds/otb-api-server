@@ -11,5 +11,11 @@ module V3
 
       render json: @tour_modes
     end
-end
+
+    # GET /v3/tour_media/1
+    def show
+      tour_mode = TourMode.find(params[:id])
+      render json: tour_mode
+    end
+  end
 end

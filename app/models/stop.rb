@@ -64,6 +64,10 @@ class Stop < ApplicationRecord
     tours.published.present?
   end
 
+  def orphaned
+    tours.empty?
+  end
+
 
   private
 

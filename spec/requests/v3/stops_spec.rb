@@ -5,14 +5,14 @@ require 'rails_helper'
 
 RSpec.describe 'V3::Stops API' do
   # Initialize the test data
-  let!(:login) { User.find_by(super: true).login }
+  let!(:user) { User.find_by(super: true) }
 
   # Test suite for GET /stops
   describe 'GET /stops' do
     context 'when stops exist' do
-      
+
       before { get "/#{Apartment::Tenant.current}/stops" }
-      
+
       it 'returns status code 200' do
         expect(response).to have_http_status(200)
       end
@@ -114,8 +114,11 @@ RSpec.describe 'V3::Stops API' do
     end
 
     context 'when request attributes are valid' do
-      before { User.first.update_attribute(:super, true) }
-      before { post "/#{Apartment::Tenant.current}/stops", params: valid_attributes, headers: { Authorization: "Bearer #{User.first.login.oauth2_token}" } }
+      before {
+        User.first.update_attribute(:super, true)
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
+        post "/#{Apartment::Tenant.current}/stops", params: valid_attributes
+      }
 
       it 'returns status code 201' do
         expect(response).to have_http_status(201)
@@ -141,7 +144,10 @@ RSpec.describe 'V3::Stops API' do
       factory_to_json_api(FactoryBot.build(:stop, title: '3 Stacks'))
     end
 
-    before { put "/#{Apartment::Tenant.current}/stops/#{Stop.second.id}", params: valid_attributes, headers: { Authorization: "Bearer #{login.oauth2_token}" } }
+    before {
+      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
+      put "/#{Apartment::Tenant.current}/stops/#{Stop.second.id}", params: valid_attributes
+    }
 
     context 'when stop exists' do
       it 'returns status code 204' do
@@ -155,7 +161,10 @@ RSpec.describe 'V3::Stops API' do
     end
 
     context 'when the stop does not exist' do
-      before { put "/#{Apartment::Tenant.current}/stops/0", params: valid_attributes, headers: { Authorization: "Bearer #{login.oauth2_token}" } }
+      before {
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
+        put "/#{Apartment::Tenant.current}/stops/0", params: valid_attributes
+      }
 
       it 'returns status code 404' do
         expect(response).to have_http_status(404)
@@ -169,7 +178,10 @@ RSpec.describe 'V3::Stops API' do
 
   # Test suite for DELETE /stops/:id
   describe 'DELETE /stops/:id' do
-    before { delete "/#{Apartment::Tenant.current}/stops/#{Stop.last.id}", headers: { Authorization: "Bearer #{login.oauth2_token}" } }
+    before {
+      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
+      delete "/#{Apartment::Tenant.current}/stops/#{Stop.last.id}"
+    }
 
     it 'returns status code 204' do
       expect(response).to have_http_status(204)

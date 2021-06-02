@@ -18,7 +18,7 @@ FactoryBot.define do
 
       # https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#transient-attributes
       after(:create) do |stop, evaluator|
-        create_list(:medium, evaluator.media_count, stops: [stop])
+        # create_list(:medium, evaluator.media_count, stops: [stop])
       end
     end
   end

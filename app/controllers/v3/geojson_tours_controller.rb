@@ -14,6 +14,7 @@ module V3
     private
 
       def feature(stop)
+        stop.media.map { |m| m.caption = nil if m.caption.blank? }
         {
           type: 'Feature',
           geometry: {
@@ -23,7 +24,7 @@ module V3
             properties: {
               title: stop.title,
               description: stop.description,
-              images: stop.media.map(&:desktop).map { |m| "#{request.protocol}#{request.host}/#{m}" }
+              images: stop.media.map { |m| { caption: m.caption, url: "#{request.protocol}#{request.host}/#{m.desktop}" } }
             }
         }
       end

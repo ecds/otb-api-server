@@ -36,7 +36,7 @@ RSpec.describe 'V3::Stops API' do
   describe 'GET /tour-stops?slug=slug&tour=X' do
     before { Apartment::Tenant.switch! TourSet.second.subdir }
     before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Tour.first.stops.first.stop_slugs.first.slug}&tour=#{Tour.first.id}" }
-    
+
     context 'get tour stop by slug and tour'do
         it 'responds with the tour stop' do
           expect(json['id'].to_i).to eq(Tour.first.stops.first.id)
@@ -52,15 +52,15 @@ RSpec.describe 'V3::Stops API' do
     let!(:tour2) { Tour.last }
     let!(:stop2) { tour2.stops.last }
     let!(:new_title) { "#{Faker::Movies::Lebowski.character}" }
-    
+
     before{
       tour1.stops = [Stop.create(title: new_title)]
       tour1.save
       tour2.stops = [Stop.create(title: new_title)]
       tour2.save
     }
-    
-    
+
+
     context 'get stop with duplicate title/slug in correct tour' do
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour1.id}" }
       it 'is true' do
@@ -69,7 +69,7 @@ RSpec.describe 'V3::Stops API' do
       end
     end
 
-    
+
     context 'get stop with duplicate title/slug in correct tour' do
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour2.id}" }
       it 'is true' do
@@ -81,19 +81,25 @@ RSpec.describe 'V3::Stops API' do
   end
 
   describe 'DELETE /tour-stops' do
-    before { User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current) }
-    before { @stop = Stop.last }
-    before { @stop_count = Stop.count }
-    before { delete "/#{Apartment::Tenant.current}/tour-stops/#{TourStop.find_by(stop: @stop).id}", headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" } }
-    
+    before {
+      User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      @stop = Stop.last
+      @stop_count = Stop.count
+      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
+      delete "/#{Apartment::Tenant.current}/tour-stops/#{TourStop.find_by(stop: @stop).id}"
+    }
+
     context 'when a tour-stop is deleted and the stop no longers belogs to a tour, the stop is deleted' do
       it 'deletes the associated stop' do
         expect(Stop.count).to eq @stop_count - 1
       end
     end
-    
-    before { Tour.all.each { |t| t.stops << Stop.first } }
-    before { delete "/#{Apartment::Tenant.current}/tour-stops/#{TourStop.find_by(stop: Stop.first).id}", headers: { Authorization: "Bearer #{User.last.login.oauth2_token}" } }
+
+    before {
+      Tour.all.each { |t| t.stops << Stop.first }
+      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
+      delete "/#{Apartment::Tenant.current}/tour-stops/#{TourStop.find_by(stop: Stop.first).id}"
+    }
 
     context 'when a tour-stop is deleted, the stop is not deleted if it belongs to other tours.' do
       it 'deletes tour-stop but not the stop' do

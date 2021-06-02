@@ -6,10 +6,7 @@ RSpec.describe 'V3::StopMedia', type: :request do
   let!(:stop) { create_list(:stop_with_media, 1) }
   let!(:medium) { create(:medium) }
   let!(:new_medium) { create(:medium) }
-  let!(:user) { create(:user) }
-  let!(:login) { create(:login, user: user) }
-  let(:headers) { { Authorization: "Bearer #{login.oauth2_token}" } }
-
+  let!(:user) { User.first }
 
   describe 'GET /stop-media' do
     context 'gets all stop media' do

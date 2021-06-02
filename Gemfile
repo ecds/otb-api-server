@@ -28,7 +28,8 @@ gem "actionview", ">= 5.2.2.1"
 
 # Social Auth
 # gem 'ecds_rails_auth_engine', path: '../ecds_auth_engine'
-gem 'ecds_rails_auth_engine', git: 'https://github.com/ecds/ecds_rails_auth_engine.git', :tag => 'v0.1.5'
+# gem 'ecds_rails_auth_engine', git: 'https://github.com/ecds/ecds_rails_auth_engine.git', branch: 'feature/fauxoauth'
+gem 'ecds_rails_auth_engine', path: '/data/ecds_auth_engine'
 gem 'cancancan', '~> 2.0'
 
 # Active Storage will land in 5.2

@@ -8,7 +8,7 @@ jobs:
     docker:
       - image: circleci/ruby:3.0.0-node
         environment:
-          PGUSER: root
+          PGUSER: postgres
           RAILS_ENV: test
           DB_HOSTNAME: 127.0.0.1
           DB_USERNAME: postgres

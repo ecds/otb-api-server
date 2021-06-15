@@ -1,19 +1,21 @@
 GIT
-  remote: https://github.com/stympy/faker.git
-  revision: e1bd4a5a57775b724e8441ffa14cce0861b5a4b6
-  branch: master
-  specs:
-    faker (2.18.0)
-      i18n (>= 1.6, < 2)
-
-PATH
-  remote: /data/ecds_auth_engine
+  remote: https://github.com/ecds/ecds_rails_auth_engine.git
+  revision: 75eafbaf5656b9f9cbaed25647c75b56d8ac34ac
+  branch: feature/fauxoauth
   specs:
     ecds_rails_auth_engine (0.1.6)
       cancancan
       httparty
       jwt
       rails
+
+GIT
+  remote: https://github.com/stympy/faker.git
+  revision: e1bd4a5a57775b724e8441ffa14cce0861b5a4b6
+  branch: master
+  specs:
+    faker (2.18.0)
+      i18n (>= 1.6, < 2)
 
 GEM
   remote: https://rubygems.org/

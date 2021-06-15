@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/atlmaps
+    working_directory: ~/otb-api
 
     # Primary container image where all commands run
 
@@ -34,14 +34,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt install -y libgeos-dev libproj-dev
-            sudo apt update
-            sudo apt install -y libappindicator1 fonts-liberation
-            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-            sudo dpkg -i google-chrome*.deb
-            sudo apt install -f
-            sudo dpkg -i google-chrome*.deb
-
             bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
 
       - run: sudo apt install -y postgresql-client || true

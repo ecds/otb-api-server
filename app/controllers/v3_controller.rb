@@ -2,9 +2,24 @@
 
 class V3Controller < ApplicationController
   include EcdsRailsAuthEngine::CurrentUser
-  # check_authorization
+  before_action :allowed?, only: [:create, :update, :destroy]
 
-  rescue_from CanCan::AccessDenied do |exception|
-    head 401
+  def serialize_errors
+    errors = []
+    @record.errors.messages[:base].each do |error|
+      errors.push({
+        detail: error,
+        source: {
+          pointer: 'data/attributes'
+        }
+      })
+    end
+    { errors: errors }
   end
+
+  private
+
+    def allowed?
+      @allowed = current_user && current_user.current_tenant_admin?
+    end
 end

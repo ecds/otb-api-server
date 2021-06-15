@@ -1,6 +1,6 @@
 class V3::StopMediaController < V3Controller
   before_action :set_stop_medium, only: [:show, :update, :destroy]
-  authorize_resource
+  #authorize_resource
 
   # GET /v3/stop_media
   def index

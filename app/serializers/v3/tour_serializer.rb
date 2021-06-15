@@ -12,4 +12,6 @@ class V3::TourSerializer < V3::TourBaseSerializer
   has_many :tour_media
   has_many :flat_pages
   has_many :tour_flat_pages
+
+  attributes :bounds
 end

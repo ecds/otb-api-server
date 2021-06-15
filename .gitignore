@@ -1,12 +1,14 @@
 *.DS_Store
 coverage
-config/database.yml
 log
 config/secrets.yml
 tmp
 config/initializers/auth.rb
 public/uploads/
+public/storage/*
 .vscode
 *.env*
-.ruby-version
 
+
+/config/master.key
+storage

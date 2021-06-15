@@ -7,7 +7,7 @@ set :branch, 'develop3.0'
 # Defines a single server with a list of roles and multiple properties.
 # You can define all roles on a single server, or split them:
 
-server "otb.ecdsdev.org", user: "deploy", roles: %w{app db web}, primary: :my_value
+server "3.81.27.251", user: "deploy", roles: %w{app db web}, primary: :my_value
 # server "otb.ecdsdev.org", user: "deploy", roles: %w{app web}, other_property: :other_value
 # server "db.otb.ecdsdev.org", user: "deploy", roles: %w{db}
 
@@ -21,9 +21,9 @@ server "otb.ecdsdev.org", user: "deploy", roles: %w{app db web}, primary: :my_va
 # property set. Specify the username and a domain or IP for the server.
 # Don't use `:all`, it's a meta role.
 
-# role :app, %w{deploy@otb.ecdsdev.org}, my_property: :my_value
-# role :web, %w{user1@primary.com user2@additional.com}, other_property: :other_value
-# role :db,  %w{deploy@otb.ecdsdev.org}
+role :app, %w{deploy@3.81.27.251}
+role :web, %w{user1@3.81.27.251}
+role :db,  %w{deploy@3.81.27.251}
 
 
 
@@ -45,11 +45,13 @@ server "otb.ecdsdev.org", user: "deploy", roles: %w{app db web}, primary: :my_va
 #
 # Global options
 # --------------
-#  set :ssh_options, {
-#    keys: %w(/home/rlisowski/.ssh/id_rsa),
-#    forward_agent: false,
-#    auth_methods: %w(password)
-#  }
+ set :ssh_options, {
+   forward_agent: false,
+   auth_methods: %w(publickey)
+ }
+
+ set :branch, 'develop',
+ set :deploy_to, '/data/otb-api'
 #
 # The server-based syntax can be used to override options:
 # ------------------------------------

@@ -3,7 +3,7 @@
 # app/controllers/v3/tour_modes_controller.rb
 module V3
   class TourModesController < V3Controller
-    authorize_resource
+    #authorize_resource
 
     # GET /tour_sets
     def index

@@ -4,8 +4,8 @@ The OpenTourBuilder API server provides a multi-tenant REST API for geographic t
 
 ## Requirements
 
-- Ruby 2.4.1+
-- 5.2.x
+- rbenv
+- Ruby 2.7.2
 - PostgreSQL 9.6.9
   - Plugins*
     - pgcrypto
@@ -14,9 +14,44 @@ The OpenTourBuilder API server provides a multi-tenant REST API for geographic t
 
 \* Database plugins are enabled during the install process
 
+## Install Headless Chrome
+
+This is mostly taken from [this blog post](https://geekflare.com/install-chromium-ubuntu-centos/) and works on Ubuntu 20.04
+
+~~~bash
+sudo apt update
+sudo apt install -y libappindicator1 fonts-liberation
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome*.deb
+~~~
+
+I always get some errors about missing/mis-matched dependencies. The following will fix that.
+
+~~~bash
+sudo apt install -f
+~~~
+
+And try to install it again.
+
+~~~bash
+sudo dpkg -i google-chrome*.deb
+~~~
+
+Assuming all went well, verify the install be running:
+
+~~~bash
+google-chrome-stable -version
+~~~
+
+You should see something like:
+
+~~~bash
+Google Chrome 91.0.4472.106
+~~~
+
 ## Build Status
 
-[![Build Status](https://travis-ci.com/ecds/otb-api-server.svg?branch=develop)](https://travis-ci.com/ecds/otb-api-server)
+TODO: Add CircleCI
 
 ## Installation
 
@@ -70,6 +105,7 @@ cap deploy staging
 We use the [Git-Flow](https://danielkummer.github.io/git-flow-cheatsheet/) branching model. Please submit pull requests against the develop branch.
 
 ### Code of conduct
+
 [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## License

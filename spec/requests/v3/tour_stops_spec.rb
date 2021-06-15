@@ -53,7 +53,7 @@ RSpec.describe 'V3::Stops API' do
     let!(:stop2) { tour2.stops.last }
     let!(:new_title) { "#{Faker::Movies::Lebowski.character}" }
 
-    before{
+    before {
       tour1.stops = [Stop.create(title: new_title)]
       tour1.save
       tour2.stops = [Stop.create(title: new_title)]

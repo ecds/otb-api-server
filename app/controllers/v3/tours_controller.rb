@@ -4,8 +4,8 @@
 # module V3
 class V3::ToursController < V3Controller
   before_action :set_tour, only: [:show, :update, :destroy]
-  # authorize_resource
-  load_and_authorize_resource
+  # #authorize_resource
+  #load_and_#authorize_resource
 
   # GET /tours
   def index
@@ -47,30 +47,20 @@ class V3::ToursController < V3Controller
 
   # GET /tours/1
   def show
-    render json: @tour,
-           include: [
-               'tour_modes',
-               'tour_stops',
-               'stops',
-               'stops.media',
-               'stops.stop_media',
-               'mode',
-               'modes',
-               'theme',
-               'media',
-               'tour_media',
-               'flat_pages',
-               'tour_flat_pages'
-           ]
+    render json: @tour
   end
 
   # POST /tours
   def create
-    @tour = Tour.new(tour_params)
-    if @tour.save
-      render json: @tour, status: :created, location: "/#{Apartment::Tenant.current}/tours/#{@tour.id}"
+    if current_user.current_tenant_admin?
+      @tour = Tour.new(tour_params)
+      if @tour.save
+        render json: @tour, status: :created, location: "/#{Apartment::Tenant.current}/tours/#{@tour.id}"
+      else
+        render json: @tour.errors, status: :unprocessable_entity
+      end
     else
-      render json: @tour.errors, status: :unprocessable_entity
+      head 401
     end
   end
 
@@ -117,7 +107,7 @@ class V3::ToursController < V3Controller
                     :is_geo, :modes, :published, :theme_id,
                     :mode, :meta_description, :stops,
                     :media, :authors, :flat_pages, :map_type,
-                    :theme
+                    :theme, :use_directions, :default_lng
 	        ]
             )
       end

@@ -2,7 +2,7 @@
 
   class V3::TourCollectionsController < V3Controller
     before_action :set_tour_collection, only: [:show, :update, :destroy]
-    authorize_resource
+    #authorize_resource
 
     # GET /v3/tour_collections
     def index

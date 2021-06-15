@@ -9,6 +9,7 @@ class Stop < ApplicationRecord
   has_many :stop_media
   has_many :media, through: :stop_media
   belongs_to :medium, optional: true
+  belongs_to :map_icon, optional: true
   has_many :stop_slugs, dependent: :delete_all
 
   validates :title, presence: true
@@ -54,9 +55,9 @@ class Stop < ApplicationRecord
   end
 
   def insecure_splash
-    if !stop_media.empty?
-      return medium.nil? ? stop_media.order(:position).first.medium.insecure : medium.insecure
-    end
+    # if !stop_media.empty?
+    #   return medium.nil? ? stop_media.order(:position).first.medium.insecure : medium.insecure
+    # end
     nil
   end
 
@@ -76,6 +77,6 @@ class Stop < ApplicationRecord
     end
 
     def ensure_slug
-      StopSlug.find_or_create_by(slug: self.slug, stop: self)
+      tour_stops.each { |ts| ts.save }
     end
 end

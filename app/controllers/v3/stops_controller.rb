@@ -5,7 +5,7 @@
 class V3::StopsController < V3Controller
   # before_action :set_tour
   before_action :set_stop, only: [:show, :update, :destroy]
-  authorize_resource
+  #authorize_resource
 
   # GET /stops
   def index
@@ -29,7 +29,8 @@ class V3::StopsController < V3Controller
     render json: @stop,
            include: [
                'media',
-               'stop_media'
+               'stop_media',
+               'map_icon'
            ]
   end
 
@@ -67,7 +68,8 @@ class V3::StopsController < V3Controller
                   :title, :description, :lat, :lng,
                   :parking_lat, :parking_lng, :media,
                   :address, :tours, :direction_notes,
-                  :meta_description
+                  :meta_description, :parking_address,
+                  :icon_color, :map_icon
               ]
           )
     end

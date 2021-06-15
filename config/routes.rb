@@ -23,9 +23,13 @@ Rails.application.routes.draw do
       resources :tour_set_admins, path: 'tour-set-users'
       resources :tour_collections, path: 'tour-collections'
       resources :tour_media, path: 'tour-media'
+      resources :map_overlays, path: 'map-overlays'
+      resources :map_icons, path: 'map-icons'
       resources :themes
       resources :tours
-      resources :media
+      resources :media do
+        get :file, on: :member
+      end
       resources :stops
       resources :stop_media, path: 'stop-media'
       resources :tour_media, path: 'tour-media'
@@ -34,6 +38,7 @@ Rails.application.routes.draw do
       resources :flat_pages, path: 'flat-pages'
       resources :tour_flat_pages, path: 'tour-flat-pages'
       resources :geojson_tours
+
     end
   end
   mount EcdsRailsAuthEngine::Engine, at: '/auth'

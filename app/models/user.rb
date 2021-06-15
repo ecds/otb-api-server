@@ -18,6 +18,15 @@ class User < ActiveRecord::Base
     return false if tour_sets.empty?
     tour_sets.map(&:subdir).include? Apartment::Tenant.current
   end
+
+  def provider
+    return nil if login.nil?
+    login.provider
+  end
+
+  private
+
+    def login
+      EcdsRailsAuthEngine::Login.find_by(user_id: self.id)
+    end
 end
-
-

@@ -9,12 +9,12 @@ end
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.0'
+gem 'rails', '~> 6.0.0'
 gem "rack", ">= 2.0.6"
 gem 'pg'
 gem 'mysql2'
 # Multitenancy for Rails and ActiveRecord
-gem 'apartment'
+gem 'ros-apartment', require: 'apartment'
 # For JSONAPI responses
 gem 'active_model_serializers', '~> 0.10.0.rc3'
 gem 'acts-as-taggable-on', '~> 5.0'
@@ -36,6 +36,12 @@ gem 'cancancan', '~> 2.0'
 gem 'carrierwave', '~> 1.0'
 gem 'mini_magick'
 gem 'carrierwave-base64'
+gem 'ferrum'
+
+# RGeo is a geospatial data library for Ruby.
+# https://github.com/rgeo/rgeo
+gem('rgeo')
+
 
 # Vidoe provider APIs
 gem 'vimeo'
@@ -59,7 +65,7 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
-  gem 'rspec-rails', '~> 3.5'
+  gem 'rspec-rails', '~> 4.0.2'
   # Use Capistrano for deployment
   gem 'capistrano-rails'
   gem 'capistrano-rbenv', '~> 2.0'
@@ -70,7 +76,7 @@ end
 group :test do
   gem "factory_bot"
   gem 'factory_bot_rails'
-  gem 'shoulda-matchers', git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
+  gem 'shoulda-matchers', '~> 4.5.1' #git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
   gem 'database_cleaner'
   gem 'coveralls', require: false
   gem 'webmock'

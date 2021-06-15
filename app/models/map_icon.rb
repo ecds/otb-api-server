@@ -1,0 +1,2 @@
+class MapIcon < MediumBaseRecord
+end

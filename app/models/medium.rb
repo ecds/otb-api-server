@@ -1,20 +1,31 @@
 # frozen_string_literal: true
 
 # Model for media associated with stops.
-class Medium < ApplicationRecord
+class Medium < MediumBaseRecord
   include VideoProps
   include Rails.application.routes.url_helpers
-  before_validation :props
+  before_create :props
+  before_update :remove_tmp_file
 
-  mount_base64_uploader :original_image, MediumUploader
+  # has_one_attached :file do |attachable|
+  #   attachable.variant :mobile, resize: '200x200'
+  #   attachable.variant :tablet, resize: '300x300'
+  #   attachable.variant :desktop, resize: '750x750'
+  # end
+
+  # mount_base64_uploader :original_image, MediumUploader
   has_many :stop_media
   has_many :stops, through: :stop_media
   has_many :tour_media
   has_many :tours, through: :tour_media
 
-  validates_presence_of :original_image
+  enum video_provider: { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
+
+  # validates_presence_of :original_image
 
   attr_accessor :insecure
+
+
 
   # TODO: This is not ideal, we use these `not_in_*` scopes to make the list of media avaliable to add
   # to a stop or tour. But the paramerter does not make sense when just looking at it. Needs clearer language.
@@ -33,32 +44,42 @@ class Medium < ApplicationRecord
     VideoProps.props(self)
   end
 
-  def desktop
-    original_image.desktop.url
-  end
+  # def desktop
+  #   original_image.desktop.url
+  # end
 
-  def tablet
-    original_image.tablet.url
-  end
+  # def tablet
+  #   original_image.tablet.url
+  # end
 
-  def mobile
-    original_image.mobile_list_thumb.url
-  end
+  # def mobile
+  #   original_image.mobile_list_thumb.url
+  # end
 
-  def mobile_thumb
-    original_image.mobile_list_thumb.url
-  end
+  # def mobile_thumb
+  #   original_image.mobile_list_thumb.url
+  # end
 
   def published
     # This works and is shorter, but I think the longer way is more readable/clear.
     # tours.published.present? || stops { |s| s.tours.published }.present?
-    tours.collect(&:published).include?(true) || stops.map {|s| s.tours.collect(&:published)}.flatten.include?(true)
+    tours.collect(&:published).include?(true) || stops.map { |s| s.tours.collect(&:published) }.flatten.include?(true)
+  end
+
+  def files
+    return nil if !self.public_send("#{Apartment::Tenant.current.underscore}_file").attached?
+    {
+      mobile: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=mobile",
+      tablet: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=tablet",
+      desktop: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=desktop"
+    }
   end
 
   def srcset
-    "#{ENV['BASE_URL']}#{self.mobile} #{mobile_width}w, \
-    #{ENV['BASE_URL']}#{self.tablet} #{tablet_width}w, \
-    #{ENV['BASE_URL']}#{self.desktop} #{desktop_width}w"
+    nil
+    # "#{ENV['BASE_URL']}#{self.mobile} #{mobile_width}w, \
+    # #{ENV['BASE_URL']}#{self.tablet} #{tablet_width}w, \
+    # #{ENV['BASE_URL']}#{self.desktop} #{desktop_width}w"
   end
 
   def srcset_sizes
@@ -66,19 +87,14 @@ class Medium < ApplicationRecord
   end
 
   def insecure
-    "#{ENV['INSECURE_IMAGE_BASE_URL']}#{self.desktop}"
-  end
-
-  def base64
-    if self.original_image.file && File.file?(self.original_image.file.path)
-      return Base64.encode64(self.original_image.file.read)
-    end
     nil
+    # "#{ENV['INSECURE_IMAGE_BASE_URL']}#{self.desktop}"
   end
 
-  # private
-
-  #   def has_image
-  #     original_image.present? || remote_original_image_url.present?
+  # def base64
+  #   if self.original_image.file && File.file?(self.original_image.file.path)
+  #     return Base64.encode64(self.original_image.file.read)
   #   end
+  #   nil
+  # end
 end

@@ -2,7 +2,7 @@
 
 class V3::FlatPagesController < V3Controller
   before_action :set_flat_page, only: [:show, :update, :destroy]
-  authorize_resource
+  #authorize_resource
 
   # GET /v3/flat_pages
   def index
@@ -18,27 +18,39 @@ class V3::FlatPagesController < V3Controller
 
   # POST /v3/flat_pages
   def create
-    @flat_page = FlatPage.new(flat_page_params)
+    if @allowed
+      @flat_page = FlatPage.new(flat_page_params)
 
-    if @flat_page.save
-      render json: @flat_page, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@flat_page.id}"
+      if @flat_page.save
+        render json: @flat_page, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@flat_page.id}"
+      else
+        render json: @flat_page.errors, status: :unprocessable_entity
+      end
     else
-      render json: @flat_page.errors, status: :unprocessable_entity
+      head 401
     end
   end
 
   # PATCH/PUT /v3/flat_pages/1
   def update
-    if @flat_page.update(flat_page_params)
-      render json: @flat_page
+    if @allowed
+      if @flat_page.update(flat_page_params)
+        render json: @flat_page
+      else
+        render json: @flat_page.errors, status: :unprocessable_entity
+      end
     else
-      render json: @flat_page.errors, status: :unprocessable_entity
+      head 401
     end
   end
 
   # DELETE /v3/flat_pages/1
   def destroy
-    @flat_page.destroy
+    if @allowed
+      @flat_page.destroy
+    else
+      head 401
+    end
   end
 
   private
@@ -52,7 +64,7 @@ class V3::FlatPagesController < V3Controller
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                  :title, :content, :tours
+                  :title, :body, :tours
               ]
           )
     end

@@ -3,13 +3,17 @@
 module V3
   class TourSetAdminsController < V3Controller
     before_action :set_tour_set_admin, only: [:show, :update, :destroy]
-    authorize_resource
+    #authorize_resource
 
     # GET /tour_set_admins
     def index
-      @tour_set_admins = TourSetAdmin.all
+      if current_user && current_user.super
+        @tour_set_admins = TourSetAdmin.all
 
-      render json: @tour_set_admins
+        render json: @tour_set_admins
+      else
+        head 401
+      end
     end
 
     # GET /tour_set_admins/1

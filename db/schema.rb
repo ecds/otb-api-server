@@ -2,20 +2,40 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# Note that this schema.rb definition is the authoritative source for your
-# database schema. If you need to create the application database on another
-# system, you should be using db:schema:load, not running all the migrations
-# from scratch. The latter is a flawed and unsustainable approach (the more migrations
-# you'll amass, the slower it'll run and the greater likelihood for issues).
+# This file is the source Rails uses to define your schema when running `rails
+# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# be faster and is potentially less error prone than running all of your
+# migrations from scratch. Old migrations may fail to apply correctly if those
+# migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_18_143822) do
+ActiveRecord::Schema.define(version: 2021_06_14_154939) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
-  enable_extension "uuid-ossp"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.bigint "byte_size", null: false
+    t.string "checksum", null: false
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
 
   create_table "ecds_rails_auth_engine_logins", force: :cascade do |t|
     t.string "who"
@@ -29,7 +49,7 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
 
   create_table "flat_pages", force: :cascade do |t|
     t.string "title"
-    t.string "content"
+    t.string "body"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "position"
@@ -49,6 +69,28 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.index ["user_id"], name: "index_logins_on_user_id"
   end
 
+  create_table "map_icons", force: :cascade do |t|
+    t.text "base_sixty_four"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "title"
+  end
+
+  create_table "map_overlays", force: :cascade do |t|
+    t.decimal "south", precision: 100, scale: 8
+    t.decimal "north", precision: 100, scale: 8
+    t.decimal "east", precision: 100, scale: 8
+    t.decimal "west", precision: 100, scale: 8
+    t.bigint "tour_id"
+    t.bigint "stop_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.text "base_sixty_four"
+    t.text "title"
+    t.index ["stop_id"], name: "index_map_overlays_on_stop_id"
+    t.index ["tour_id"], name: "index_map_overlays_on_tour_id"
+  end
+
   create_table "media", force: :cascade do |t|
     t.string "title"
     t.text "caption"
@@ -64,6 +106,8 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.integer "tablet_height"
     t.integer "mobile_width"
     t.integer "mobile_height"
+    t.text "base_sixty_four"
+    t.integer "video_provider", default: 0
   end
 
   create_table "modes", force: :cascade do |t|
@@ -100,7 +144,9 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.bigint "stop_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "tour_id"
     t.index ["stop_id"], name: "index_stop_slugs_on_stop_id"
+    t.index ["tour_id"], name: "index_stop_slugs_on_tour_id"
   end
 
   create_table "stop_tags", force: :cascade do |t|
@@ -126,6 +172,10 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.datetime "updated_at", null: false
     t.string "address"
     t.bigint "medium_id"
+    t.string "parking_address"
+    t.string "icon_color", default: "#D32F2F"
+    t.bigint "map_icon_id"
+    t.index ["map_icon_id"], name: "index_stops_on_map_icon_id"
     t.index ["medium_id"], name: "index_stops_on_medium_id"
   end
 
@@ -220,8 +270,9 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.bigint "tour_id"
     t.string "external_url"
     t.text "notes"
-    t.string "logo"
     t.string "footer_logo"
+    t.text "base_sixty_four"
+    t.string "logo_title"
     t.index ["tour_id"], name: "index_tour_sets_on_tours_id"
   end
 
@@ -259,6 +310,8 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.string "meta_description"
     t.bigint "medium_id"
     t.string "map_type"
+    t.boolean "use_directions", default: true
+    t.integer "default_lng", default: 0
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"
@@ -274,6 +327,9 @@ ActiveRecord::Schema.define(version: 2021_05_18_143822) do
     t.index ["login_id"], name: "index_users_on_login_id", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "stop_slugs", "tours"
+  add_foreign_key "stops", "map_icons"
   add_foreign_key "stops", "media"
   add_foreign_key "tour_set_admins", "roles"
   add_foreign_key "tour_sets", "tours"

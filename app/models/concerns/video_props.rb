@@ -1,79 +1,53 @@
 # frozen_string_literal: true
 
+require 'open-uri'
+
 module VideoProps
   extend ActiveSupport::Concern
 
   def self.props(medium)
     return if medium.video.nil?
-    if self.is_vimeo(medium)
-      medium.provider = 'vimeo'
-      medium.video = vimeo_id(medium)
+    case medium.video_provider
+    when 'keiner'
+      nil
+    when 'vimeo'
       metadata = HTTParty.get("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/video/#{medium.video}")
       medium.title = metadata['title']
       medium.caption = metadata['description']
-      image = metadata['thumbnail_url']
-      medium.remote_original_image_url = metadata['thumbnail_url']
-      medium.embed = "<iframe title='#{metadata['title']}' src='https://player.vimeo.com/video/#{medium.video}' frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>"
-
-    elsif self.is_youtube(medium)
-      medium.provider = 'youtube'
-      medium.video = youtube_id(medium)
+      medium.embed = "//player.vimeo.com/video/#{medium.video}"
+      downloaded_image = open(metadata['thumbnail_url'])
+      medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.video}.jpg")
+    when 'youtube'
       begin
         metadata = Yt::Video.new(id: medium.video)
         medium.title = metadata.title
         medium.caption = metadata.description
-        medium.remote_original_image_url = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
-        medium.embed = %Q[<iframe title="#{metadata.title}" src='https://www.youtube.com/embed/#{medium.video}?enablejsapi=1' frameborder='0' allowfullscreen>]
+        medium.embed = "//www.youtube.com/embed/#{medium.video}"
+        downloaded_image = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
+        medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.video}.jpg")
       rescue Yt::Errors::NoItems
         medium.provider = nil
         medium.video = nil
       end
-    end
-  end
+    when 'soundcloud'
+      if medium.video.include?('iframe')
+        embed_code = Nokogiri::HTML(medium.video)
+        titles = embed_code.xpath('//a').map { |a| a[:title] }
+        if titles.length > 1
+          medium.title = titles.join(': ')
+        else
+          medium.title = titles.first
+        end
+        medium.video = embed_code.xpath('//iframe', 'src').first['src'].split('&').first[/(.*tracks\/)(.*)/,2]
+        medium.embed = "//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false"
+        browser = Ferrum::Browser.new()
+        browser.go_to("https:#{medium.embed}")
+        spans = browser.at_xpath('//span[contains(@class, "sc-artwork")]') until spans.present?
+        image = spans.attribute('style')[/(.*\()(.*)(\).*)/, 2]
+        downloaded_image = open("https:#{image}")
+        medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.title.parameterize}.jpg")
+      end
 
-  # def set_embed(medium)
-  #   if medium.provider == 'youtube'
-  #     medium.embed = "<iframe src='https://www.youtube.com/embed/#{medium.video}' frameborder='0' allowfullscreen>"
-  #   elsif medium.provider == 'vimeo'
-  #     medium.embed = "<iframe src='https://player.vimeo.com/video/#{medium.video}' frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>"
-  #   end
-  #   medium.save
-  # end
-
-  # <iframe title="Biological PPE: Ebola Virus Disease - PAPR Level - Doffing src=" https:="" www.youtube.com="" embed="" 8kwjszjrvg4'="" frameborder="0" allowfullscreen=""></iframe>
-
-
-  def self.is_youtube(medium)
-    if medium.provider == 'vimeo'
-      return false
-    end
-    # FIXME Youtube is always going to return 200
-    (medium.video.include? 'youtube.com') || (medium.video.include? 'youtu.be') || (!medium.video.include?('iframe') && HTTParty.get("https://www.youtube.com/watch?v=#{medium.video}").code == 200)
-  end
-
-  def self.is_vimeo(medium)
-    if medium.provider == 'youtube'
-      return false
-    end
-    (medium.video.include? 'vimeo') || (!medium.video.include?('iframe') && HTTParty.get("https://vimeo.com/#{medium.video}").code == 200)
-  end
-
-  def self.youtube_id(medium)
-    if medium.video.include? 'iframe'
-      YouTubeRails.extract_video_id(Nokogiri::HTML(medium.video).xpath('//iframe')[0]['src'])
-    elsif medium.video.include?('youtu')
-      YouTubeRails.extract_video_id(medium.video)
-    else
-      medium.video
-    end
-  end
-
-  def self.vimeo_id(medium)
-    if medium.video.include? 'iframe'
-      Nokogiri::HTML(medium.video).xpath('//iframe')[0]['src'].split('/')[-1]
-    else
-      /\d{7,10}/.match(medium.video)[0]
-      # /https?:\/\/{?:www\.}?vimeo.com\/{?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/.match(medium.video)[0]
     end
   end
 end

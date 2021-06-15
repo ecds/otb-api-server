@@ -1,0 +1,36 @@
+default: &default
+  adapter: postgresql
+  encoding: utf8
+  pool: 50
+  schema_search_path: "public,shared_extensions"
+
+mysql: &mysql
+  adatabase: <%= Rails.application.credentials.dig(:dbTest, :mysql, :db) %>
+  username: <%= Rails.application.credentials.dig(:dbTest, :mysql, :user) %>
+  password: <%= Rails.application.credentials.dig(:dbTest, :mysql, :pw) %>
+  host: <%= Rails.application.credentials.dig(:dbTest, :mysql, :host) %>
+
+
+development:
+  <<: *default
+  database: <%= Rails.application.credentials.dig(:dbDev, :db) %>
+  username: <%= Rails.application.credentials.dig(:dbDev, :user) %>
+  password: <%= Rails.application.credentials.dig(:dbDev, :pw) %>
+  host: <%= Rails.application.credentials.dig(:dbDev, :host) %>
+
+staging:
+  <<: *default
+  database: <%= Rails.application.credentials.dig(:rdsStaging, :db) %>
+  username: <%= Rails.application.credentials.dig(:rdsStaging, :user) %>
+  password: <%= Rails.application.credentials.dig(:rdsStaging, :pw) %>
+  host: <%= Rails.application.credentials.dig(:rdsStaging, :host) %>
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  <<: *default
+  database: <%= Rails.application.credentials.dig(:dbTest, :postgres, :db) %>
+  username: <%= Rails.application.credentials.dig(:dbTest, :postgres, :user) %>
+  password: <%= Rails.application.credentials.dig(:dbTest, :postgres, :pw) %>
+  host: <%= Rails.application.credentials.dig(:dbTest, :postgres, :host) %>

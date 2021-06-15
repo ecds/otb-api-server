@@ -2,7 +2,7 @@
 
 class V3::TourFlatPagesController < V3Controller
   before_action :set_tour_flat_page, only: [:show, :update, :destroy]
-  authorize_resource
+  #authorize_resource
 
   # GET /v3/tour_flat_pages
   def index
@@ -18,27 +18,39 @@ class V3::TourFlatPagesController < V3Controller
 
   # POST /v3/tour_flat_pages
   def create
-    @tour_flat_page = TourFlatPage.new(tour_flat_page_params)
+    if @allowed
+      @tour_flat_page = TourFlatPage.new(tour_flat_page_params)
 
-    if @tour_flat_page.save
-      render json: @tour_flat_page, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@tour_flat_page.id}"
+      if @tour_flat_page.save
+        render json: @tour_flat_page, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@tour_flat_page.id}"
+      else
+        render json: @tour_flat_page.errors, status: :unprocessable_entity
+      end
     else
-      render json: @tour_flat_page.errors, status: :unprocessable_entity
+      head 401
     end
   end
 
   # PATCH/PUT /v3/tour_flat_pages/1
   def update
-    if @tour_flat_page.update(tour_flat_page_params)
-      render json: @tour_flat_page
+    if @allowed
+      if @tour_flat_page.update(tour_flat_page_params)
+        render json: @tour_flat_page
+      else
+        render json: @tour_flat_page.errors, status: :unprocessable_entity
+      end
     else
-      render json: @tour_flat_page.errors, status: :unprocessable_entity
+      head 401
     end
   end
 
   # DELETE /v3/tour_flat_pages/1
   def destroy
-    @tour_flat_page.destroy
+    if @allowed
+      @tour_flat_page.destroy
+    else
+      head 401
+    end
   end
 
   private

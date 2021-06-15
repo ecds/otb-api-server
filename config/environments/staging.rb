@@ -49,4 +49,6 @@ Rails.application.configure do
   config.file_watcher = ActiveSupport::FileUpdateChecker
 
   ENV['BASE_URL'] = 'https://otb-api.ecdsdev.org'
+
+  config.active_storage.service = :staging
 end

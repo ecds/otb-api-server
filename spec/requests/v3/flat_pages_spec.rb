@@ -67,6 +67,7 @@ RSpec.describe 'V3::FlatPages', type: :request do
 
     context 'create without valid params' do
       before {
+        User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/flat-pages", params: { foo: 'bar' }
       }
@@ -97,7 +98,8 @@ RSpec.describe 'V3::FlatPages', type: :request do
 
     context 'update without valid params' do
       before {
-        invalid_attributes = {data: {type: 'flat_pages', attributes: { title: nil }}}
+        User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        invalid_attributes = { data: { type: 'flat_pages', attributes: { title: nil } } }
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         put "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.last.id}", params: invalid_attributes
       }

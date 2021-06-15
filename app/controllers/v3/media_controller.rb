@@ -3,8 +3,8 @@
 # app/controllers/v3/media_controller.rb
 module V3
   class MediaController < V3Controller
-    before_action :set_medium, only: [:show, :update, :destroy]
-    authorize_resource
+    before_action :set_medium, only: [:show, :update, :destroy, :file]
+    #authorize_resource
     # GET /media
     def index
       # TODO: This ins not ideal, we use these `not_in_*` scopes to make the list of media avaliable to add
@@ -18,7 +18,7 @@ module V3
       end
       render json: @media
     end
-    
+
     # GET /media/1
     def show
       if @medium.published || current_user.id.present?
@@ -53,25 +53,39 @@ module V3
       @medium.destroy
     end
 
-    # private
-      # Use callbacks to share common setup or constraints between actions.
-      def set_medium
-        @medium = Medium.find(params[:id])
+    def file
+      if @medium&.public_send("#{Apartment::Tenant.current.underscore}_file")&.attached?
+        if params[:context] == 'mobile'
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@medium.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '200x200').processed, only_path: true)
+        elsif params[:context] == 'tablet'
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@medium.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '300x300').processed, only_path: true)
+        elsif params[:context] == 'desktop'
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@medium.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '750x750').processed, only_path: true)
+        else
+          redirect_to rails_blob_url(@medium.file)
+        end
+      else
+        head :not_found
       end
+    end
 
-      # Only allow a trusted parameter "white list" through.
-      def medium_params
-        ActiveModelSerializers::Deserialization
-        .jsonapi_parse(
-          params, only: [
-                :title, :caption, :original_image, :stops, :tours, :video, :stop_id, :tour_id
-            ]
-        )
-      end
+    # Use callbacks to share common setup or constraints between actions.
+    def set_medium
+      @medium = Medium.find(params[:id])
+    end
 
-      def update_medium_params
-        self.medium_params.except(:original_image)
-      end
+    # Only allow a trusted parameter "white list" through.
+    def medium_params
+      ActiveModelSerializers::Deserialization
+      .jsonapi_parse(
+        params, only: [
+              :title, :caption, :original_image, :stops, :tours, :video, :stop_id, :tour_id, :base_sixty_four, :video_provider, :embed
+          ]
+      )
+    end
 
+    def update_medium_params
+      self.medium_params.except(:original_image)
+    end
   end
 end

@@ -8,7 +8,7 @@ module V3
   class UsersController < V3Controller
     before_action :set_user, only: [:show, :update, :destroy]
     before_action :authenticate!, only: :me
-    authorize_resource
+    #authorize_resource
 
     # GET /users
     def index

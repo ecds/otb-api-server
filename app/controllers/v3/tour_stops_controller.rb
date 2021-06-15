@@ -3,7 +3,7 @@
 # /app/controllers/v3/tour_stops_controller.rb
 class V3::TourStopsController < V3Controller
   before_action :set_tour_stop, only: [:show, :update, :destroy]
-  authorize_resource
+  #authorize_resource
 
   # GET /stops
   def index

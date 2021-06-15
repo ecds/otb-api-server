@@ -4,7 +4,7 @@
 module V3
   class ThemesController < V3Controller
     before_action :set_theme, only: [:show, :update, :destroy]
-    authorize_resource
+    #authorize_resource
 
     # GET /themes
     def index

@@ -15,6 +15,7 @@ require 'action_cable/engine'
 # require "sprockets/railtie"
 require 'rails/test_unit/railtie'
 require 'apartment/elevators/generic'
+require 'active_storage/engine'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -28,7 +29,7 @@ module OpenTourApi
         # request is an instance of Rack::Request
         tenant_name = request.fullpath.split('/')[1]
 
-        if tenant_name == 'auth'
+        if tenant_name == 'auth' || tenant_name == 'rails'
           return nil
         end
         tenant_name

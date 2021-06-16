@@ -23,7 +23,7 @@ module VideoProps
         medium.title = metadata.title
         medium.caption = metadata.description
         medium.embed = "//www.youtube.com/embed/#{medium.video}"
-        downloaded_image = "https://img.youtube.com/vi/#{medium.video}/0.jpg"
+        downloaded_image = open("https://img.youtube.com/vi/#{medium.video}/0.jpg")
         medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.video}.jpg")
       rescue Yt::Errors::NoItems
         medium.provider = nil
@@ -38,14 +38,21 @@ module VideoProps
         else
           medium.title = titles.first
         end
-        medium.video = embed_code.xpath('//iframe', 'src').first['src'].split('&').first[/(.*tracks\/)(.*)/,2]
+        medium.video = embed_code.xpath('//iframe', 'src').first['src'].split('&').first[/(.*tracks\/)(.*)/, 2]
         medium.embed = "//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false"
         browser = Ferrum::Browser.new()
         browser.go_to("https:#{medium.embed}")
         spans = browser.at_xpath('//span[contains(@class, "sc-artwork")]') until spans.present?
         image = spans.attribute('style')[/(.*\()(.*)(\).*)/, 2]
-        downloaded_image = open("https:#{image}")
-        medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.title.parameterize}.jpg")
+        if image.nil?
+          medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(
+            io: File.open(File.join(Rails.root, 'public', 'soundcloud.jpg')),
+            filename: "#{medium.title.parameterize}.jpg"
+          )
+        else
+          downloaded_image = open("https:#{image}")
+          medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.title.parameterize}.jpg")
+        end
       end
 
     end

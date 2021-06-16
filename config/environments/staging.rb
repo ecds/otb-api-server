@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 Rails.application.configure do
+  config.hosts << 'otb-api.ecdsdev.org'
+  Rails.application.routes.default_url_options[:host] = 'https://otb-api.ecdsdev.org'
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded on

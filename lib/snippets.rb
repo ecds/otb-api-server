@@ -1,15 +1,24 @@
-Medium.all.each do |m|
-  next if m.video.nil?
-  case m.provider
-  when 'youtube'
-    m.embed = "//www.youtube.com/embed/#{m.video}";
-    puts m.embed
-    m.video_provider = 'youtube'
-    m.save
-  when 'vimeo'
-    m.embed = "//player.vimeo.com/video/#{m.video}"
-    m.video_provider = 'vimeo'
-    m.save
+sites = TourSet.all.map(&:subdir)
+
+sites.each do |ts|
+  Apartment::Tenant.switch! ts
+  reload!
+  ids = Medium.all.map(&:id)
+  ids.each do |id|
+    Apartment::Tenant.switch! ts
+    m = Medium.find(id)
+    next if m.video.nil?
+    case m.provider
+    when 'youtube'
+      m.embed = "//www.youtube.com/embed/#{m.video}"
+      puts m.embed
+      m.video_provider = 'youtube'
+      m.save
+    when 'vimeo'
+      m.embed = "//player.vimeo.com/video/#{m.video}"
+      m.video_provider = 'vimeo'
+      m.save
+    end
   end
 end
 
@@ -25,12 +34,32 @@ media.each do |m|
 end
 
 # Medium.all.each do |m|
-#   if File.exist?(m.original_image.path) && !m.file.attached?
-#     m.file.attach(io: File.open(m.original_image.path), filename: m.original_image.path.split('/').last)
+  # if File.exist?(m.original_image.path) && !m.file.attached?
+    # m.file.attach(io: File.open(m.original_image.path), filename: m.original_image.path.split('/').last)
 #   else
 #     m.delete
 #   end
 # end
+
+sites = TourSet.all.map(&:subdir)
+
+sites.each do |ts|
+  Apartment::Tenant.switch! ts
+  reload!
+  ids = Medium.all.map(&:id)
+  ids.each do |id|
+    Apartment::Tenant.switch! ts
+    m = Medium.find(id)
+    next if m.public_send("#{ts.underscore}_file").attached?
+    if m.original_image.path && File.exist?(m.original_image.path)
+      m.public_send("#{ts.underscore}_file").attach(
+        io: File.open(m.original_image.path),
+        filename: m.original_image.path.split('/').last,
+        content_type: m.original_image.content_type
+      )
+    end
+  end
+end
 
 ActiveStorage::Blob.service.send(:path_for, m.public_send("#{Apartment::Tenant.current.underscore}_file").key)
 Apartment::Tenant.switch! 'july-22nd'
@@ -41,7 +70,7 @@ ids.each do |id|
 
   next if m.public_send("#{Apartment::Tenant.current.underscore}_file").attached?
 
-  next unless m.file.attached?
+  # next unless m.file.attached?
 
   next unless File.exists? ActiveStorage::Blob.service.send(:path_for, m.file.key)
 Apartment::Tenant.switch! 'july-22nd'
@@ -67,4 +96,10 @@ ids.each do |id|
     filename: m.file.filename.to_s,
     content_type: m.file.content_type
   )
+end
+
+User.all.each do |u|
+  login = Login.find_by(user_id: u.id)
+  u.email = login.identification
+  u.save
 end

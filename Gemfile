@@ -37,6 +37,7 @@ gem 'carrierwave', '~> 1.0'
 gem 'mini_magick'
 gem 'carrierwave-base64'
 gem 'ferrum'
+gem 'aws-sdk-s3', '~> 1'
 
 # RGeo is a geospatial data library for Ruby.
 # https://github.com/rgeo/rgeo

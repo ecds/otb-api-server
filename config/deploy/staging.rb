@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-set :branch, 'develop3.0'
+set :branch, 'develop'
 
 # server-based syntax
 # ======================
@@ -50,7 +50,7 @@ role :db,  %w{deploy@3.81.27.251}
    auth_methods: %w(publickey)
  }
 
- set :branch, 'develop',
+ set :branch, 'develop'
  set :deploy_to, '/data/otb-api'
 #
 # The server-based syntax can be used to override options:

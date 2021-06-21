@@ -1,30 +1,27 @@
 # frozen_string_literal: true
 
 class V3::TourFlatPagesController < V3Controller
-  before_action :set_tour_flat_page, only: [:show, :update, :destroy]
-  #authorize_resource
-
   # GET /v3/tour_flat_pages
   def index
-    @tour_flat_pages = TourFlatPage.all
+    @records = TourFlatPage.all
 
-    render json: @tour_flat_pages
+    render json: @records
   end
 
   # GET /v3/tour_flat_pages/1
   def show
-    render json: @tour_flat_page
+    render json: @record
   end
 
   # POST /v3/tour_flat_pages
   def create
     if @allowed
-      @tour_flat_page = TourFlatPage.new(tour_flat_page_params)
+      @record = TourFlatPage.new(tour_flat_page_params)
 
-      if @tour_flat_page.save
-        render json: @tour_flat_page, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@tour_flat_page.id}"
+      if @record.save
+        render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@record.id}"
       else
-        render json: @tour_flat_page.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     else
       head 401
@@ -34,10 +31,10 @@ class V3::TourFlatPagesController < V3Controller
   # PATCH/PUT /v3/tour_flat_pages/1
   def update
     if @allowed
-      if @tour_flat_page.update(tour_flat_page_params)
-        render json: @tour_flat_page
+      if @record.update(tour_flat_page_params)
+        render json: @record
       else
-        render json: @tour_flat_page.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     else
       head 401
@@ -47,18 +44,13 @@ class V3::TourFlatPagesController < V3Controller
   # DELETE /v3/tour_flat_pages/1
   def destroy
     if @allowed
-      @tour_flat_page.destroy
+      @record.destroy
     else
       head 401
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_tour_flat_page
-      @tour_flat_page = TourFlatPage.find(params[:id])
-    end
-
     # Only allow a trusted parameter "white list" through.
     def tour_flat_page_params
       ActiveModelSerializers::Deserialization
@@ -67,5 +59,9 @@ class V3::TourFlatPagesController < V3Controller
                   :tour, :flat_page, :position
               ]
           )
+    end
+
+    def set_record
+      @record = TourFlatPage.find(params[:id])
     end
 end

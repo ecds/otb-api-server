@@ -1,56 +1,54 @@
-class V3::MapIconsController < ApplicationController
-  before_action :set_map_icon, only: [:show, :update, :destroy]
+class V3::MapIconsController < V3Controller
 
-  # GET /map_icons
+  # GET /records
   def index
-    @map_icons = MapIcon.all
+    @records = MapIcon.all
 
-    render json: @map_icons
+    render json: @records
   end
 
-  # GET /map_icons/1
+  # GET /records/1
   def show
-    render json: @map_icon
+    render json: @record
   end
 
-  # POST /map_icons
+  # POST /records
   def create
-    @map_icon = MapIcon.new(map_icon_params)
+    @record = MapIcon.new(record_params)
 
-    if @map_icon.save
-      render json: @map_icon, status: :created
+    if @record.save
+      render json: @record, status: :created
     else
-      render json: @map_icon.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /map_icons/1
+  # PATCH/PUT /records/1
   def update
-    if @map_icon.update(map_icon_params)
-      render json: @map_icon
+    if @record.update(record_params)
+      render json: @record
     else
-      render json: @map_icon.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /map_icons/1
+  # DELETE /records/1
   def destroy
-    @map_icon.destroy
+    @record.destroy
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_map_icon
-      @map_icon = MapIcon.find(params[:id])
-    end
-
     # Only allow a trusted parameter "white list" through.
-    def map_icon_params
+    def record_params
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
                 :base_sixty_four, :title
               ]
           )
+    end
+
+    def set_record
+      @record = MapIcon.find(params[:id])
     end
 end

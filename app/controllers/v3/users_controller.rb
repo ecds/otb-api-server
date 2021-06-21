@@ -6,9 +6,7 @@ module V3
   # Endpoints for User Model
   #
   class UsersController < V3Controller
-    before_action :set_user, only: [:show, :update, :destroy]
     before_action :authenticate!, only: :me
-    #authorize_resource
 
     # GET /users
     def index
@@ -25,36 +23,37 @@ module V3
 
     # GET /users/1
     def show
-      if current_user == @user || current_user.super
-        render json: @user
+      if current_user == @record || current_user.super
+        render json: @record
       else
         render json: { message: 'You are not autorized to to view this resource.' }.to_json, status: 401
       end
     end
 
+    # TODO: Is this endpoint ever used?
     # POST /users
     def create
-      @user = User.new(user_params)
+      @record = User.new(user_params)
 
-      if @user.save && user.create_login(login_params)
-        render json: @user, status: :created, location: @user
+      if @record.save
+        render json: @record, status: :created, location: @record
       else
-        render json: @user.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # PATCH/PUT /users/1
     def update
-      if @user.update(user_params)
-        render json: @user
+      if @record.update(user_params)
+        render json: @record
       else
-        render json: @user.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # DELETE /users/1
     def destroy
-      @user.destroy
+      @record.destroy
     end
 
     def me
@@ -67,12 +66,6 @@ module V3
     end
 
       private
-
-        # Use callbacks to share common setup or constraints between actions.
-        def set_user
-          @user = User.find(params[:id])
-        end
-
         # Only allow a trusted parameter "white list" through.
         def user_params
           ActiveModelSerializers::Deserialization
@@ -85,14 +78,8 @@ module V3
               )
         end
 
-        def login_params
-          ActiveModelSerializers::Deserialization
-              .jsonapi_parse(
-                params, only: [
-                      :identification, :password,
-                      :password_confirmation, :uid
-                  ]
-              )
+        def set_record
+          @record = User.find(params[:id])
         end
   end
 end

@@ -2,9 +2,7 @@
 
 # app/controllers/v3/tour_modes_controller.rb
 module V3
-  class TourModesController < V3Controller
-    #authorize_resource
-
+  class TourModesController < ApplicationController
     # GET /tour_sets
     def index
       @tour_modes = TourMode.all

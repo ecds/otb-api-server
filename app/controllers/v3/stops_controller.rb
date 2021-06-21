@@ -3,13 +3,9 @@
 # /app/controllers/v3/stops_controller.rb
 # module V3
 class V3::StopsController < V3Controller
-  # before_action :set_tour
-  before_action :set_stop, only: [:show, :update, :destroy]
-  #authorize_resource
-
   # GET /stops
   def index
-    @stops = if params[:tour_id]
+    @records = if params[:tour_id]
       Stop.not_in_tour(params[:tour_id]).or(Stop.no_tours)
     elsif params[:slug]
       # stop = StopSlug.find_by(slug: params[:slug]).stop
@@ -17,7 +13,7 @@ class V3::StopsController < V3Controller
     else
       Stop.all
     end
-    render json: @stops,
+    render json: @records,
     include: [
         'media',
         'stop_media'
@@ -26,7 +22,7 @@ class V3::StopsController < V3Controller
 
   # GET /stops/1
   def show
-    render json: @stop,
+    render json: @record,
            include: [
                'media',
                'stop_media',
@@ -36,55 +32,55 @@ class V3::StopsController < V3Controller
 
   # POST /stops
   def create
-    @stop = Stop.new(stop_params)
-    if @stop.save
-      render json: @stop, status: :created, location: "/#{Apartment::Tenant.current}/#{@stop.id}"
+    @record = Stop.new(stop_params)
+    if @record.save
+      render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
     else
-      render json: @stop.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /stops/1
   def update
-    if @stop.update(stop_params)
-      render json: @stop, location: "/#{Apartment::Tenant.current}/stops/#{@stop.id}"
+    if @record.update(stop_params)
+      render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
     else
-      render json: @stop.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /stops/1
   def destroy
-    @stop.destroy
+    @record.destroy
   end
 
     private
 
-    # Only allow a trusted parameter "white list" through.
-    def stop_params
-      ActiveModelSerializers::Deserialization
-          .jsonapi_parse(
-            params, only: [
-                  :title, :description, :lat, :lng,
-                  :parking_lat, :parking_lng, :media,
-                  :address, :tours, :direction_notes,
-                  :meta_description, :parking_address,
-                  :icon_color, :map_icon
-              ]
-          )
-    end
+      # Only allow a trusted parameter "white list" through.
+      def stop_params
+        ActiveModelSerializers::Deserialization
+            .jsonapi_parse(
+              params, only: [
+                    :title, :description, :lat, :lng,
+                    :parking_lat, :parking_lng, :media,
+                    :address, :tours, :direction_notes,
+                    :meta_description, :parking_address,
+                    :icon_color, :map_icon
+                ]
+            )
+      end
 
-    # Use callbacks to share common setup or constraints between actions.
+      # Use callbacks to share common setup or constraints between actions.
 
-    def set_tour
-      @tour = Tour.find(params[:tour_id])
-    end
+      def set_tour
+        @tour = Tour.find(params[:tour_id])
+      end
 
-    def set_stop
-      @stop = Stop.find(params[:id])
-    end
+      def set_record
+        @record = Stop.find(params[:id])
+      end
 
-    def set_tour_stop
-      @stop = @tour.stops.find_by!(id: params[:id]) if @tour
-    end
+      def set_tour_stop
+        @record = @tour.stops.find_by!(id: params[:id]) if @tour
+      end
 end

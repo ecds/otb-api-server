@@ -1,33 +1,32 @@
 class V3::MapOverlaysController < V3Controller
-  before_action :set_map_overlay, only: [:show, :update, :destroy]
 
   def show
-    render json: @map_overlay
+    render json: @record
   end
 
   def create
-    @map_overlay = MapOverlay.new(map_overlay_params)
-    if @map_overlay.save
-      render json: @map_overlay, status: :created
+    @record = MapOverlay.new(record_params)
+    if @record.save
+      render json: @record, status: :created
     else
-      render json: @map_overlay.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /stops/1
   def update
-    if @map_overlay.update(map_overlay_params)
+    if @record.update(record_params)
       # render json: @stop
       head :no_content
     else
-      render json: @map_overlay.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /stops/1
   def destroy
-    if @map_overlay
-      @map_overlay.destroy
+    if @record
+      @record.destroy
     end
     head :no_content
   end
@@ -35,7 +34,7 @@ class V3::MapOverlaysController < V3Controller
   private
 
     # Only allow a trusted parameter "white list" through.
-    def map_overlay_params
+    def record_params
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
@@ -44,7 +43,7 @@ class V3::MapOverlaysController < V3Controller
           )
     end
 
-    def set_map_overlay
-      @map_overlay = MapOverlay.find_by(id: params[:id])
+    def set_record
+      @record = MapOverlay.find(params[:id])
     end
 end

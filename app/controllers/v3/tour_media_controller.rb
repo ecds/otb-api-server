@@ -1,7 +1,4 @@
 class V3::TourMediaController < V3Controller
-  before_action :set_tour_medium, only: [:show, :update, :destroy]
-  #authorize_resource
-
   # GET /v3/tour_media
   def index
     @tour_media = if params[:tour_id] && params[:medium_id]
@@ -15,40 +12,35 @@ class V3::TourMediaController < V3Controller
 
   # GET /v3/tour_media/1
   def show
-    render json: @tour_medium
+    render json: @record
   end
 
   # POST /v3/tour_media
   def create
-    @tour_medium = TourMedium.new(tour_medium_params)
+    @record = TourMedium.new(tour_medium_params)
 
-    if @tour_medium.save
-      render json: @tour_medium, status: :created, location: @tour_medium
+    if @record.save
+      render json: @record, status: :created, location: @record
     else
-      render json: @tour_medium.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /v3/tour_media/1
   def update
-    if @tour_medium.update(tour_medium_params)
-      render json: @tour_medium
+    if @record.update(tour_medium_params)
+      render json: @record
     else
-      render json: @tour_medium.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /v3/tour_media/1
   def destroy
-    @tour_medium.destroy
+    @record.destroy
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_tour_medium
-      @tour_medium = TourMedium.find(params[:id])
-    end
-
     # Only allow a trusted parameter "white list" through.
     def tour_medium_params
       ActiveModelSerializers::Deserialization
@@ -59,7 +51,7 @@ class V3::TourMediaController < V3Controller
           )
     end
 
-    def set_tour_medium
-      @tour_medium = TourMedium.find_by!(id: params[:id])
+    def set_record
+      @record = TourMedium.find(params[:id])
     end
 end

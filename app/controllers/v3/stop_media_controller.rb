@@ -1,7 +1,7 @@
+#
+# Endpoint for through model for Stops and Media
+#
 class V3::StopMediaController < V3Controller
-  before_action :set_stop_medium, only: [:show, :update, :destroy]
-  #authorize_resource
-
   # GET /v3/stop_media
   def index
     @stop_media = if params[:stop_id] && params[:medium_id]
@@ -14,45 +14,37 @@ class V3::StopMediaController < V3Controller
 
   # GET /v3/stop_media/1
   def show
-    render json: @stop_medium,
-     include: [
-        #  'media'
-     ]
+    render json: @record
   end
 
   # POST /v3/stop_media
   def create
-    @stop_medium = StopMedium.new(stop_medium_params)
+    @record = StopMedium.new(record_params)
 
-    if @stop_medium.save
-      render json: @stop_medium, status: :created, location: "/#{Apartment::Tenant.current}/stop-medium/#{@stop_medium.id}"
+    if @record.save
+      render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/stop-medium/#{@record.id}"
     else
-      render json: @stop_medium.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /v3/stop_media/1
   def update
-    if @stop_medium.update(stop_medium_params)
-      render json: @stop_medium
+    if @record.update(record_params)
+      render json: @record
     else
-      render json: @stop_medium.errors, status: :unprocessable_entity
+      render json: serialize_errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /v3/stop_media/1
   def destroy
-    @stop_medium.destroy
+    @record.destroy
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_stop_medium
-      @stop_medium = StopMedium.find(params[:id])
-    end
-
     # Only allow a trusted parameter "white list" through.
-    def stop_medium_params
+    def record_params
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
@@ -61,7 +53,7 @@ class V3::StopMediaController < V3Controller
           )
     end
 
-    def set_stop_medium
-      @stop_medium = StopMedium.find_by!(id: params[:id])
+    def set_record
+      @record = StopMedium.find(params[:id])
     end
 end

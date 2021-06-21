@@ -1,53 +1,53 @@
 # frozen_string_literal: true
 
 class V3::FlatPagesController < V3Controller
-  before_action :set_flat_page, only: [:show, :update, :destroy]
+  before_action :set_record, only: [:show, :update, :destroy]
   #authorize_resource
 
-  # GET /v3/flat_pages
+  # GET /v3/records
   def index
-    @flat_pages = FlatPage.all
+    @records = FlatPage.all
 
-    render json: @flat_pages
+    render json: @records
   end
 
-  # GET /v3/flat_pages/1
+  # GET /v3/records/1
   def show
-    render json: @flat_page
+    render json: @record
   end
 
-  # POST /v3/flat_pages
+  # POST /v3/records
   def create
     if @allowed
-      @flat_page = FlatPage.new(flat_page_params)
+      @record = FlatPage.new(record_params)
 
-      if @flat_page.save
-        render json: @flat_page, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@flat_page.id}"
+      if @record.save
+        render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@record.id}"
       else
-        render json: @flat_page.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     else
       head 401
     end
   end
 
-  # PATCH/PUT /v3/flat_pages/1
+  # PATCH/PUT /v3/records/1
   def update
     if @allowed
-      if @flat_page.update(flat_page_params)
-        render json: @flat_page
+      if @record.update(record_params)
+        render json: @record
       else
-        render json: @flat_page.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     else
       head 401
     end
   end
 
-  # DELETE /v3/flat_pages/1
+  # DELETE /v3/records/1
   def destroy
     if @allowed
-      @flat_page.destroy
+      @record.destroy
     else
       head 401
     end
@@ -55,12 +55,12 @@ class V3::FlatPagesController < V3Controller
 
   private
     # Use callbacks to share common setup or constraints between actions.
-    def set_flat_page
-      @flat_page = FlatPage.find(params[:id])
+    def set_record
+      @record = FlatPage.find(params[:id])
     end
 
     # Only allow a trusted parameter "white list" through.
-    def flat_page_params
+    def record_params
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [

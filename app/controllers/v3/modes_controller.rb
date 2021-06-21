@@ -2,7 +2,7 @@
 
 # app/controllers/v3/modes_controller.rb
 module V3
-  class ModesController < V3Controller
+  class ModesController < ApplicationController
 
     # GET /modes
     def index

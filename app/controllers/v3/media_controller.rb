@@ -3,8 +3,8 @@
 # app/controllers/v3/media_controller.rb
 module V3
   class MediaController < V3Controller
-    before_action :set_medium, only: [:show, :update, :destroy, :file]
-    #authorize_resource
+    before_action :set_record, only: [:show, :update, :destroy, :file]
+
     # GET /media
     def index
       # TODO: This ins not ideal, we use these `not_in_*` scopes to make the list of media avaliable to add
@@ -21,8 +21,8 @@ module V3
 
     # GET /media/1
     def show
-      if @medium.published || current_user.id.present?
-        render json: @medium
+      if @record.published || current_user.id.present?
+        render json: @record
       else
         head 401
       end
@@ -30,39 +30,39 @@ module V3
 
     # POST /media
     def create
-      @medium = Medium.new(medium_params)
+      @record = Medium.new(record_params)
 
-      if @medium.save
-        render json: @medium, status: :created, location: "/#{Apartment::Tenant.current}/media/#{@medium.id}"
+      if @record.save
+        render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/media/#{@record.id}"
       else
-        render json: @medium.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # PATCH/PUT /media/1
     def update
-      if @medium.update(update_medium_params)
-        render json: @medium
+      if @record.update(record_params)
+        render json: @record
       else
-        render json: @medium.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # DELETE /media/1
     def destroy
-      @medium.destroy
+      @record.destroy
     end
 
     def file
-      if @medium&.public_send("#{Apartment::Tenant.current.underscore}_file")&.attached?
+      if @record&.public_send("#{Apartment::Tenant.current.underscore}_file")&.attached?
         if params[:context] == 'mobile'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@medium.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '200x200').processed, only_path: true)
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '200x200').processed, only_path: true)
         elsif params[:context] == 'tablet'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@medium.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '300x300').processed, only_path: true)
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '300x300').processed, only_path: true)
         elsif params[:context] == 'desktop'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@medium.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '750x750').processed, only_path: true)
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '750x750').processed, only_path: true)
         else
-          redirect_to rails_blob_url(@medium.file)
+          redirect_to rails_blob_url(@record.file)
         end
       else
         head :not_found
@@ -70,22 +70,18 @@ module V3
     end
 
     # Use callbacks to share common setup or constraints between actions.
-    def set_medium
-      @medium = Medium.find(params[:id])
+    def set_record
+      @record = Medium.find(params[:id])
     end
 
     # Only allow a trusted parameter "white list" through.
-    def medium_params
+    def record_params
       ActiveModelSerializers::Deserialization
       .jsonapi_parse(
         params, only: [
               :title, :caption, :original_image, :stops, :tours, :video, :stop_id, :tour_id, :base_sixty_four, :video_provider, :embed
           ]
       )
-    end
-
-    def update_medium_params
-      self.medium_params.except(:original_image)
     end
   end
 end

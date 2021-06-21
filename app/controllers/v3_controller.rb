@@ -2,6 +2,7 @@
 
 class V3Controller < ApplicationController
   include EcdsRailsAuthEngine::CurrentUser
+  before_action :set_record, only: [:show, :update, :destroy]
   before_action :allowed?, only: [:create, :update, :destroy]
 
   def serialize_errors

@@ -35,18 +35,18 @@ module V3
 
     # POST /tour_sets
     def create
-      @record = TourSet.new(tour_set_params)
+      @record = TourSet.new(record_params)
 
       if @record.save
         render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
       else
-        render json: @record.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # PATCH/PUT /tour_sets/1
     def update
-      if @record.update(tour_set_params)
+      if @record.update(record_params)
         # render json: @record
         head :no_content
       else
@@ -67,7 +67,7 @@ module V3
     end
 
     # Only allow a trusted parameter "white list" through.
-    def tour_set_params
+    def record_params
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [

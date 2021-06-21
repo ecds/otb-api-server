@@ -144,10 +144,10 @@ class TourSet < ApplicationRecord
     def validate_logo_dimensions
       image = MiniMagick::Image.open(tmp_file_path)
       if image[:width] > 300
-        errors[:base] << 'Logo cannot be wider than 300 pixels.'
+        errors.add(:base, 'Logo cannot be wider than 300 pixels.')
       end
       if image[:height] > 80
-        errors[:base] << 'Logo cannot be taller than 80 pixels.'
+        errors.add(:base, 'Logo cannot be taller than 80 pixels.')
       end
     end
 end

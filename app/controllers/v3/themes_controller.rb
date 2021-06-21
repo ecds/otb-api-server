@@ -3,55 +3,51 @@
 # app/controllers/v3/themes_controller.rb
 module V3
   class ThemesController < V3Controller
-    before_action :set_theme, only: [:show, :update, :destroy]
-    #authorize_resource
-
     # GET /themes
     def index
-      @themes = Theme.all
+      @records = Theme.all
 
-      render json: @themes
+      render json: @records
     end
 
     # GET /themes/1
     def show
-      render json: @theme
+      render json: @record
     end
 
     # POST /themes
     def create
-      @theme = Theme.new(theme_params)
+      @record = Theme.new(theme_params)
 
-      if @theme.save
-        render json: @theme, status: :created, location: @theme
+      if @record.save
+        render json: @record, status: :created, location: @record
       else
-        render json: @theme.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # PATCH/PUT /themes/1
     def update
-      if @theme.update(theme_params)
-        render json: @theme
+      if @record.update(theme_params)
+        render json: @record
       else
-        render json: @theme.errors, status: :unprocessable_entity
+        render json: serialize_errors, status: :unprocessable_entity
       end
     end
 
     # DELETE /themes/1
     def destroy
-      @theme.destroy
+      @record.destroy
     end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_theme
-      @theme = Theme.find(params[:id])
-    end
-
     # Only allow a trusted parameter "white list" through.
     def theme_params
       params.fetch(:theme, {})
     end
-end
+
+    def set_record
+      @record = Theme.find(params[:id])
+    end
+  end
 end

@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 #
-# <Description>
+# Endpoint that returns a tour serialized as GeoJSON
 #
 module V3
-  class GeojsonToursController < V3Controller
-    skip_authorization_check
+  class GeojsonToursController < ApplicationController
     def show
       @tour = Tour.find(params[:id])
       render json: { type: 'FeatureCollection', features: @tour.stops.map { |s| feature(s) } }.to_json

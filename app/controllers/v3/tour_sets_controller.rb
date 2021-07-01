@@ -4,9 +4,6 @@
 # app/controllers/v3/tour_sets.rb
 module V3
   class TourSetsController < V3Controller
-    before_action :set_record, only: [:show, :update, :destroy]
-    #authorize_resource
-
     # GET /tour_sets
     def index
       @records = []

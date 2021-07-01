@@ -46,6 +46,12 @@ class Stop < ApplicationRecord
     nil
   end
 
+  def splash_url
+    return if splash.nil?
+
+    splash.files[:desktop]
+  end
+
   def splash_height
     splash.nil? ? nil : splash.desktop_height
   end

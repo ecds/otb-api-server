@@ -56,9 +56,9 @@ module V3
     def file
       if @record&.public_send("#{Apartment::Tenant.current.underscore}_file")&.attached?
         if params[:context] == 'mobile'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '200x200').processed, only_path: true)
-        elsif params[:context] == 'tablet'
           redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '300x300').processed, only_path: true)
+        elsif params[:context] == 'tablet'
+          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '400x400').processed, only_path: true)
         elsif params[:context] == 'desktop'
           redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.public_send("#{Apartment::Tenant.current.underscore}_file").variant(resize: '750x750').processed, only_path: true)
         else

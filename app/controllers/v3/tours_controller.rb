@@ -19,7 +19,6 @@ class V3::ToursController < V3Controller
     else
       Tour.published
     end
-
     if @records.nil?
       render json: { error: 'not found' }.to_json, status: 404
     else

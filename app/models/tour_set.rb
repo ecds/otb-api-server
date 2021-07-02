@@ -21,10 +21,28 @@ class TourSet < ApplicationRecord
     begin
       Apartment::Tenant.switch! self.subdir
       tours = []
-      Tour.published.each do |t|
+      Tour.published.has_stops.each do |t|
         tour = {
           title: t.title,
           slug: t.slug
+        }
+        tours.push(tour)
+      end
+      tours
+    rescue Apartment::TenantNotFound => error
+      # self.delete
+    end
+  end
+
+  def mapable_tours
+    begin
+      Apartment::Tenant.switch! self.subdir
+      tours = []
+      Tour.published.has_stops.mapable.each do |t|
+        tour = {
+          title: t.title,
+          slug: t.slug,
+          center: { lat: t.bounds[:centerLat], lng: t.bounds[:centerLng] }
         }
         tours.push(tour)
       end

@@ -36,6 +36,8 @@ class Tour < ApplicationRecord
   after_create :add_modes
 
   scope :published, -> { where(published: true) }
+  scope :mapable, -> { where(is_geo: true) }
+  scope :has_stops, -> { includes(:stops).where.not(stops: { id: nil }) }
 
   def sanitized_description
     HtmlSaintizer.accessable(description)
@@ -101,9 +103,9 @@ class Tour < ApplicationRecord
   def bounds
     return nil if stops.empty?
 
-    points = stops.map { |s| RGeo::Geographic.spherical_factory.point(s.lng, s.lat) }
+    points = stops.map { |stop| RGeo::Geographic.spherical_factory.point(stop.lng, stop.lat) }
     box = RGeo::Cartesian::BoundingBox.create_from_points(points.pop, points.pop)
-    points.each { |p| box.add(p) }
+    points.each { |point| box.add(point) }
 
     {
       south: box.min_y,

@@ -178,6 +178,6 @@ RSpec.configure do |config|
   end
 
   config.after(:suite) do
-    TourSet.all.each { |ts| ts.destroy }
+    # TourSet.all.each { |ts| ts.destroy }
   end
 end

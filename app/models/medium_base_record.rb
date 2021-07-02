@@ -5,7 +5,8 @@ class MediumBaseRecord < ApplicationRecord
   self.abstract_class = true
   before_create :attach_file
 
-  has_one_attached "#{Apartment::Tenant.current.underscore}_file"
+  # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
+  has_one_attached 'file'
 
   def tmp_file_path
     return Rails.root.join('public', 'storage', 'tmp', title) if self.title
@@ -31,7 +32,7 @@ class MediumBaseRecord < ApplicationRecord
       f.write(Base64.decode64(base_sixty_four))
     end
 
-    self.public_send("#{Apartment::Tenant.current.underscore}_file").attach(
+    self.file.attach(
       io: File.open(tmp_file_path),
       filename: title,
       content_type: content_type

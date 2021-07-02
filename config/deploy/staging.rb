@@ -7,7 +7,7 @@ set :branch, 'develop'
 # Defines a single server with a list of roles and multiple properties.
 # You can define all roles on a single server, or split them:
 
-server "3.81.27.251", user: "deploy", roles: %w{app db web}, primary: :my_value
+server "44.192.13.190", user: "deploy", roles: %w{app db web}, primary: :my_value
 # server "otb.ecdsdev.org", user: "deploy", roles: %w{app web}, other_property: :other_value
 # server "db.otb.ecdsdev.org", user: "deploy", roles: %w{db}
 
@@ -21,9 +21,9 @@ server "3.81.27.251", user: "deploy", roles: %w{app db web}, primary: :my_value
 # property set. Specify the username and a domain or IP for the server.
 # Don't use `:all`, it's a meta role.
 
-role :app, %w{deploy@3.81.27.251}
-role :web, %w{user1@3.81.27.251}
-role :db,  %w{deploy@3.81.27.251}
+role :app, %w{deploy@44.192.13.190}
+role :web, %w{user1@44.192.13.190}
+role :db,  %w{deploy@44.192.13.190}
 
 
 

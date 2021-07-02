@@ -50,9 +50,9 @@ sites.each do |ts|
   ids.each do |id|
     Apartment::Tenant.switch! ts
     m = Medium.find(id)
-    next if m.public_send("#{ts.underscore}_file").attached?
+    next if m.file.attached?
     if m.original_image.path && File.exist?(m.original_image.path)
-      m.public_send("#{ts.underscore}_file").attach(
+      m.file.attach(
         io: File.open(m.original_image.path),
         filename: m.original_image.path.split('/').last,
         content_type: m.original_image.content_type
@@ -61,20 +61,20 @@ sites.each do |ts|
   end
 end
 
-ActiveStorage::Blob.service.send(:path_for, m.public_send("#{Apartment::Tenant.current.underscore}_file").key)
+ActiveStorage::Blob.service.send(:path_for, m.file.key)
 Apartment::Tenant.switch! 'july-22nd'
 ids = Medium.all.map(&:id)
 ids.each do |id|
   Apartment::Tenant.switch! 'july-22nd'
   m = Medium.find(id)
 
-  next if m.public_send("#{Apartment::Tenant.current.underscore}_file").attached?
+  next if m.file.attached?
 
   # next unless m.file.attached?
 
   next unless File.exists? ActiveStorage::Blob.service.send(:path_for, m.file.key)
 Apartment::Tenant.switch! 'july-22nd'
-  m.public_send("#{Apartment::Tenant.current.underscore}_file").attach(
+  m.file.attach(
     io: File.open(ActiveStorage::Blob.service.send(:path_for, m.file.key)),
     filename: m.file.filename.to_s,
     content_type: m.file.content_type
@@ -91,7 +91,7 @@ ids.each do |id|
 
   next unless File.exists? ActiveStorage::Blob.service.send(:path_for, m.file.key)
 
-  m.public_send("#{Apartment::Tenant.current.underscore}_file").attach(
+  m.file.attach(
     io: File.open(ActiveStorage::Blob.service.send(:path_for, m.file.key)),
     filename: m.file.filename.to_s,
     content_type: m.file.content_type
@@ -102,4 +102,18 @@ User.all.each do |u|
   login = Login.find_by(user_id: u.id)
   u.email = login.identification
   u.save
+end
+
+sites = TourSet.all.map(&:subdir)
+
+sites.each do |ts|
+  puts ts
+  Apartment::Tenant.switch! ts
+  Tour.all.each do |t|
+    puts t.title
+    if t.bounds
+      t.is_geo = true
+      t.save
+    end
+  end
 end

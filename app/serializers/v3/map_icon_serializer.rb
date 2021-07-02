@@ -3,7 +3,7 @@ class V3::MapIconSerializer < ActiveModel::Serializer
   attributes :id, :base_sixty_four, :title, :image_url
 
   def image_url
-    return nil unless object.public_send("#{Apartment::Tenant.current.underscore}_file").attached?
-    rails_blob_url(object.public_send("#{Apartment::Tenant.current.underscore}_file"))
+    return nil unless object.file.attached?
+    rails_blob_url(object.file)
   end
 end

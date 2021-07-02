@@ -16,7 +16,7 @@ module VideoProps
       medium.caption = metadata['description']
       medium.embed = "//player.vimeo.com/video/#{medium.video}"
       downloaded_image = open(metadata['thumbnail_url'])
-      medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.video}.jpg")
+      medium.file.attach(io: downloaded_image, filename: "#{medium.video}.jpg")
     when 'youtube'
       begin
         metadata = Yt::Video.new(id: medium.video)
@@ -24,7 +24,7 @@ module VideoProps
         medium.caption = metadata.description
         medium.embed = "//www.youtube.com/embed/#{medium.video}"
         downloaded_image = open("https://img.youtube.com/vi/#{medium.video}/0.jpg")
-        medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.video}.jpg")
+        medium.file.attach(io: downloaded_image, filename: "#{medium.video}.jpg")
       rescue Yt::Errors::NoItems
         medium.provider = nil
         medium.video = nil
@@ -45,13 +45,13 @@ module VideoProps
         spans = browser.at_xpath('//span[contains(@class, "sc-artwork")]') until spans.present?
         image = spans.attribute('style')[/(.*\()(.*)(\).*)/, 2]
         if image.nil?
-          medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(
+          medium.file.attach(
             io: File.open(File.join(Rails.root, 'public', 'soundcloud.jpg')),
             filename: "#{medium.title.parameterize}.jpg"
           )
         else
           downloaded_image = open("https:#{image}")
-          medium.public_send("#{Apartment::Tenant.current.underscore}_file").attach(io: downloaded_image, filename: "#{medium.title.parameterize}.jpg")
+          medium.file.attach(io: downloaded_image, filename: "#{medium.title.parameterize}.jpg")
         end
       end
 

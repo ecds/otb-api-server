@@ -13,7 +13,7 @@ class Medium < MediumBaseRecord
   #   attachable.variant :desktop, resize: '750x750'
   # end
 
-  # mount_base64_uploader :original_image, MediumUploader
+  mount_base64_uploader :original_image, MediumUploader
   has_many :stop_media
   has_many :stops, through: :stop_media
   has_many :tour_media
@@ -67,7 +67,7 @@ class Medium < MediumBaseRecord
   end
 
   def files
-    return nil if !self.public_send("#{Apartment::Tenant.current.underscore}_file").attached?
+    return nil if !self.file.attached?
     {
       mobile: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=mobile",
       tablet: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=tablet",

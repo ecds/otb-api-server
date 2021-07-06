@@ -4,6 +4,12 @@ class MapOverlay < MediumBaseRecord
   belongs_to :tour, optional: true
   belongs_to :stop, optional: true
 
+  def image_url
+    return nil unless file.attached?
+
+    file.service_url
+  end
+
   def set_initial_bounds
     if tour
       self.south = self.tour.bounds[:south]

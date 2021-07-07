@@ -126,7 +126,7 @@ ActiveRecord::Schema.define(version: 2021_07_07_161803) do
     t.string "title"
   end
 
-  create_table "slugs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "slugs", force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
     t.datetime "created_at", null: false

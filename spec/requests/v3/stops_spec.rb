@@ -22,15 +22,15 @@ RSpec.describe 'V3::Stops API' do
       end
     end
 
-    context 'returns stops not associated with given tour' do
-      before {
-        get "/#{Apartment::Tenant.current}/stops?tour_id=#{Tour.last.id}"
-      }
+    # context 'returns stops not associated with given tour' do
+    #   before {
+    #     get "/#{Apartment::Tenant.current}/stops?tour_id=#{Tour.last.id}"
+    #   }
 
-      it 'returns stops not part of given tour' do
-        expect(json.size).to eq(Stop.not_in_tour(Tour.last.id).count)
-      end
-    end
+    #   it 'returns stops not part of given tour' do
+    #     expect(json.size).to eq(Stop.not_in_tour(Tour.last.id).count)
+    #   end
+    # end
 
     context 'get stop by slug and tour' do
       before {

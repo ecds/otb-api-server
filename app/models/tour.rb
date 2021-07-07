@@ -76,9 +76,9 @@ class Tour < ApplicationRecord
   end
 
   def splash_url
-    return if splash.nil?
-
-    splash.files[:desktop]
+    return if splash.nil? || splash.files.nil?
+    nil
+    # splash.files[:desktop]
   end
 
   def splash_height

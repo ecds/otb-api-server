@@ -5,7 +5,7 @@ class Medium < MediumBaseRecord
   include VideoProps
   include Rails.application.routes.url_helpers
   before_create :props
-  before_update :remove_tmp_file
+  before_update :replace_video
 
   # has_one_attached :file do |attachable|
   #   attachable.variant :mobile, resize: '200x200'
@@ -25,54 +25,31 @@ class Medium < MediumBaseRecord
 
   attr_accessor :insecure
 
-
-
-  # TODO: This is not ideal, we use these `not_in_*` scopes to make the list of media avaliable to add
-  # to a stop or tour. But the paramerter does not make sense when just looking at it. Needs clearer language.
-  scope :not_in_stop, lambda { |stop_id| includes(:stop_media).where.not(stop_media: { stop_id: stop_id }) }
-  scope :not_in_tour, lambda { |tour_id| includes(:tour_media).where.not(tour_media: { tour_id: tour_id }) }
-  scope :no_stops, lambda { includes(:stop_media).where(stop_media: { stop_id: nil }) }
-  scope :no_tours, lambda { includes(:tour_media).where(tour_media: { tour_id: nil }) }
-  scope :orphan, -> { no_tours.no_stops }
-  scope :published_by_tour, lambda { includes(:tours).where(tours: { published: true }) }
-  scope :published_by_stop, -> { joins(:stops).merge(Stop.published) }
-
-
   def props
     return if self.video.nil? || self.video.empty?
 
     VideoProps.props(self)
   end
 
-  # def desktop
-  #   original_image.desktop.url
-  # end
-
-  # def tablet
-  #   original_image.tablet.url
-  # end
-
-  # def mobile
-  #   original_image.mobile_list_thumb.url
-  # end
-
-  # def mobile_thumb
-  #   original_image.mobile_list_thumb.url
-  # end
-
   def published
-    # This works and is shorter, but I think the longer way is more readable/clear.
-    # tours.published.present? || stops { |s| s.tours.published }.present?
-    tours.collect(&:published).include?(true) || stops.map { |s| s.tours.collect(&:published) }.flatten.include?(true)
+    tours.any? { |tour| tour.published } || stops.any? { |stop| stop.published }
   end
 
   def files
     return nil if !self.file.attached?
-    {
-      mobile: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=mobile",
-      tablet: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=tablet",
-      desktop: "#{ENV['BASE_URL']}/#{Apartment::Tenant.current}/media/#{id}/file?context=desktop"
-    }
+    begin
+      {
+        mobile: file.variant(resize: '300x300').processed.service_url,
+        tablet: file.variant(resize: '400x400').processed.service_url,
+        desktop: file.variant(resize: '750x750').processed.service_url
+      }
+    rescue ActiveStorage::FileNotFoundError => error
+      { mobile: nil, tablet: nil, desktop: nil }
+    end
+  end
+
+  def orphaned
+    tours.empty? && stops.empty?
   end
 
   def srcset
@@ -83,7 +60,8 @@ class Medium < MediumBaseRecord
   end
 
   def srcset_sizes
-    "(max-width: 680px) #{mobile_width}px, (max-width: 880px) #{tablet_width}px, #{desktop_width}px"
+    nil
+    # "(max-width: 680px) #{mobile_width}px, (max-width: 880px) #{tablet_width}px, #{desktop_width}px"
   end
 
   def insecure
@@ -91,10 +69,9 @@ class Medium < MediumBaseRecord
     # "#{ENV['INSECURE_IMAGE_BASE_URL']}#{self.desktop}"
   end
 
-  # def base64
-  #   if self.original_image.file && File.file?(self.original_image.file.path)
-  #     return Base64.encode64(self.original_image.file.read)
-  #   end
-  #   nil
-  # end
+  def replace_video
+    if video.present? && base_sixty_four.present?
+      attach_file
+    end
+  end
 end

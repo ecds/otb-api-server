@@ -9,12 +9,10 @@ module V3
     def index
       # TODO: This ins not ideal, we use these `not_in_*` scopes to make the list of media avaliable to add
       # to a stop or tour. But the paramerter does not make sense when just looking at it. Needs clearer language.
-      @media = if params[:stop_id]
-        Medium.not_in_stop(params[:stop_id]).or(Medium.no_stops)
-      elsif params[:tour_id]
-        Medium.not_in_tour(params[:tour_id]).or(Medium.no_tours)
-      else
+      @media = if (current_user && current_user.current_tenant_admin?)
         Medium.all
+      else
+        Medium.all.map { |medium| medium if medium.published }.compact
       end
       render json: @media
     end
@@ -56,13 +54,13 @@ module V3
     def file
       if @record&.file&.attached?
         if params[:context] == 'mobile'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.file.variant(resize: '300x300').processed, only_path: true)
+          redirect_to @record.file.variant(resize: '300x300').processed.service_url
         elsif params[:context] == 'tablet'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.file.variant(resize: '400x400').processed, only_path: true)
+          redirect_to @record.file.variant(resize: '400x400').processed.service_url
         elsif params[:context] == 'desktop'
-          redirect_to Rails.application.routes.url_helpers.rails_representation_url(@record.file.variant(resize: '750x750').processed, only_path: true)
+          redirect_to @record.file.variant(resize: '750x750').processed.service_url
         else
-          redirect_to rails_blob_url(@record.file)
+          redirect_to @record.file.service_url
         end
       else
         head :not_found
@@ -79,7 +77,7 @@ module V3
       ActiveModelSerializers::Deserialization
       .jsonapi_parse(
         params, only: [
-              :title, :caption, :original_image, :stops, :tours, :video, :stop_id, :tour_id, :base_sixty_four, :video_provider, :embed
+            :title, :caption, :original_image, :stops, :tours, :video, :stop_id, :tour_id, :base_sixty_four, :video_provider, :embed, :filename
           ]
       )
     end

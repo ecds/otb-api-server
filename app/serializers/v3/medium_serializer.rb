@@ -2,7 +2,7 @@
 
 class V3::MediumSerializer < ActiveModel::Serializer
   # include Rails.application.routes.url_helpers
-  attributes :id, :title, :caption, :video, :provider, :original_image, :embed, :srcset, :srcset_sizes, :insecure, :files
+  attributes :id, :title, :caption, :video, :provider, :original_image, :embed, :srcset, :srcset_sizes, :insecure, :files, :orphaned, :filename
 
   # def files
   #   return nil unless object.file.attached?

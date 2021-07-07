@@ -38,7 +38,7 @@ class V3::MapOverlaysController < V3Controller
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                  :south, :east, :north, :west, :base_sixty_four, :title, :tour, :stop
+                  :south, :east, :north, :west, :base_sixty_four, :filename, :tour, :stop
               ]
           )
     end

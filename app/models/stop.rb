@@ -20,9 +20,9 @@ class Stop < ApplicationRecord
 
   before_validation -> { self.title ||= 'untitled' }
 
-  scope :not_in_tour, lambda { |tour_id| includes(:tour_stops).where.not(tour_stops: { tour_id: tour_id }) }
-  scope :no_tours, lambda { includes(:tour_stops).where(tour_stops: { tour_id: nil }) }
-  scope :published, lambda { includes(:tours).where(tours: { published: true }) }
+  # scope :not_in_tour, lambda { |tour_id| includes(:tour_stops).where.not(tour_stops: { tour_id: tour_id }) }
+  # scope :no_tours, lambda { includes(:tour_stops).where(tour_stops: { tour_id: nil }) }
+  # scope :published, lambda { includes(:tours).where(tours: { published: true }) }
   scope :by_slug_and_tour, lambda { |slug, tour_id| joins(:stop_slugs).joins(:tours).where('stop_slugs.slug = ?', slug).where('tour_stops.tour_id = ?', tour_id) }
 
   def sanitized_description
@@ -47,7 +47,7 @@ class Stop < ApplicationRecord
   end
 
   def splash_url
-    return if splash.nil?
+    return if splash.nil? || splash.files.nil?
 
     splash.files[:desktop]
   end
@@ -75,6 +75,9 @@ class Stop < ApplicationRecord
     tours.empty?
   end
 
+  def published
+    tours.any? { |tour| tour.published }
+  end
 
   private
 

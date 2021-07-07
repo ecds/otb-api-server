@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_14_154939) do
+ActiveRecord::Schema.define(version: 2021_07_07_161803) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
+  enable_extension "uuid-ossp"
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -73,7 +74,7 @@ ActiveRecord::Schema.define(version: 2021_06_14_154939) do
     t.text "base_sixty_four"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "title"
+    t.string "filename"
   end
 
   create_table "map_overlays", force: :cascade do |t|
@@ -86,7 +87,7 @@ ActiveRecord::Schema.define(version: 2021_06_14_154939) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "base_sixty_four"
-    t.text "title"
+    t.text "filename"
     t.index ["stop_id"], name: "index_map_overlays_on_stop_id"
     t.index ["tour_id"], name: "index_map_overlays_on_tour_id"
   end
@@ -108,6 +109,10 @@ ActiveRecord::Schema.define(version: 2021_06_14_154939) do
     t.integer "mobile_height"
     t.text "base_sixty_four"
     t.integer "video_provider", default: 0
+    t.string "mobile"
+    t.string "tablet"
+    t.string "desktop"
+    t.string "filename"
   end
 
   create_table "modes", force: :cascade do |t|
@@ -121,7 +126,7 @@ ActiveRecord::Schema.define(version: 2021_06_14_154939) do
     t.string "title"
   end
 
-  create_table "slugs", force: :cascade do |t|
+  create_table "slugs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
     t.datetime "created_at", null: false

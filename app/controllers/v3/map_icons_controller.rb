@@ -43,7 +43,7 @@ class V3::MapIconsController < V3Controller
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                :base_sixty_four, :title
+                :base_sixty_four, :filename
               ]
           )
     end

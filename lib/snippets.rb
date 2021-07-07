@@ -61,6 +61,40 @@ sites.each do |ts|
   end
 end
 
+sites = TourSet.all.map(&:subdir)
+sites.each do |ts|
+  Apartment::Tenant.switch! ts
+    reload!
+    ids = Medium.all.map(&:id)
+    ids.each do |id|
+      m = Medium.find(id)
+      next if m.file.attached?
+      if m.original_image.path && File.exist?(m.original_image.path)
+        m.file.attach(
+          io: File.open(m.original_image.path),
+          filename: m.original_image.path.split('/').last,
+          content_type: m.original_image.content_type
+        )
+      end
+    end
+end
+
+sites = TourSet.all.map(&:subdir)
+
+sites.each do |ts|
+  Apartment::Tenant.switch! ts
+  reload!
+  ids = Medium.all.map(&:id)
+  ids.each do |id|
+    Apartment::Tenant.switch! ts
+    m = Medium.find(id)
+    m.file.purge if m.file.attached?
+    m.delete
+  end
+  TourMedium.all.each {|tm| tm.delete}
+  StopMedium.all.each {|tm| tm.delete}
+end
+
 ActiveStorage::Blob.service.send(:path_for, m.file.key)
 Apartment::Tenant.switch! 'july-22nd'
 ids = Medium.all.map(&:id)
@@ -114,6 +148,22 @@ sites.each do |ts|
     if t.bounds
       t.is_geo = true
       t.save
+    end
+  end
+end
+
+sites = TourSet.all.map(&:subdir)
+
+sites.each do |ts|
+  puts ts
+  Apartment::Tenant.switch! ts
+  Medium.all.each do |m|
+    begin
+      next unless m.public_send("#{ts.underscore}_file").present?
+      next unless m.public_send("#{ts.underscore}_file").attached?
+
+      m.public_send("#{ts.underscore}_file").purge
+    rescue NoMethodError => error
     end
   end
 end

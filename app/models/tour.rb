@@ -14,10 +14,9 @@ class Tour < ApplicationRecord
   has_many :tour_flat_pages
   has_many :flat_pages, through: :tour_flat_pages
   has_many :tour_authors
-  has_many :authors, through: :tour_authors, source: :user
+  has_many :users, through: :tour_authors
   has_many :slugs, dependent: :delete_all
   has_one :map_overlay
-  # has_many :authors, through: :tour_authors, foreign_key: :user_id
 
   # belongs_to :splash_image_medium_id, class_name: 'Medium'
   belongs_to :theme, default: -> { Theme.first }
@@ -67,26 +66,26 @@ class Tour < ApplicationRecord
   end
 
   def splash
-    if medium.present?
-      return medium
+    splash_medium = if medium.present?
+      medium
     elsif tour_media.present?
-      return tour_media.order(:position).first.medium
+      tour_media.order(:position).first.medium
+    else
+      nil
+    end
+
+    if splash_medium
+      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.files[:desktop] }
     end
     nil
   end
 
-  def splash_url
-    return if splash.nil? || splash.files.nil?
-    nil
-    # splash.files[:desktop]
-  end
-
   def splash_height
-    splash.nil? ? nil : splash.desktop_height
+    splash.nil? ? nil : 700 #splash.desktop_height
   end
 
   def splash_width
-    splash.nil? ? nil : splash.desktop_width
+    splash.nil? ? nil : 700 #splash.desktop_width
   end
 
   def insecure_splash

@@ -38,26 +38,26 @@ class Stop < ApplicationRecord
   end
 
   def splash
-    if medium.present?
-      return medium
+    splash_medium = if medium.present?
+      medium
     elsif stop_media.present?
-      return stop_media.order(:position).first.medium
+      stop_media.order(:position).first.medium
+    else
+      nil
+    end
+
+    if splash_medium
+      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.files[:desktop] }
     end
     nil
   end
 
-  def splash_url
-    return if splash.nil? || splash.files.nil?
-
-    splash.files[:desktop]
-  end
-
   def splash_height
-    splash.nil? ? nil : splash.desktop_height
+    splash.nil? ? nil : 700 #splash.desktop_height
   end
 
   def splash_width
-    splash.nil? ? nil : splash.desktop_width
+    splash.nil? ? nil : 700 #splash.desktop_width
   end
 
   def insecure_splash

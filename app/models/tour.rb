@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'google_maps_service'
+
 # Model class for a tour.
 class Tour < ApplicationRecord
   include HtmlSaintizer
@@ -114,6 +116,25 @@ class Tour < ApplicationRecord
       centerLat: box.center_y,
       centerLng: box.center_x
     }
+  end
+
+  def duration
+    return nil if stops.count < 2
+
+    return nil if mode.nil?
+
+    return nil if mode.title.nil?
+
+    gmaps = GoogleMapsService::Client.new
+    destinations = tour_stops.order(:position).map {|tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng]}
+    origin = destinations.shift
+    matrix = gmaps.distance_matrix(origin, destinations, mode: mode.title.downcase)
+    return nil if matrix[:rows].first[:elements].first[:status] == 'ZERO_RESULTS'
+
+    puts matrix
+
+    matrix[:rows].first[:elements].map { |e| e[:duration][:value] }.sum + 600 + (stops.count * 600)
+    # ActiveSupport::Duration.build(seconds).parts
   end
 
   private

@@ -8,6 +8,7 @@ public/uploads/
 public/storage/*
 .vscode
 *.env*
+.bundle
 
 
 /config/master.key

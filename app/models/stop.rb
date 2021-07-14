@@ -46,7 +46,7 @@ class Stop < ApplicationRecord
       nil
     end
 
-    if splash_medium
+    if splash_medium&.files
       return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.files[:desktop] }
     end
     nil

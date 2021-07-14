@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+include ActionView::Helpers::DateHelper
+
 # app/serializers/tour_serializer.rb
 class V3::TourBaseSerializer < ActiveModel::Serializer
   has_one :map_overlay
@@ -22,5 +24,12 @@ class V3::TourBaseSerializer < ActiveModel::Serializer
              :insecure_splash,
              :use_directions,
              :default_lng,
-             :stop_count
+             :stop_count,
+             :est_time
+
+  def est_time
+    return nil if object.duration.nil?
+
+    distance_of_time_in_words(object.duration)
+  end
 end

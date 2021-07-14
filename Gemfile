@@ -9,7 +9,7 @@ end
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.0'
+gem 'rails', '~> 6.1.0'
 gem "rack", ">= 2.0.6"
 gem 'pg'
 gem 'mysql2'
@@ -34,14 +34,16 @@ gem 'cancancan', '~> 2.0'
 
 # Active Storage will land in 5.2
 gem 'carrierwave', '~> 1.0'
-gem 'mini_magick'
 gem 'carrierwave-base64'
+gem 'mini_magick'
+gem 'image_processing', '~> 1.2'
 gem 'ferrum'
 gem 'aws-sdk-s3', '~> 1'
 
 # RGeo is a geospatial data library for Ruby.
 # https://github.com/rgeo/rgeo
 gem('rgeo')
+gem 'google_maps_service'
 
 
 # Vidoe provider APIs

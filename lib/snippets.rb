@@ -167,3 +167,16 @@ sites.each do |ts|
     end
   end
 end
+
+
+sites = TourSet.all.map(&:subdir)
+sites.each do |ts|
+  Apartment::Tenant.switch! ts
+    reload!
+    ids = Medium.all.map(&:id)
+    ids.each do |id|
+      m = Medium.find(id)
+      m.save
+    end
+  end
+end

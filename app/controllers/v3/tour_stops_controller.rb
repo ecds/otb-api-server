@@ -4,9 +4,11 @@
 class V3::TourStopsController < V3Controller
   # GET /stops
   def index
-    @records = if params[:tour_id] && params[:stop_id]
+    @records = if params[:fastboot] == 'true'
+      nil
+    elsif params[:tour_id] && params[:stop_id]
       TourStop.where(tour: Tour.find(params[:tour_id])).where(stop: Stop.find(params[:stop_id])).first || {}
-    elsif params[:tour] && params[:slug]
+    elsif params[:tour] && params[:tour] != '0' && params[:slug]
       # stop = StopSlug.find_by(slug: params[:slug])
       stop = Stop.by_slug_and_tour(params[:slug], params[:tour]).first
       # TourStop.where(tour: Tour.find(params[:tour])).where(stop: stop).first
@@ -14,11 +16,16 @@ class V3::TourStopsController < V3Controller
     else
       TourStop.all
     end
-    render json: @records, include: ['stop']
+    if @records.nil?
+      render json: { data: {type: 'tour_stops', id: 0 } }
+    else
+      render json: @records, include: ['stop']
+    end
   end
 
   # GET /stops/1
   def show
+    render json: { data: {} } if @record.nil?
     render json: @record, include: ['stop']
   end
 

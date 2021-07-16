@@ -20,7 +20,7 @@ class V3::ToursController < V3Controller
       Tour.published
     end
     if @records.nil?
-      render json: { error: 'not found' }.to_json, status: 404
+      render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
     else
       render json: @records, each_serializer: V3::TourBaseSerializer
     end
@@ -28,7 +28,11 @@ class V3::ToursController < V3Controller
 
   # GET /tours/1
   def show
-    render json: @record
+    if @record.nil?
+      render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
+    else
+      render json: @record
+    end
   end
 
   # POST /tours

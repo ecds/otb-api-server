@@ -5,6 +5,14 @@ class V3Controller < ApplicationController
   before_action :set_record, only: [:show, :update, :destroy]
   before_action :allowed?, only: [:create, :update, :destroy]
 
+  def destroy
+    if @allowed
+      @record.destroy
+    else
+      head 401
+    end
+  end
+
   def serialize_errors
     errors = []
     @record.errors.messages[:base].each do |error|

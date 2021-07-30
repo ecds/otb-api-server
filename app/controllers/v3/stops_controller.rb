@@ -5,53 +5,47 @@
 class V3::StopsController < V3Controller
   # GET /stops
   def index
-    @records = if params[:tour_id]
-      Stop.not_in_tour(params[:tour_id]).or(Stop.no_tours)
-    elsif params[:slug]
-      # stop = StopSlug.find_by(slug: params[:slug]).stop
-      stop = Stop.by_slug_and_tour(params[:slug], params[:tour_id])
-    else
+    @records = if current_user.current_tenant_admin?
       Stop.all
+    elsif current_user.tours.present?
+      current_user.tours.map { |tour| tour.stops }.flatten.uniq
+    else
+      Tour.published.map { |tour| tour.stops }.flatten.uniq
     end
-    render json: @records,
-    include: [
-        'media',
-        'stop_media'
-    ]
+    render json: @records
   end
 
   # GET /stops/1
+  # Direct access to stops goes throught V3:TourStopsController
   def show
-    render json: @record,
-           include: [
-               'media',
-               'stop_media',
-               'map_icon'
-           ]
+    render json: {}
   end
 
   # POST /stops
   def create
-    @record = Stop.new(stop_params)
-    if @record.save
-      render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
+    if @allowed
+      @record = Stop.new(stop_params)
+      if @record.save
+        render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
+      else
+        render json: serialize_errors, status: :unprocessable_entity
+      end
     else
-      render json: serialize_errors, status: :unprocessable_entity
+      head 401
     end
   end
 
   # PATCH/PUT /stops/1
   def update
-    if @record.update(stop_params)
-      render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
+    if @allowed
+      if @record.update(stop_params)
+        render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
+      else
+        render json: serialize_errors, status: :unprocessable_entity
+      end
     else
-      render json: serialize_errors, status: :unprocessable_entity
+      head 401
     end
-  end
-
-  # DELETE /stops/1
-  def destroy
-    @record.destroy
   end
 
     private
@@ -82,5 +76,9 @@ class V3::StopsController < V3Controller
 
       def set_tour_stop
         @record = @tour.stops.find_by!(id: params[:id]) if @tour
+      end
+
+      def allowed?
+        @allowed = current_user&.current_tenant_admin? || current_user.tours&.any? { |tour| Tour.all.include?(tour) }
       end
 end

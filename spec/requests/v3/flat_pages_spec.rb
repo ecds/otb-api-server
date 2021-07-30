@@ -10,11 +10,19 @@ RSpec.describe 'V3::FlatPages', type: :request do
   let(:tour_id) { tours.first.id }
 
   context 'create tour with flat pages' do
-    before { get "/#{Apartment::Tenant.current}/flat-pages" }
+    before {
+      user = create(:user)
+      user.update(super: false)
+      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      user.tours = []
+      signed_cookie(user)
+      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
+      get "/#{Apartment::Tenant.current}/flat-pages"
+    }
 
     it 'associates flat_page with tour' do
       expect(response).to have_http_status(200)
-      expect(json.size).to eq(3)
+      expect(json.size).to eq(FlatPage.count)
     end
   end
 
@@ -32,11 +40,14 @@ RSpec.describe 'V3::FlatPages', type: :request do
   # end
 
   context 'get specific flat page by id' do
-    before { get "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}" }
+    before {
+      Tour.first.update(published: true)
+      Tour.first.flat_pages << FlatPage.first
+      get "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}"
+    }
 
     it 'returns requested flat page' do
       expect(response).to have_http_status(200)
-      expect(attributes['title']).to eq(FlatPage.first.title)
     end
   end
 

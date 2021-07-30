@@ -6,12 +6,15 @@ class V3::ToursController < V3Controller
   # GET /tours
   def index
     @records = if (params[:slug])
-      tour = Slug.find_by(slug: params[:slug]).tour
-      if tour.published || (current_user && current_user.current_tenant_admin?)
-        tour
+      @record = Slug.find_by(slug: params[:slug]).tour
+      if @record.published || allowed?
+        @record
       else
         nil
       end
+    elsif (current_user && params[:tourTenant])
+      Apartment::Tenant.switch! params[:tourTenant]
+      Tour.find(params[:tour])
     elsif (current_user && current_user.current_tenant_admin?)
       Tour.all
     elsif (current_user && current_user.id)
@@ -28,10 +31,10 @@ class V3::ToursController < V3Controller
 
   # GET /tours/1
   def show
-    if @record.nil?
-      render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
-    else
+    if @record&.published || allowed?
       render json: @record
+    else
+      render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
     end
   end
 
@@ -51,30 +54,19 @@ class V3::ToursController < V3Controller
 
   # PATCH/PUT /tours/1
   def update
-    if @record.update(tour_params)
-      render json: @record, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}", include: [
-        'tour_modes',
-        'tour_stops',
-        'stops',
-        'stops.media',
-        'stops.stop_media',
-        'mode',
-        'modes',
-        'theme',
-        'media',
-        'tour_media',
-        'flat_pages',
-        'tour_flat_pages'
-    ]
+    if @allowed
+      if @record.update(tour_params)
+        render json: @record, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}"
+      else
+        render json: serialize_errors, status: :unprocessable_entity
+      end
     else
-      render json: serialize_errors, status: :unprocessable_entity
+      head 401
     end
   end
 
   # DELETE /tours/1
-  def destroy
-    @record.destroy
-  end
+
 
     private
       # Only allow a trusted parameter "white list" through.
@@ -93,5 +85,10 @@ class V3::ToursController < V3Controller
 
       def set_record
         @record = Tour.find(params[:id])
+      end
+
+      def allowed?
+        @allowed = current_user && current_user.current_tenant_admin? || current_user.tours.include?(@record)
+        return @allowed
       end
 end

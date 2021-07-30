@@ -6,14 +6,22 @@ class V3::FlatPagesController < V3Controller
 
   # GET /v3/records
   def index
-    @records = FlatPage.all
-
+    @records = if current_user.current_tenant_admin?
+      FlatPage.all
+    elsif current_user.tours.present?
+      current_user.tours.map { |tour| tour.flat_pages }.flatten.uniq
+    else
+      Tour.published.map { |tour| tour.flat_pages }.flatten.uniq
+    end
     render json: @records
   end
 
   # GET /v3/records/1
+  # def show
+  #   render json: @record
+  # end
   def show
-    render json: @record
+    render json: {}
   end
 
   # POST /v3/records
@@ -45,13 +53,7 @@ class V3::FlatPagesController < V3Controller
   end
 
   # DELETE /v3/records/1
-  def destroy
-    if @allowed
-      @record.destroy
-    else
-      head 401
-    end
-  end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.
@@ -67,5 +69,9 @@ class V3::FlatPagesController < V3Controller
                   :title, :body, :tours
               ]
           )
+    end
+
+    def allowed?
+      @allowed = current_user&.current_tenant_admin? || current_user.tours&.any? { |tour| Tour.all.include?(tour) }
     end
 end

@@ -4,7 +4,7 @@
 module RequestSpecHelper
   # Parse JSON response to ruby hash
   def json
-    JSON.parse(response.body)['data']
+    JSON.parse(response.body).with_indifferent_access[:data]
   end
 
   def response_id
@@ -12,6 +12,9 @@ module RequestSpecHelper
   end
 
   def attributes
+    if json.is_a?(Array)
+      return json.map { |record| record[:attributes] }
+    end
     json['attributes']
   end
 
@@ -20,7 +23,7 @@ module RequestSpecHelper
   end
 
   def included
-    JSON.parse(response.body)['included']
+    JSON.parse(response.body).with_indifferent_access[:included]
   end
 
   def hash_to_json_api(model, attributes)

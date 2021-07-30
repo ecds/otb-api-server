@@ -46,6 +46,9 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
 
   config.include RequestSpecHelper, type: :request
+  config.include(RequestSpecHelper, type: :controller)
+  config.include(SignedCookieHelper, type: :request)
+  config.include(SignedCookieHelper, type: :controller)
   config.include FactoryBot::Syntax::Methods
   # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
   config.before(:suite) do

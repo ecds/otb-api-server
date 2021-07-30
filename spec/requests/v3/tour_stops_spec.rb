@@ -8,9 +8,11 @@ RSpec.describe 'V3::Stops API' do
 
   # Test suite for GET /stops
   describe 'GET /tour-stops' do
-    before { Apartment::Tenant.switch! TourSet.second.subdir }
-    # before { Tour.first.stops << Stop.last(5) }
-    before { get "/#{Apartment::Tenant.current}/tour-stops" }
+    before {
+      Apartment::Tenant.switch! TourSet.second.subdir
+      Tour.all.each { |tour| tour.update(published: true) }
+      get "/#{Apartment::Tenant.current}/tour-stops"
+    }
 
     context 'when stops exist' do
       it 'returns status code 200' do
@@ -34,13 +36,16 @@ RSpec.describe 'V3::Stops API' do
   end
 
   describe 'GET /tour-stops?slug=slug&tour=X' do
-    before { Apartment::Tenant.switch! TourSet.second.subdir }
-    before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Tour.first.stops.first.stop_slugs.first.slug}&tour=#{Tour.first.id}" }
+    before {
+      Apartment::Tenant.switch! TourSet.second.subdir
+      Tour.first.update(published: true)
+      get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Tour.first.stops.first.stop_slugs.first.slug}&tour=#{Tour.first.id}"
+    }
 
-    context 'get tour stop by slug and tour'do
-        it 'responds with the tour stop' do
-          expect(json['id'].to_i).to eq(Tour.first.stops.first.id)
-        end
+    context 'get tour stop by slug and tour' do
+      it 'responds with the tour stop' do
+        expect(json['id'].to_i).to eq(Tour.first.stops.first.id)
+      end
     end
   end
 
@@ -55,8 +60,10 @@ RSpec.describe 'V3::Stops API' do
 
     before {
       tour1.stops = [Stop.create(title: new_title)]
+      tour1.update(published: true)
       tour1.save
       tour2.stops = [Stop.create(title: new_title)]
+      tour2.update(published: true)
       tour2.save
     }
 
@@ -69,41 +76,11 @@ RSpec.describe 'V3::Stops API' do
       end
     end
 
-
     context 'get stop with duplicate title/slug in correct tour' do
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour2.id}" }
       it 'is true' do
         expect(json['relationships']['stop']['data']['id'].to_i).to eq(tour2.stops.order(created_at: :desc).first.id)
         expect(json['relationships']['tour']['data']['id'].to_i).to eq(tour2.id)
-      end
-    end
-
-  end
-
-  describe 'DELETE /tour-stops' do
-    before {
-      User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
-      @stop = Stop.last
-      @stop_count = Stop.count
-      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
-      delete "/#{Apartment::Tenant.current}/tour-stops/#{TourStop.find_by(stop: @stop).id}"
-    }
-
-    context 'when a tour-stop is deleted and the stop no longers belogs to a tour, the stop is deleted' do
-      it 'deletes the associated stop' do
-        expect(Stop.count).to eq @stop_count - 1
-      end
-    end
-
-    before {
-      Tour.all.each { |t| t.stops << Stop.first }
-      cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
-      delete "/#{Apartment::Tenant.current}/tour-stops/#{TourStop.find_by(stop: Stop.first).id}"
-    }
-
-    context 'when a tour-stop is deleted, the stop is not deleted if it belongs to other tours.' do
-      it 'deletes tour-stop but not the stop' do
-        expect(Stop.first.title).to eq(Stop.first.title)
       end
     end
   end

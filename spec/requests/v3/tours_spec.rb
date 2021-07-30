@@ -178,7 +178,11 @@ RSpec.describe 'V3::Tours', type: :request do
 
     context 'when the record exists' do
       before {
-        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
+        user = create(:user)
+        user.update(super: false)
+        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        signed_cookie(user)
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
         put "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}", params: valid_attributes
       }
 

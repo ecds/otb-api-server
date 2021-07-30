@@ -11,7 +11,15 @@ RSpec.describe 'V3::Stops API' do
   describe 'GET /stops' do
     context 'when stops exist' do
 
-      before { get "/#{Apartment::Tenant.current}/stops" }
+      before {
+        user = create(:user)
+        user.update(super: false)
+        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        user.tours = []
+        signed_cookie(user)
+        cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
+        get "/#{Apartment::Tenant.current}/stops"
+      }
 
       it 'returns status code 200' do
         expect(response).to have_http_status(200)
@@ -34,7 +42,9 @@ RSpec.describe 'V3::Stops API' do
 
     context 'get stop by slug and tour' do
       before {
-        get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Stop.first.slug}&tour=#{Stop.first.tours.first.id}"
+        Tour.first.update(published: true)
+        Tour.first.stops << Stop.first
+        get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Stop.first.slug}&tour=#{Tour.first.id}"
       }
 
       it 'returns stop in tour with slug' do
@@ -46,20 +56,25 @@ RSpec.describe 'V3::Stops API' do
 
   # Test suite for GET /stops/:id
   describe 'GET /stops/:id' do
-    before { get "/#{Apartment::Tenant.current}/stops/#{Stop.first.id}" }
+    before {
+      Tour.first.update(published: true)
+      Tour.first.stops << Stop.first
+      get "/#{Apartment::Tenant.current}/stops/#{Stop.first.id}"
+    }
 
     context 'when tour stop exists' do
       it 'returns status code 200' do
         expect(response).to have_http_status(200)
       end
 
-      it 'returns the stop' do
-        expect(json['id']).to eq(Stop.first.id.to_s)
-      end
+      # For now, access to stop is through /tour-stop?slug=XX&tour=Y
+      # it 'returns the stop' do
+      #   expect(json['id']).to eq(Stop.first.id.to_s)
+      # end
 
-      it 'has a meta_description based on description truncated and sanitized' do
-        expect(attributes['meta_description']).not_to include('<p>')
-      end
+      # it 'has a meta_description based on description truncated and sanitized' do
+      #   expect(attributes['meta_description']).not_to include('<p>')
+      # end
     end
 
     context 'when tour stop does not exist' do
@@ -75,7 +90,7 @@ RSpec.describe 'V3::Stops API' do
     end
   end
 
-  describe 'GET /:tenant/stops?slug=:stop_slug' do
+  describe 'GET /:tenant/tour-stops?slug=:stop_slug' do
     let!(:stop) { Stop.second }
     let!(:tour) { stop.tours.first }
     let!(:original_slug) { stop.slug }
@@ -84,8 +99,8 @@ RSpec.describe 'V3::Stops API' do
     context 'get stop after title change' do
 
       before {
-        stop.title = new_title
-        stop.save
+        tour.update(published: true)
+        stop.update(title: new_title)
       }
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour.id}" }
 

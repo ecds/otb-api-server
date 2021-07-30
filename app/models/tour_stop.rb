@@ -38,6 +38,8 @@ class TourStop < ApplicationRecord
   private
 
     def _set_position
+      return if tour.nil?
+
       self.position = self.position || self.tour.stops.length + 1
     end
 

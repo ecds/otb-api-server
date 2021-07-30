@@ -12,7 +12,7 @@ module V3
     def index
       if current_user.present?
         if params['me']
-          render json: current_user, include: ['tours', 'tour_sets']
+          render json: current_user
         elsif current_user.current_tenant_admin?
           render json: User.all
         end

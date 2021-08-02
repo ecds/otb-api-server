@@ -133,7 +133,8 @@ class Tour < ApplicationRecord
       matrix = gmaps.distance_matrix(origin, destinations, mode: mode.title.downcase)
       return nil if matrix[:rows].first[:elements].first[:status] == 'ZERO_RESULTS'
 
-      matrix[:rows].first[:elements].map { |e| e[:duration][:value] }.sum + 600 + (stops.count * 600)
+      durations = matrix[:rows].first[:elements].map { |e| e[:duration][:value] if e[:duration].present? }.reject { |d| d.nil? }
+      durations.sum + 600 + (stops.count * 600)
       # ActiveSupport::Duration.build(seconds).parts
     rescue GoogleMapsService::Error::ApiError => error
       nil

@@ -314,7 +314,6 @@ GEM
     sync (0.5.0)
     term-ansicolor (1.7.1)
       tins (~> 1.0)
-    test-prof (1.0.6)
     thor (1.1.0)
     tins (1.29.1)
       sync
@@ -377,7 +376,6 @@ DEPENDENCIES
   shoulda-matchers (~> 4.5.1)
   spring
   spring-watcher-listen (~> 2.0.0)
-  test-prof
   tzinfo-data
   vimeo
   webmock

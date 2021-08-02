@@ -24,11 +24,9 @@ set :deploy_to, '/data/otb-api-server'
 
 # Default value for :linked_files is []
 append :linked_files, 'config/master.key'
+append :linked_files, 'public/tmp'
 
 # append :linked_files, 'config/database.yml'
-
-# Default value for linked_dirs is []
-# append :linked_dirs, 'public/uploads'
 
 # Default value for default_env is {}
 # set :default_env, { path: '/opt/ruby/bin:$PATH' }

@@ -10,7 +10,7 @@ end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.1.0'
-gem "rack", ">= 2.0.6"
+gem 'rack', '>= 2.0.6'
 gem 'pg'
 gem 'mysql2'
 # Multitenancy for Rails and ActiveRecord
@@ -22,11 +22,10 @@ gem 'acts-as-taggable-on', '~> 5.0'
 gem 'puma', '~> 4.3.0'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '~> 3.0'
-gem "actionview", ">= 5.2.2.1"
+gem 'actionview', '>= 5.2.2.1'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-# Social Auth
 # gem 'ecds_rails_auth_engine', path: '../ecds_auth_engine'
 gem 'ecds_rails_auth_engine', git: 'https://github.com/ecds/ecds_rails_auth_engine.git', branch: 'feature/fauxoauth'
 # gem 'ecds_rails_auth_engine', path: '/data/ecds_auth_engine'
@@ -37,12 +36,13 @@ gem 'carrierwave', '~> 1.0'
 gem 'carrierwave-base64'
 gem 'mini_magick'
 gem 'image_processing', '~> 1.2'
+gem 'ruby-vips'
 gem 'ferrum'
 gem 'aws-sdk-s3', '~> 1'
 
 # RGeo is a geospatial data library for Ruby.
 # https://github.com/rgeo/rgeo
-gem('rgeo')
+gem 'rgeo'
 gem 'google_maps_service'
 
 
@@ -60,7 +60,7 @@ gem 'faker', git: 'https://github.com/stympy/faker.git', branch: 'master'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   # gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
-  gem "test-prof"
+  # gem "test-prof"
 end
 
 group :development do
@@ -77,7 +77,7 @@ end
 
 
 group :test do
-  gem "factory_bot"
+  gem 'factory_bot'
   gem 'factory_bot_rails'
   gem 'shoulda-matchers', '~> 4.5.1' #git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
   gem 'database_cleaner'

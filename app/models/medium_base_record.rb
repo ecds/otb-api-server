@@ -12,7 +12,7 @@ class MediumBaseRecord < ApplicationRecord
   def image_url
     return nil unless file.attached?
 
-    file.service_url
+    file.url
   end
 
   def tmp_file_path

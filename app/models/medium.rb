@@ -13,7 +13,7 @@ class Medium < MediumBaseRecord
   #   attachable.variant :desktop, resize: '750x750'
   # end
 
-  mount_base64_uploader :original_image, MediumUploader
+  # mount_base64_uploader :original_image, MediumUploader
   has_many :stop_media
   has_many :stops, through: :stop_media
   has_many :tour_media
@@ -38,10 +38,18 @@ class Medium < MediumBaseRecord
   def files
     return nil if !self.file.attached?
     begin
+      if file.content_type.include?('gif')
+        height = ActiveStorage::Analyzer::ImageAnalyzer.new(file).metadata[:height]
+        return {
+          mobile: file.variant(scale: "#{300.0 / height * 100}%", coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+          tablet: file.variant(scale: "#{400.0 / height * 100}%", coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+          desktop: file.variant(scale: "#{750.0 / height * 100}%", coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
+        }
+      end
       {
-        mobile: file.variant(resize: '300x300').processed.service_url,
-        tablet: file.variant(resize: '400x400').processed.service_url,
-        desktop: file.variant(resize: '750x750').processed.service_url
+        mobile: file.variant(resize: '300x300').processed.url,
+        tablet: file.variant(resize: '400x400').processed.url,
+        desktop: file.variant(resize: '750x750').processed.url
       }
     rescue ActiveStorage::FileNotFoundError => error
       { mobile: nil, tablet: nil, desktop: nil }

@@ -77,15 +77,16 @@ RSpec.describe 'V3::Stops API' do
       # end
     end
 
-    context 'when tour stop does not exist' do
+    context 'when stop does not exist' do
       before { get "/#{Apartment::Tenant.current}/stops/0" }
 
       it 'returns status code 404' do
-        expect(response).to have_http_status(404)
+        expect(response).to have_http_status(200)
       end
 
-      it 'returns a not found message' do
-        expect(response.body).to match(/Couldn't find Stop/)
+      it 'returns dummy stop' do
+        expect(json[:id]).to match('0')
+        expect(attributes[:title]).to be_nil
       end
     end
   end
@@ -186,7 +187,7 @@ RSpec.describe 'V3::Stops API' do
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Couldn't find Stop/)
+        expect(response.body).to match(/Record not found/)
       end
     end
   end

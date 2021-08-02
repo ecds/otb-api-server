@@ -323,7 +323,6 @@ RSpec.describe V3::ToursController, type: :controller do
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
-      new_title = Faker::Name.unique.name
       tour_count = Tour.count
       post :destroy, params: { id: tour.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(204)

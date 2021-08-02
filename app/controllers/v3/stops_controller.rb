@@ -16,9 +16,8 @@ class V3::StopsController < V3Controller
   end
 
   # GET /stops/1
-  # Direct access to stops goes throught V3:TourStopsController
   def show
-    render json: {}
+    render json: @record
   end
 
   # POST /stops
@@ -38,10 +37,11 @@ class V3::StopsController < V3Controller
   # PATCH/PUT /stops/1
   def update
     if @allowed
-      if @record.update(stop_params)
+      if @record&.update(stop_params)
         render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
       else
-        render json: serialize_errors, status: :unprocessable_entity
+        # status =
+        render json: serialize_errors, status: @record.nil? ? :not_found : :unprocessable_entity
       end
     else
       head 401
@@ -71,7 +71,8 @@ class V3::StopsController < V3Controller
       end
 
       def set_record
-        @record = Stop.find(params[:id])
+        _record = Stop.find_by(id: params[:id])
+        @record = _record&.published || @allowed ? _record : Stop.new(id: params[:id])
       end
 
       def set_tour_stop

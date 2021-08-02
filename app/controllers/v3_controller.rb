@@ -2,8 +2,8 @@
 
 class V3Controller < ApplicationController
   include EcdsRailsAuthEngine::CurrentUser
+  before_action :allowed?, only: [:show, :create, :update, :destroy]
   before_action :set_record, only: [:show, :update, :destroy]
-  before_action :allowed?, only: [:create, :update, :destroy]
 
   def destroy
     if @allowed
@@ -15,13 +15,19 @@ class V3Controller < ApplicationController
 
   def serialize_errors
     errors = []
-    @record.errors.messages[:base].each do |error|
-      errors.push({
-        detail: error,
-        source: {
-          pointer: 'data/attributes'
-        }
-      })
+    if @record.nil?
+      errors.push({ detail: 'Record not found', source: { pointer: 'data/attributes' } })
+      # head 404
+    else
+      @record.errors.messages[:base].each do |error|
+        errors.push({
+          detail: error,
+          source: {
+            pointer: 'data/attributes'
+          }
+        })
+      end
+      # head 422
     end
     { errors: errors }
   end

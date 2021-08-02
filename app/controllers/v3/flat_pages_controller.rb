@@ -17,11 +17,8 @@ class V3::FlatPagesController < V3Controller
   end
 
   # GET /v3/records/1
-  # def show
-  #   render json: @record
-  # end
   def show
-    render json: {}
+    render json: @record
   end
 
   # POST /v3/records
@@ -58,7 +55,8 @@ class V3::FlatPagesController < V3Controller
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_record
-      @record = FlatPage.find(params[:id])
+      _record = FlatPage.find(params[:id])
+      @record = _record.published || @allowed ? _record : FlatPage.new(id: params[:id])
     end
 
     # Only allow a trusted parameter "white list" through.

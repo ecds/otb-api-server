@@ -21,6 +21,7 @@ RSpec.describe V3::StopsController, type: :controller do
       create_list(:tour_with_stops, 5, theme: create(:theme), mode: create(:mode))
       Tour.first.update(published: true) if Tour.published.empty?
       Tour.last.update(published: false) if Tour.published.count == Tour.count
+      Tour.last.stops.drop(0) if Tour.last.stops.count > 1
       user = create(:user)
       user.tour_sets = []
       user.tours = []
@@ -60,11 +61,87 @@ RSpec.describe V3::StopsController, type: :controller do
   end
 
   describe 'GET #show' do
-    it 'returns a 200 response' do
+    it 'returns a 200 response that is empty stop' do
       tour = create(:tour)
-      get :show, params: { tenant: tour.tenant, id: Stop.last.id }
+      tour.update(published: false)
+      Stop.all.each { |stop| tour.stops << stop }
+      # Make sure the stop is only associated with the newly created tour
+      tour.stops.last.update(tours: [tour])
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
       expect(response.status).to eq(200)
-      expect(json).to be_nil
+      expect(json[:id]).to eq(tour.stops.last.id.to_s)
+      expect(attributes[:title]).to be_nil
+    end
+
+    it 'returns a 200 response and stop when stop is part of published tour' do
+      tour = create(:tour)
+      tour.update(published: true)
+      Stop.all.each { |stop| tour.stops << stop }
+      tour.stops.last.update(tours: [tour])
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
+      expect(response.status).to eq(200)
+      expect(attributes[:title]).to eq(tour.stops.last.title)
+    end
+
+    it 'returns a 200 response that is empty stop when request is authenticated by someone w/o permission' do
+      tour = create(:tour)
+      tour.update(published: false)
+      Stop.all.each { |stop| tour.stops << stop }
+      tour.stops.last.update(tours: [tour])
+      user = create(:user)
+      user.update(super: false)
+      user.tours = []
+      user.tour_sets = []
+      signed_cookie(user)
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
+      expect(response.status).to eq(200)
+      expect(json[:id]).to eq(tour.stops.last.id.to_s)
+      expect(attributes[:title]).to be_nil
+    end
+
+    it 'returns a 200 response that is a stop when request is authenticated by a tour author' do
+      tour = create(:tour)
+      tour.update(published: false)
+      Stop.all.each { |stop| tour.stops << stop }
+      tour.stops.first.update(tours: [tour])
+      user = create(:user)
+      user.update(super: false)
+      user.tours << tour
+      user.tour_sets = []
+      signed_cookie(user)
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.first.id }
+      expect(response.status).to eq(200)
+      expect(attributes[:title]).to eq(tour.stops.first.title)
+    end
+
+    it 'returns a 200 response that is a stop when request is authenticated by a tenant admin' do
+      tour = create(:tour)
+      tour.update(published: false)
+      Stop.all.each { |stop| tour.stops << stop }
+      tour.stops.first.update(tours: [tour])
+      user = create(:user)
+      user.update(super: false)
+      user.tours = []
+      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      signed_cookie(user)
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.first.id }
+      expect(response.status).to eq(200)
+      expect(attributes[:title]).to eq(tour.stops.first.title)
+    end
+
+    it 'returns a 200 response that is a stop when request is authenticated by a super user' do
+      tour = create(:tour)
+      tour.update(published: false)
+      Stop.all.each { |stop| tour.stops << stop }
+      tour.stops.first.update(tours: [tour])
+      user = create(:user)
+      user.update(super: true)
+      user.tours = []
+      user.tour_sets = []
+      signed_cookie(user)
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.first.id }
+      expect(response.status).to eq(200)
+      expect(attributes[:title]).to eq(tour.stops.first.title)
     end
   end
 

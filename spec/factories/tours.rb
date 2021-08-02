@@ -16,7 +16,7 @@ FactoryBot.define do
 
       # https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#transient-attributes
       after(:create) do |tour, evaluator|
-        create_list(:stop, evaluator.stops_count, tours: [tour])
+        create_list(:tour_stop, evaluator.stops_count, tour: tour, stop: create(:stop))
       end
     end
 

@@ -7,7 +7,8 @@ class V3::ToursController < V3Controller
   def index
     @records = if (params[:slug])
       @record = Slug.find_by(slug: params[:slug]).tour
-      if @record.published || allowed?
+      allowed?
+      if @record.published || @allowed
         @record
       else
         nil
@@ -40,7 +41,7 @@ class V3::ToursController < V3Controller
 
   # POST /tours
   def create
-    if current_user.current_tenant_admin?
+    if @allowed
       @record = Tour.new(tour_params)
       if @record.save
         render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}"
@@ -65,9 +66,6 @@ class V3::ToursController < V3Controller
     end
   end
 
-  # DELETE /tours/1
-
-
     private
       # Only allow a trusted parameter "white list" through.
       def tour_params
@@ -84,11 +82,13 @@ class V3::ToursController < V3Controller
       end
 
       def set_record
-        @record = Tour.find(params[:id])
+        _record = Tour.find(params[:id])
+        @record = _record&.published || @allowed ? _record : Tour.new(id: params[:id])
+
       end
 
       def allowed?
-        @allowed = current_user && current_user.current_tenant_admin? || current_user.tours.include?(@record)
-        return @allowed
+        set_record if @record.nil? && params[:id].present?
+        @allowed = current_user&.current_tenant_admin? || current_user.tours.include?(@record)
       end
 end

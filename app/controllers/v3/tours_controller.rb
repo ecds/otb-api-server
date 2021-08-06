@@ -32,6 +32,7 @@ class V3::ToursController < V3Controller
 
   # GET /tours/1
   def show
+    puts request.env['ipinfo'].all if request.env['ipinfo'].present?
     if @record&.published || allowed?
       render json: @record
     else

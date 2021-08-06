@@ -44,6 +44,7 @@ gem 'aws-sdk-s3', '~> 1'
 # https://github.com/rgeo/rgeo
 gem 'rgeo'
 gem 'google_maps_service'
+gem 'ipinfo-rails'
 
 
 # Vidoe provider APIs

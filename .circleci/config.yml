@@ -60,4 +60,4 @@ jobs:
 
       - run:
           name: Parallel RSpec
-          command: bundle exec rspec spec/
+          command: bundle exec rspec spec/controllers/

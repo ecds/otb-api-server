@@ -243,6 +243,8 @@ RSpec.describe 'V3::Tours', type: :request do
       }
 
       it 'only returns tours user can edit' do
+        puts '*****'
+        puts response.body
         expect(json.size).to eq(1)
         expect(json.size).not_to eq(Tour.count)
       end

@@ -136,7 +136,7 @@ class Tour < ApplicationRecord
       durations = matrix[:rows].first[:elements].map { |e| e[:duration][:value] if e[:duration].present? }.reject { |d| d.nil? }
       durations.sum + 600 + (stops.count * 600)
       # ActiveSupport::Duration.build(seconds).parts
-    rescue GoogleMapsService::Error::ApiError => error
+    rescue GoogleMapsService::Error::ApiError, ArgumentError => error
       nil
     end
   end

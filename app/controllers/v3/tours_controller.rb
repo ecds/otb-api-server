@@ -32,9 +32,14 @@ class V3::ToursController < V3Controller
 
   # GET /tours/1
   def show
-    puts request.env['ipinfo'].all if request.env['ipinfo'].present?
+    request_loc = if request.env['ipinfo'].respond_to?('longitude')
+      { centerLng: request.env['ipinfo'].longitude, centerLat: request.env['ipinfo'].latitude }
+    else
+      { centerLng: -84.38979, centerLat: 33.75432 }
+    end
+
     if @record&.published || allowed?
-      render json: @record
+      render json: @record, loc: request_loc
     else
       render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
     end

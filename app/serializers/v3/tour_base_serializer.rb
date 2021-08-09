@@ -31,4 +31,18 @@ class V3::TourBaseSerializer < ActiveModel::Serializer
 
     distance_of_time_in_words(object.duration)
   end
+
+  def map_type
+    object.map_type || 'hybrid'
+  end
+
+  def bounds
+    return object.bounds if object.bounds.present?
+
+    if @instance_options[:loc].present?
+      return @instance_options[:loc]
+    end
+
+    nil
+  end
 end

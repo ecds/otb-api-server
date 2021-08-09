@@ -21,7 +21,10 @@ RSpec.describe V3::StopsController, type: :controller do
       create_list(:tour_with_stops, 5, theme: create(:theme), mode: create(:mode))
       Tour.first.update(published: true) if Tour.published.empty?
       Tour.last.update(published: false) if Tour.published.count == Tour.count
-      Tour.last.stops.drop(0) if Tour.last.stops.count > 1
+      Tour.last.stops.tours = [] if Tour.last.stops.count > 1
+      if Stop.all.all? { |s| s.published }
+        Stop.last.update(tours: [])
+      end
       user = create(:user)
       user.tour_sets = []
       user.tours = []

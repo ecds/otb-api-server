@@ -15,6 +15,8 @@ module V3
           render json: current_user
         elsif current_user.current_tenant_admin?
           render json: User.all
+        else
+          render json: { data: [] }
         end
       else
         render json: { message: 'You are not autorized to to view this resource.' }.to_json, status: 401

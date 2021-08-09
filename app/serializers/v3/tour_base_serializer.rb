@@ -29,7 +29,7 @@ class V3::TourBaseSerializer < ActiveModel::Serializer
   def est_time
     return nil if object.duration.nil?
 
-    distance_of_time_in_words(object.duration)
+    "#{distance_of_time_in_words(object.duration).capitalize} #{object.mode.title.downcase}"
   end
 
   def map_type

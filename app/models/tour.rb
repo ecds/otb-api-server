@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'google_maps_service'
+require 'uri'
 
 # Model class for a tour.
 class Tour < ApplicationRecord
@@ -33,6 +34,7 @@ class Tour < ApplicationRecord
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }
   before_validation -> { self.title ||= 'untitled' }
+  before_save :check_url
   after_save :ensure_slug
   after_create :add_modes
 
@@ -153,5 +155,15 @@ class Tour < ApplicationRecord
       Mode.all.each do |m|
         self.modes << m
       end
+    end
+
+    def check_url
+      return if link_address.nil?
+
+      uri = URI(link_address)
+
+      10.times { puts uri.scheme.nil? }
+
+      self.link_address = "http://#{link_address}" if uri.scheme.nil?
     end
 end

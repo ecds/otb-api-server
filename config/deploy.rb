@@ -24,7 +24,7 @@ set :deploy_to, '/data/otb-api-server'
 
 # Default value for :linked_files is []
 append :linked_files, 'config/master.key'
-append :linked_dirs, 'public/tmp'
+append :linked_dirs, 'public/storage/'
 
 # append :linked_files, 'config/database.yml'
 

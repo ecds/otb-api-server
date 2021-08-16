@@ -146,9 +146,7 @@ class Tour < ApplicationRecord
   private
 
     def ensure_slug
-      new_slug = Slug.find_or_create_by(slug: self.slug)
-      new_slug.tour = self
-      new_slug.save
+      Slug.find_or_create_by(slug: self.slug, tour: self)
     end
 
     def add_modes
@@ -161,8 +159,6 @@ class Tour < ApplicationRecord
       return if link_address.nil?
 
       uri = URI(link_address)
-
-      10.times { puts uri.scheme.nil? }
 
       self.link_address = "http://#{link_address}" if uri.scheme.nil?
     end

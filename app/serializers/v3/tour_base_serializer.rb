@@ -24,7 +24,9 @@ class V3::TourBaseSerializer < ActiveModel::Serializer
              :use_directions,
              :default_lng,
              :stop_count,
-             :est_time
+             :est_time,
+             :link_address,
+             :link_text
 
   def est_time
     return nil if object.duration.nil?

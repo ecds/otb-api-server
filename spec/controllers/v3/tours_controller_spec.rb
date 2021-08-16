@@ -39,7 +39,7 @@ RSpec.describe V3::ToursController, type: :controller do
       get :index, params: { tenant: tour.tenant, slug: tour.slug }
       expect(response.status).to eq(200)
       expect(attributes[:title]).not_to eq(tour.title)
-      expect(attributes[:title]).to eq('Not Found')
+      expect(attributes[:title]).to eq('....')
     end
 
     it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
@@ -86,7 +86,7 @@ RSpec.describe V3::ToursController, type: :controller do
       get :show, params: { tenant: tour.tenant, id: tour.id }
       expect(response.status).to eq(200)
       expect(attributes[:title]).not_to eq(tour.title)
-      expect(attributes[:title]).to eq('Not Found')
+      expect(attributes[:title]).to eq('....')
     end
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do

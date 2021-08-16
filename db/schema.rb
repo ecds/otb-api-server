@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_12_234207) do
+ActiveRecord::Schema.define(version: 2021_08_16_124235) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -133,11 +133,12 @@ ActiveRecord::Schema.define(version: 2021_07_12_234207) do
     t.string "title"
   end
 
-  create_table "slugs", force: :cascade do |t|
+  create_table "slugs", id: false, force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigserial "id"
     t.index ["tour_id"], name: "index_slugs_on_tour_id"
   end
 
@@ -324,6 +325,8 @@ ActiveRecord::Schema.define(version: 2021_07_12_234207) do
     t.string "map_type"
     t.boolean "use_directions", default: true
     t.integer "default_lng", default: 0
+    t.string "link_address"
+    t.string "link_text"
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"

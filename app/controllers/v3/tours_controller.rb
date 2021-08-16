@@ -24,7 +24,7 @@ class V3::ToursController < V3Controller
       Tour.published
     end
     if @records.nil?
-      render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
+      render json: { data: { id: 0, type: 'tours', attributes: { title: '....' } } }
     else
       render json: @records, each_serializer: V3::TourBaseSerializer
     end
@@ -41,7 +41,7 @@ class V3::ToursController < V3Controller
     if @record&.published || allowed?
       render json: @record, loc: request_loc
     else
-      render json: { data: { id: 0, type: 'tours', attributes: { title: 'Not Found' } } }
+      render json: { data: { id: 0, type: 'tours', attributes: { title: '....' } } }
     end
   end
 
@@ -82,7 +82,8 @@ class V3::ToursController < V3Controller
                     :is_geo, :modes, :published, :theme_id,
                     :mode, :meta_description, :stops,
                     :media, :users, :flat_pages, :map_type,
-                    :theme, :use_directions, :default_lng
+                    :theme, :use_directions, :default_lng,
+                    :link_address, :link_text
               ]
             )
       end
@@ -90,7 +91,6 @@ class V3::ToursController < V3Controller
       def set_record
         _record = Tour.find(params[:id])
         @record = _record&.published || @allowed ? _record : Tour.new(id: params[:id])
-
       end
 
       def allowed?

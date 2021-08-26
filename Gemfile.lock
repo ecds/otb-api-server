@@ -401,7 +401,6 @@ DEPENDENCIES
   rgeo
   ros-apartment
   rspec-rails (~> 4.0.2)
-  ruby-vips
   shoulda-matchers (~> 4.5.1)
   spring
   spring-watcher-listen (~> 2.0.0)

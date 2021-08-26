@@ -45,9 +45,9 @@ class Medium < MediumBaseRecord
       if file.content_type.include?('gif')
         height = ActiveStorage::Analyzer::ImageAnalyzer.new(file).metadata[:height]
         return {
-          mobile: file.variant(scale: "#{300.0 / height * 100}%", coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-          tablet: file.variant(scale: "#{400.0 / height * 100}%", coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-          desktop: file.variant(scale: "#{750.0 / height * 100}%", coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
+          mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+          tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+          desktop: file.variant(resize_to_limit: [750, 750], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
         }
       end
       {

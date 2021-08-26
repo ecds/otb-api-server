@@ -15,16 +15,19 @@ module VideoProps
       medium.title = metadata['title']
       medium.caption = metadata['description']
       medium.embed = "//player.vimeo.com/video/#{medium.video}"
-      downloaded_image = open(metadata['thumbnail_url'])
-      medium.file.attach(io: downloaded_image, filename: "#{medium.video}.jpg")
+      thumbnail_width = metadata['thumbnail_width']
+      thumbnail_height = metadata['thumbnail_height']
+      scale_by = 1000 / thumbnail_width
+      thumbnail_url = "#{metadata['thumbnail_url'].split('_')[0]}_#{thumbnail_width * scale_by}x#{thumbnail_height * scale_by}"
+      downloaded_image = URI.open(thumbnail_url)
     when 'youtube'
       begin
         metadata = Yt::Video.new(id: medium.video)
         medium.title = metadata.title
         medium.caption = metadata.description
         medium.embed = "//www.youtube.com/embed/#{medium.video}"
-        downloaded_image = open("https://img.youtube.com/vi/#{medium.video}/0.jpg")
-        medium.file.attach(io: downloaded_image, filename: "#{medium.video}.jpg")
+        downloaded_image = URI.open("https://img.youtube.com/vi/#{medium.video}/0.jpg")
+
       rescue Yt::Errors::NoItems
         medium.provider = nil
         medium.video = nil
@@ -56,5 +59,9 @@ module VideoProps
       end
 
     end
+    medium.filename = "#{medium.video}.jpg"
+    medium.base_sixty_four = Base64.encode64(downloaded_image.open.read)
+    downloaded_image.unlink
+    medium.attach_file unless medium.file.attached?
   end
 end

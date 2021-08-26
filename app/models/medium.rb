@@ -35,6 +35,10 @@ class Medium < MediumBaseRecord
     tours.any? { |tour| tour.published } || stops.any? { |stop| stop.published }
   end
 
+  def original_image_url
+    file.url
+  end
+
   def files
     return nil if !self.file.attached?
     begin
@@ -47,9 +51,9 @@ class Medium < MediumBaseRecord
         }
       end
       {
-        mobile: file.variant(resize: '300x300').processed.url,
-        tablet: file.variant(resize: '400x400').processed.url,
-        desktop: file.variant(resize: '750x750').processed.url
+        mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
+        tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
+        desktop: file.variant(resize_to_limit: [750, 750]).processed.url
       }
     rescue ActiveStorage::FileNotFoundError => error
       { mobile: nil, tablet: nil, desktop: nil }

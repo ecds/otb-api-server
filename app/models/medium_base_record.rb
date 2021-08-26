@@ -32,11 +32,16 @@ class MediumBaseRecord < ApplicationRecord
   def attach_file
     return if base_sixty_four.nil?
 
-    file.blob.delete if file.attached?
+    # file.blob.delete if file.attached?
 
-    headers, self.base_sixty_four = base_sixty_four.split(',')
-    headers =~ /^data:(.*?)$/
-    content_type = Regexp.last_match(1).split(';base64').first
+    if base_sixty_four.include?('data:')
+      headers, self.base_sixty_four = base_sixty_four.split(',')
+      headers =~ /^data:(.*?)$/
+      content_type = Regexp.last_match(1).split(';base64').first
+    else
+      content_type = 'image/jpeg'
+    end
+
     File.open(tmp_file_path, 'wb') do |f|
       f.write(Base64.decode64(base_sixty_four))
     end
@@ -46,6 +51,8 @@ class MediumBaseRecord < ApplicationRecord
       filename: filename,
       content_type: content_type
     )
+
+    self.base_sixty_four = nil
   end
 
   def remove_tmp_file

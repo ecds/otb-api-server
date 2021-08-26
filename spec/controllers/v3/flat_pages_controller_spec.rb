@@ -30,7 +30,7 @@ RSpec.describe V3::FlatPagesController, type: :controller do
       json.each do |flat_page|
         expect(FlatPage.find(flat_page[:id]).tours.any? { |tour| tour.published })
       end
-      expect(json.count).to be < FlatPage.count
+      expect(json.count).to be == FlatPage.all.reject {|fp| !fp.published}.count
     end
 
     it 'returns a 200 response with flat_pages when request is authenticated by tenant admin and tour is unpublished' do

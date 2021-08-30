@@ -57,7 +57,7 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
 
   create_table "flat_pages", force: :cascade do |t|
     t.string "title"
-    t.string "body"
+    t.text "body"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "position"
@@ -85,10 +85,10 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
   end
 
   create_table "map_overlays", force: :cascade do |t|
-    t.decimal "south", precision: 10, scale: 8
-    t.decimal "north", precision: 10, scale: 8
-    t.decimal "east", precision: 10, scale: 8
-    t.decimal "west", precision: 10, scale: 8
+    t.decimal "south", precision: 10, scale: 6
+    t.decimal "north", precision: 10, scale: 6
+    t.decimal "east", precision: 10, scale: 6
+    t.decimal "west", precision: 10, scale: 6
     t.bigint "tour_id"
     t.bigint "stop_id"
     t.datetime "created_at", precision: 6, null: false
@@ -174,10 +174,10 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
     t.string "article_link"
     t.string "video_embed"
     t.string "video_poster"
-    t.decimal "lat", precision: 10, scale: 8
-    t.decimal "lng", precision: 10, scale: 8
-    t.decimal "parking_lat", precision: 10, scale: 8
-    t.decimal "parking_lng", precision: 10, scale: 8
+    t.decimal "lat", precision: 10, scale: 6
+    t.decimal "lng", precision: 10, scale: 6
+    t.decimal "parking_lat", precision: 10, scale: 6
+    t.decimal "parking_lng", precision: 10, scale: 6
     t.text "direction_intro"
     t.text "direction_notes"
     t.datetime "created_at", null: false
@@ -300,8 +300,8 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
 
   create_table "tour_tags", force: :cascade do |t|
     t.string "title"
-    t.decimal "lat", precision: 10, scale: 8
-    t.decimal "lng", precision: 10, scale: 8
+    t.decimal "lat", precision: 10, scale: 6
+    t.decimal "lng", precision: 10, scale: 6
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

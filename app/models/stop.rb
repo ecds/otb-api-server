@@ -16,6 +16,7 @@ class Stop < ApplicationRecord
   # validates :title, uniqueness: true
 
   after_initialize :default_values
+  before_create :ensure_icon_color
   after_save :ensure_slug
 
   before_validation -> { self.title ||= 'untitled' }
@@ -87,5 +88,9 @@ class Stop < ApplicationRecord
 
     def ensure_slug
       tour_stops.each { |ts| ts.save }
+    end
+
+    def encode64
+      self.icon_color = '#D32F2F' if icon_color.nil?
     end
 end

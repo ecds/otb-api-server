@@ -316,7 +316,7 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
     t.bigint "theme_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "mode_id"
+    t.bigint "mode_id"
     t.integer "position"
     t.bigint "splash_image_medium_id"
     t.string "meta_description"

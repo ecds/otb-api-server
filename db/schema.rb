@@ -133,12 +133,11 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
     t.string "title"
   end
 
-  create_table "slugs", id: false, force: :cascade do |t|
+  create_table "slugs", force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigserial "id"
     t.index ["tour_id"], name: "index_slugs_on_tour_id"
   end
 

@@ -90,7 +90,7 @@ class Stop < ApplicationRecord
       tour_stops.each { |ts| ts.save }
     end
 
-    def encode64
+    def ensure_icon_color
       self.icon_color = '#D32F2F' if icon_color.nil?
     end
 end

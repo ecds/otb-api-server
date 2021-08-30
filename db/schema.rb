@@ -318,7 +318,7 @@ ActiveRecord::Schema.define(version: 2021_08_16_124235) do
     t.datetime "updated_at", null: false
     t.integer "mode_id"
     t.integer "position"
-    t.integer "splash_image_medium_id"
+    t.bigint "splash_image_medium_id"
     t.string "meta_description"
     t.bigint "medium_id"
     t.string "map_type"

@@ -21,6 +21,11 @@ jobs:
           POSTGRES_USER: root
           POSTGRES_DB: test
 
+      -image: circleci/mysql:latest
+        environment:
+          MYSQL_DATABASE: test
+          MYSQL_USER: root
+
     steps:
       - checkout
 
@@ -60,4 +65,4 @@ jobs:
 
       - run:
           name: Parallel RSpec
-          command: bundle exec rspec spec/controllers/
+          command: TEST_DB_ADAPTER=mysql2 bundle exec rspec spec/controllers/

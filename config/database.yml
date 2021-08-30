@@ -32,7 +32,8 @@ staging:
 
 test:
   <<: *default
-  database: <%= ENV['TEST_DB_NAME'] %>
+  adapter: <%= ENV['TEST_DB_NAME'] %>
+  database: <%= ENV['TEST_DB_ADAPTER'] %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

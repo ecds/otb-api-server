@@ -11,31 +11,27 @@ jobs:
           PGUSER: root
           RAILS_ENV: test
           DB_HOSTNAME: 127.0.0.1
-          DB_USERNAME: root
-          TEST_DB_NAME: test
-
-    # Service container image available at `host: localhost`
+          DB_USERNAME: user
+          DB_PASSWORD: password
+          TEST_DB_NAME: otb
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
 
       - image: circleci/postgres:9.6.8-alpine-postgis
         environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: test
+          POSTGRES_USER: user
+          POSTGRES_DB: otb
 
-      -image: circleci/mysql:latest
+      - image: circleci/mysql:latest
+        command: [--default-authentication-plugin=mysql_native_password]
         environment:
-          MYSQL_DATABASE: test
-          MYSQL_USER: root
+          MYSQL_DATABASE: otb
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: password
 
     steps:
       - checkout
-
-      # Restore bundle cache
-      # - restore_cache:
-      #     keys:
-      #       - rails-demo-{{ checksum "Gemfile.lock" }}
-      #       - rails-demo-
-
-      # Bundle install dependencies
       - run:
           name: Install dependencies
           command: |
@@ -44,25 +40,43 @@ jobs:
             sudo apt install -y libvips-dev
             bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
 
-
-      # Store bundle cache
-
-
-      - run:
-          name: Database Setup
-          command: |
-            bundle exec rake db:drop RAILS_ENV=test
-            bundle exec rake db:create RAILS_ENV=test
-            bundle exec rake db:schema:load RAILS_ENV=test
-            bundle exec rake db:migrate RAILS_ENV=test
-
       - run:
           name: Make Tmp Directory
           command: |
             sudo mkdir -p /data/tmp
             sudo chmod 777 /data/tmp
             sudo chown $USER:$USER /data/tmp
+            sudo mkdir -p public/storage/tmp
+            sudo chmod 777 public/storage/tmp
+            sudo chown $USER:$USER public/storage/tmp
+
+      # Test building MySQL
+      # TODO: Figure out how to allow the database user to create new tenants in
+      # the MySQL Docker instance. For now, we'll just test that it can setup the
+      # initial database using MySQL.
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m
 
       - run:
-          name: Parallel RSpec
-          command: TEST_DB_ADAPTER=mysql2 bundle exec rspec spec/controllers/
+          name: MySQL Setup
+          command: |
+            export TEST_DB_ADAPTER=mysql2
+            bundle exec rake db:drop RAILS_ENV=test TEST_DB_ADAPTER=mysql2
+            bundle exec rake db:create RAILS_ENV=test TEST_DB_ADAPTER=mysql2
+            bundle exec rake db:schema:load RAILS_ENV=test TEST_DB_ADAPTER=mysql2
+            bundle exec rake db:migrate RAILS_ENV=test TEST_DB_ADAPTER=mysql2
+
+      # Test using PostgreSQL
+      - run:
+          name: PostgreSQL Setup
+          command: |
+            export TEST_DB_ADAPTER=postgresql
+            bundle exec rake db:drop RAILS_ENV=test TEST_DB_ADAPTER=postgresql
+            bundle exec rake db:create RAILS_ENV=test TEST_DB_ADAPTER=postgresql
+            bundle exec rake db:schema:load RAILS_ENV=test TEST_DB_ADAPTER=postgresql
+            bundle exec rake db:migrate RAILS_ENV=test TEST_DB_ADAPTER=postgresql
+
+      - run:
+          name: Parallel RSpec with PostgreSQL
+          command: TEST_DB_ADAPTER=postgresql bundle exec rspec spec/controllers/

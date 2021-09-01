@@ -2,15 +2,15 @@
 
 # Model class for tour sets. This is the main model for "instances" of Open Tour Builder.
 class TourSet < ApplicationRecord
-  before_validation :attach_file
   before_save :set_subdir
+  around_update :attach_file
   after_create :create_tenant
   # after_create :create_defaults
   before_destroy :drop_tenant
 
   validates :name, presence: true, uniqueness: true
 
-  has_one_attached :logo
+  has_one_attached 'logo'
 
   has_many :tour_set_admins
   has_many :admins, through: :tour_set_admins, source: :user
@@ -50,6 +50,13 @@ class TourSet < ApplicationRecord
     rescue Apartment::TenantNotFound => error
       # self.delete
     end
+  end
+
+  def logo_url
+    Apartment::Tenant.switch! 'public'
+    return logo.url if logo.attached?
+
+    nil
   end
 
   private
@@ -94,18 +101,6 @@ class TourSet < ApplicationRecord
       Apartment::Tenant.drop(subdir)
     end
 
-    # def symlink_logo
-    #   FileUtils.mkdir "#{Rails.root}/public/uploads/#{self.subdir}"
-    #   FileUtils.ln_s "#{Rails.root}/public/otblogo.png",
-    #                   "#{Rails.root}/public/uploads/#{self.subdir}/otblogo.png"
-    #   self.logo = 'otblogo.png'
-    #   self.footer_logo = 'otblogo.png'
-    # end
-
-    # def uploading?
-    #   footer_logo_width.present? && footer_logo_height.present?
-    # end
-
     def tmp_file_path
       return nil if logo_title.nil?
 
@@ -122,50 +117,26 @@ class TourSet < ApplicationRecord
     #
     #
     def attach_file
-      return if base_sixty_four.nil?
+      return if base_sixty_four.nil? && !logo.attached?
 
       headers, self.base_sixty_four = base_sixty_four.split(',')
-      headers =~ /^data:(.*?)$/
-      content_type = Regexp.last_match(1).split(';base64').first
+      # content_type = Regexp.last_match(1).split(';base64').first
+
       File.open(tmp_file_path, 'wb') do |f|
         f.write(Base64.decode64(base_sixty_four))
+      end
+      self.base_sixty_four = nil
+
+      image = MiniMagick::Image.open(tmp_file_path)
+
+      if image[:height] > 80
+        image.resize('300x80')
+        image.write(tmp_file_path)
       end
 
       self.logo.attach(
         io: File.open(tmp_file_path),
-        filename: logo_title,
-        content_type: content_type
+        filename: logo_title
       )
-
-      validate_logo
-    end
-
-    def validate_logo
-      if logo.attached?
-        valitate_logo_type
-        validate_logo_dimensions
-
-        if errors
-          # File.delete(tmp_file_path)
-          # logo.purge
-        end
-      end
-    end
-
-    def valitate_logo_type
-      types = %w[jpeg jpg png svg]
-      unless types.any? { |type| logo.content_type.include?(type) }
-        errors[:base] << "Logo must be one of the following types #{types.join(', ')}"
-      end
-    end
-
-    def validate_logo_dimensions
-      image = MiniMagick::Image.open(tmp_file_path)
-      if image[:width] > 300
-        errors.add(:base, 'Logo cannot be wider than 300 pixels.')
-      end
-      if image[:height] > 80
-        errors.add(:base, 'Logo cannot be taller than 80 pixels.')
-      end
     end
 end

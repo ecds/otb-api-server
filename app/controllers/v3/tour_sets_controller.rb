@@ -43,9 +43,15 @@ module V3
 
     # PATCH/PUT /tour_sets/1
     def update
+      if record_params[:logo].nil? && @record.logo.attached?
+        @record.logo.purge
+        puts @record.logo.attached?
+      end
+
+      @record.logo = nil if record_params
+      @record.base_sixty_four = nil if record_params[:base_sixty_four].nil?
       if @record.update(record_params)
-        # render json: @record
-        head :no_content
+        render json: @record
       else
         render json: serialize_errors, status: :unprocessable_entity
       end
@@ -68,7 +74,7 @@ module V3
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                  :name, :tours, :admins, :base_sixty_four, :logo_title
+                  :name, :tours, :admins, :base_sixty_four, :logo_title, :logo
               ]
           )
     end

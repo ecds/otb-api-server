@@ -239,7 +239,8 @@ RSpec.describe V3::StopsController, type: :controller do
       end
 
       it 'return 200 and updated tour when authenciated by super' do
-        create(:tour)
+        tour = create(:tour)
+        tour.stops << create_list(:stop, 4)
         user = create(:user)
         user.tour_sets = []
         user.update(super: true)

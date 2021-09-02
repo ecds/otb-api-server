@@ -5,8 +5,7 @@ RSpec.describe V3::FlatPagesController, type: :controller do
     it 'returns a 200 response with flat_pages connected to published tours' do
       create_list(:tour_with_flat_pages, 5, theme: create(:theme), mode: create(:mode))
       Tour.first.update(published: true) if Tour.published.empty?
-      Tour.last.update(published: false) if Tour.published.count == Tour.count
-      Tour.last.flat_pages.drop(0) if Tour.last.flat_pages.count > 1
+      Tour.last.update(published: false)
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to eq(200)
       expect(Tour.count).to be > Tour.published.count

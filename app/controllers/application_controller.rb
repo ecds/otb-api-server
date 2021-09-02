@@ -5,4 +5,7 @@ class ApplicationController < ActionController::API
   include Response
   include ExceptionHandler
   include EcdsRailsAuthEngine::CurrentUser
+  if Rails.env == 'test'
+    include ActiveStorage::SetCurrent
+  end
 end

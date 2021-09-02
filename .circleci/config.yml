@@ -61,22 +61,22 @@ jobs:
       - run:
           name: MySQL Setup
           command: |
-            export TEST_DB_ADAPTER=mysql2
-            bundle exec rake db:drop RAILS_ENV=test TEST_DB_ADAPTER=mysql2
-            bundle exec rake db:create RAILS_ENV=test TEST_DB_ADAPTER=mysql2
-            bundle exec rake db:schema:load RAILS_ENV=test TEST_DB_ADAPTER=mysql2
-            bundle exec rake db:migrate RAILS_ENV=test TEST_DB_ADAPTER=mysql2
+            export DB_ADAPTER=mysql2
+            bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=mysql2
+            bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=mysql2
+            bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=mysql2
+            bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=mysql2
 
       # Test using PostgreSQL
       - run:
           name: PostgreSQL Setup
           command: |
-            export TEST_DB_ADAPTER=postgresql
-            bundle exec rake db:drop RAILS_ENV=test TEST_DB_ADAPTER=postgresql
-            bundle exec rake db:create RAILS_ENV=test TEST_DB_ADAPTER=postgresql
-            bundle exec rake db:schema:load RAILS_ENV=test TEST_DB_ADAPTER=postgresql
-            bundle exec rake db:migrate RAILS_ENV=test TEST_DB_ADAPTER=postgresql
+            export DB_ADAPTER=postgresql
+            bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=postgresql
+            bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
+            bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
+            bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=postgresql
 
       - run:
           name: Parallel RSpec with PostgreSQL
-          command: TEST_DB_ADAPTER=postgresql bundle exec rspec spec/controllers/
+          command: DB_ADAPTER=postgresql bundle exec rspec spec/controllers/

@@ -15,7 +15,11 @@ class V3::MediumSerializer < ActiveModel::Serializer
              :files,
              :orphaned,
              :filename,
-             :original_image_url
+             :original_image_url,
+             :lqip_width,
+             :mobile_width,
+             :tablet_width,
+             :desktop_width
 
   # def files
   #   return nil unless object.file.attached?

@@ -3,6 +3,13 @@
 require 'coveralls'
 Coveralls.wear!
 
+require 'simplecov'
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+SimpleCov.start do
+  add_filter 'spec'
+  add_filter 'db'
+end
+
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 WebMock.disable_net_connect!(allow: '45.33.24.119')

@@ -12,18 +12,14 @@ class Stop < ApplicationRecord
   belongs_to :map_icon, optional: true
   has_many :stop_slugs, dependent: :delete_all
 
+  before_validation -> { self.title ||= 'untitled' }
+
   validates :title, presence: true
-  # validates :title, uniqueness: true
 
   after_initialize :default_values
   before_create :ensure_icon_color
   after_save :ensure_slug
 
-  before_validation -> { self.title ||= 'untitled' }
-
-  # scope :not_in_tour, lambda { |tour_id| includes(:tour_stops).where.not(tour_stops: { tour_id: tour_id }) }
-  # scope :no_tours, lambda { includes(:tour_stops).where(tour_stops: { tour_id: nil }) }
-  # scope :published, lambda { includes(:tours).where(tours: { published: true }) }
   scope :by_slug_and_tour, lambda { |slug, tour_id| joins(:stop_slugs).joins(:tours).where('stop_slugs.slug = ?', slug).where('tour_stops.tour_id = ?', tour_id) }
 
   def sanitized_description

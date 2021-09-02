@@ -6,8 +6,8 @@ RSpec.describe V3::StopsController, type: :controller do
   describe 'GET #index' do
     it 'returns a 200 response with stops connected to published tours' do
       create_list(:tour_with_stops, 5, theme: create(:theme), mode: create(:mode))
-      Tour.first.update(published: true) if Tour.published.empty?
-      Tour.last.update(published: false) if Tour.published.count == Tour.count
+      Tour.first.update(published: true)
+      Tour.last.update(published: false)
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to eq(200)
       expect(Tour.count).to be > Tour.published.count

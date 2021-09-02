@@ -27,7 +27,6 @@ module VideoProps
         medium.caption = metadata.description
         medium.embed = "//www.youtube.com/embed/#{medium.video}"
         downloaded_image = URI.open("https://img.youtube.com/vi/#{medium.video}/0.jpg")
-
       rescue Yt::Errors::NoItems
         medium.provider = nil
         medium.video = nil
@@ -48,20 +47,20 @@ module VideoProps
         spans = browser.at_xpath('//span[contains(@class, "sc-artwork")]') until spans.present?
         image = spans.attribute('style')[/(.*\()(.*)(\).*)/, 2]
         if image.nil?
-          medium.file.attach(
-            io: File.open(File.join(Rails.root, 'public', 'soundcloud.jpg')),
-            filename: "#{medium.title.parameterize}.jpg"
-          )
+          downloaded_image = File.open(File.join(Rails.root, 'public', 'soundcloud.jpg')).read
         else
-          downloaded_image = open("https:#{image}")
-          medium.file.attach(io: downloaded_image, filename: "#{medium.title.parameterize}.jpg")
+          downloaded_image = URI.open("https:#{image}")
         end
       end
 
     end
     medium.filename = "#{medium.video}.jpg"
-    medium.base_sixty_four = Base64.encode64(downloaded_image.open.read)
-    downloaded_image.unlink
+    begin
+      medium.base_sixty_four = Base64.encode64(downloaded_image.open.read)
+      downloaded_image.unlink
+    rescue NoMethodError
+      medium.base_sixty_four = Base64.encode64(downloaded_image)
+    end
     medium.attach_file unless medium.file.attached?
   end
 end

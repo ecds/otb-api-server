@@ -8,5 +8,7 @@ FactoryBot.define do
     filename { Faker::File.file_name(dir: '', ext: 'png', directory_separator: '') }
     base_sixty_four { File.read(Rails.root.join('spec/factories/base64_image.txt')) }
     created_at { Faker::Number.number(digits: 10) }
+    video { nil }
+    video_provider { nil }
   end
 end

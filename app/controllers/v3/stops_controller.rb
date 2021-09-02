@@ -26,8 +26,6 @@ class V3::StopsController < V3Controller
       @record = Stop.new(stop_params)
       if @record.save
         render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
-      else
-        render json: serialize_errors, status: :unprocessable_entity
       end
     else
       head 401
@@ -39,9 +37,6 @@ class V3::StopsController < V3Controller
     if @allowed
       if @record&.update(stop_params)
         render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
-      else
-        # status =
-        render json: serialize_errors, status: @record.nil? ? :not_found : :unprocessable_entity
       end
     else
       head 401
@@ -66,17 +61,9 @@ class V3::StopsController < V3Controller
 
       # Use callbacks to share common setup or constraints between actions.
 
-      def set_tour
-        @tour = Tour.find(params[:tour_id])
-      end
-
       def set_record
         _record = Stop.find_by(id: params[:id])
         @record = _record&.published || @allowed ? _record : Stop.new(id: params[:id])
-      end
-
-      def set_tour_stop
-        @record = @tour.stops.find_by!(id: params[:id]) if @tour
       end
 
       def allowed?

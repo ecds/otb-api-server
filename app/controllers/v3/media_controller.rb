@@ -41,22 +41,6 @@ module V3
       end
     end
 
-    def file
-      if @record&.file&.attached?
-        if params[:context] == 'mobile'
-          redirect_to @record.file.variant(resize: '300x300').processed.service_url
-        elsif params[:context] == 'tablet'
-          redirect_to @record.file.variant(resize: '400x400').processed.service_url
-        elsif params[:context] == 'desktop'
-          redirect_to @record.file.variant(resize: '750x750').processed.service_url
-        else
-          redirect_to @record.file.service_url
-        end
-      else
-        head :not_found
-      end
-    end
-
     # Use callbacks to share common setup or constraints between actions.
     def set_record
       @record = Medium.find(params[:id])

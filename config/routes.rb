@@ -28,9 +28,7 @@ Rails.application.routes.draw do
       resources :map_icons, path: 'map-icons'
       resources :themes
       resources :tours
-      resources :media do
-        get :file, on: :member
-      end
+      resources :media
       resources :stops
       resources :stop_media, path: 'stop-media'
       resources :tour_media, path: 'tour-media'

@@ -180,3 +180,23 @@ sites.each do |ts|
     end
   end
 end
+
+sites = TourSet.all.map(&:subdir)
+
+sites.each do |ts|
+  puts ts
+  Apartment::Tenant.switch! ts
+  Stop.all.each do |s|
+    if s.lat
+      s.update(lat: s.lat.round(7).to_f, lng: s.lng.round(7).to_f)
+    end
+    if s.parking_lat
+      s.update(parking_lat: s.parking_lat.round(7).to_f, parking_lng: s.parking_lng.round(7).to_f)
+    end
+  end
+end
+
+Medium.all.each do |m|
+  next unless m.desktop_width.nil?
+  m.save
+end

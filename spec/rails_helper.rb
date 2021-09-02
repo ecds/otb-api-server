@@ -43,7 +43,9 @@ RSpec.configure do |config|
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
-  config.use_transactional_fixtures = true
+  if ENV['DB_ADAPTER'] == 'postgresql'
+    config.use_transactional_fixtures = true
+  end
 
   config.include RequestSpecHelper, type: :request
   config.include(RequestSpecHelper, type: :controller)
@@ -119,6 +121,12 @@ RSpec.configure do |config|
         body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
         status: 200
       )
+
+    stub_request(:get, /http:\/\/test\.host\/rails\/active_storage\/.*/)
+    .to_return(
+      body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
+      status: 200
+    )
 
     stub_request(
       :get,

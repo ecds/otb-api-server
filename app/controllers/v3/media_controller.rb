@@ -22,33 +22,23 @@ module V3
       if @record.published || current_user.id.present?
         render json: @record
       else
-        head 401
+        render json: { data: { id: 0, type: 'media', attributes: { title: '....' } } }
       end
     end
 
     # POST /media
     def create
-      @record = Medium.new(record_params)
+      if allowed?
+        @record = Medium.new(record_params)
 
-      if @record.save
-        render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/media/#{@record.id}"
+        if @record.save
+          render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/media/#{@record.id}"
+        else
+          render json: serialize_errors, status: :unprocessable_entity
+        end
       else
-        render json: serialize_errors, status: :unprocessable_entity
+        render json: {}, status: :unauthorized
       end
-    end
-
-    # PATCH/PUT /media/1
-    def update
-      if @record.update(record_params)
-        render json: @record
-      else
-        render json: serialize_errors, status: :unprocessable_entity
-      end
-    end
-
-    # DELETE /media/1
-    def destroy
-      @record.destroy
     end
 
     def file

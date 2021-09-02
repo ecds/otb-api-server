@@ -368,7 +368,7 @@ PLATFORMS
 
 DEPENDENCIES
   actionview (>= 5.2.2.1)
-  active_model_serializers (~> 0.10.0.rc3)
+  active_model_serializers (~> 0.10.12)
   aws-sdk-s3 (~> 1)
   cancancan (~> 2.0)
   capistrano-passenger
@@ -401,6 +401,7 @@ DEPENDENCIES
   shoulda-matchers (~> 4.5.1)
   spring
   spring-watcher-listen (~> 2.0.0)
+  term-ansicolor
   tzinfo-data
   vimeo
   webmock

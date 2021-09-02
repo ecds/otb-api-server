@@ -16,7 +16,7 @@ gem 'mysql2'
 # Multitenancy for Rails and ActiveRecord
 gem 'ros-apartment', require: 'apartment'
 # For JSONAPI responses
-gem 'active_model_serializers', '~> 0.10.0.rc3'
+gem 'active_model_serializers', '~> 0.10.12'
 # Use Puma as the app server
 gem 'puma', '~> 4.3.0'
 # Use Redis adapter to run Action Cable in production
@@ -80,8 +80,9 @@ group :test do
   gem 'factory_bot_rails'
   gem 'shoulda-matchers', '~> 4.5.1' #git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
   gem 'database_cleaner'
-  gem 'coveralls', require: false
   gem 'webmock'
+  gem 'coveralls', require: false
+  gem 'term-ansicolor'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

@@ -6,6 +6,8 @@ class MediumBaseRecord < ApplicationRecord
   before_create :attach_file
   before_destroy :purge
 
+  validates_presence_of :filename
+
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
   has_one_attached 'file'
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_08_31_202533) do
+ActiveRecord::Schema.define(version: 2021_09_02_164843) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -120,6 +120,7 @@ ActiveRecord::Schema.define(version: 2021_08_31_202533) do
     t.string "tablet"
     t.string "desktop"
     t.string "filename"
+    t.integer "lqip_width"
   end
 
   create_table "modes", force: :cascade do |t|

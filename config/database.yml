@@ -1,5 +1,5 @@
 default: &default
-  adapter: <%= ENV['TEST_DB_ADAPTER'] || 'postgresql' %>
+  adapter: <%= ENV['DB_ADAPTER'] || 'postgresql' %>
   encoding: utf8
   pool: 50
   schema_search_path: "public,shared_extensions"
@@ -32,4 +32,4 @@ staging:
 
 test:
   <<: *default
-  database: <%= ENV['TEST_DB_NAME'] %>
+  database: <%= ENV['TEST_DB_NAME'] || 'otb_test' %>

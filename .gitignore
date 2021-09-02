@@ -9,7 +9,7 @@ public/storage/*
 .vscode
 *.env*
 .bundle
-
+.coveralls.yml
 
 /config/master.key
 storage

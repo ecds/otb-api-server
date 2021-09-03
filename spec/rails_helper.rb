@@ -150,8 +150,12 @@ RSpec.configure do |config|
     stub_request(:get, 'https://vimeo.com/https://youtu.be/F9ULbmCvmxY')
       .to_return(status: 404, body: '', headers: {})
 
-    stub_request(:get, 'https://vimeo.com/https://www.youtube.com/watch?v=F9ULbmCvmxY')
-      .to_return(status: 404, body: '', headers: {})
+    stub_request(:get, 'https://www.googleapis.com/youtube/v3/videos?id=CvmxYF9ULbm&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet')
+      .to_return(
+        status: 200,
+        body: '{"kind": "youtube#videoListResponse", "etag": "YIUPVpqNjppyCWOZfL-19bLb7uk", "items": [ ], "pageInfo": { "totalResults": 0, "resultsPerPage": 0 } }',
+        headers: { 'content-type': 'application/json' }
+      )
 
     stub_request(:get, 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/431162745&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false')
       .to_return(

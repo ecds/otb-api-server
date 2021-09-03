@@ -163,7 +163,7 @@ RSpec.configure do |config|
     stub_request(:get, 'https://w.soundcloud.com/player/?auto_play=false&color=%23ff5500&hide_related=true&sharing=false&show_comments=false&show_reposts=false&show_teaser=false&show_user=false&url=https://api.soundcloud.com/tracks/457871163&visual=true')
       .to_return(
         status: 200,
-        body: '<html><span></span></html>',
+        body: '<html><div class="image sc-artwork sc-artwork-placeholder-9"><span style="width:100%;height:100%;" class="sc-artwork sc-artwork-placeholder-9 image__full g-transition-opacity" aria-label="Subsatellite Launch" aria-role="img"></span></div></html>',
         headers: {}
       )
 

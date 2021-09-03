@@ -156,11 +156,11 @@ RSpec.configure do |config|
     stub_request(:get, 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/431162745&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false')
       .to_return(
         status: 200,
-        body: '<html><span></span></html>',
+        body: '<html><span style="background-image:url(//i1.sndcdn.com/artworks-KsTDkyGJ8S6x-0-t500x500.jpg);width:100%;height:100%;" class="sc-artwork sc-artwork-placeholder-3 image__full g-transition-opacity" aria-label="Boca Raton (with A$AP Ferg)" aria-role="img"></span></html>',
         headers: {}
       )
 
-    stub_request(:get, 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/296743143&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false')
+    stub_request(:get, 'https://w.soundcloud.com/player/?auto_play=false&color=%23ff5500&hide_related=true&sharing=false&show_comments=false&show_reposts=false&show_teaser=false&show_user=false&url=https://api.soundcloud.com/tracks/457871163&visual=true')
       .to_return(
         status: 200,
         body: '<html><span></span></html>',

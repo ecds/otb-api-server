@@ -42,10 +42,18 @@ module VideoProps
         end
         medium.video = embed_code.xpath('//iframe', 'src').first['src'].split('&').first[/(.*tracks\/)(.*)/, 2]
         medium.embed = "//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false"
-        browser = Ferrum::Browser.new()
-        browser.go_to("https:#{medium.embed}")
-        spans = browser.at_xpath('//span[contains(@class, "sc-artwork")]') until spans.present?
-        image = spans.attribute('style')[/(.*\()(.*)(\).*)/, 2]
+        # When testing, the requests made via Ferrum do not go through webmock and CircleCI does not seem to
+        # let requests out to the world.
+        begin
+          browser = Ferrum::Browser.new()
+          browser.go_to("https:#{medium.embed}")
+          spans = browser.at_xpath('//span[contains(@class, "sc-artwork")]') until spans.present?
+          image = spans.attribute('style')[/(.*\()(.*)(\).*)/, 2]
+        rescue Ferrum::ProcessTimeoutError
+          html = Nokogiri::HTML(HTTParty.get("https:#{medium.embed}"))
+          style = html.xpath('//span[contains(@class, "sc-artwork")]/@style').first
+          image = style.value[/\((.*?)\)/, 1]
+        end
         if image.nil?
           downloaded_image = File.open(File.join(Rails.root, 'public', 'soundcloud.jpg')).read
         else

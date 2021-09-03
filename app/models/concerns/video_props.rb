@@ -23,7 +23,6 @@ module VideoProps
     when 'youtube'
       begin
         metadata = Yt::Video.new(id: medium.video)
-        puts metadata
         medium.title = metadata.title
         medium.caption = metadata.description
         medium.embed = "//www.youtube.com/embed/#{medium.video}"

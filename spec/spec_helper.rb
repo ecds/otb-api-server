@@ -1,14 +1,20 @@
 # frozen_string_literal: true
 
-require 'coveralls'
-Coveralls.wear!
+if ENV['COV'] == 'simple'
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/config/'
+    add_filter '/spec/'
+    add_filter '/db/'
+    add_filter '/bin/'
+  end
+else
+  require 'coveralls'
+  Coveralls.wear!
+end
 
 require 'simplecov'
-SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-SimpleCov.start do
-  add_filter 'spec'
-  add_filter 'db'
-end
+# SimpleCov.start
 
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)

@@ -82,6 +82,7 @@ group :test do
   gem 'database_cleaner'
   gem 'webmock'
   gem 'coveralls', require: false
+  gem 'simplecov', require: false
   gem 'term-ansicolor'
 end
 

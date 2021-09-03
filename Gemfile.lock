@@ -399,6 +399,7 @@ DEPENDENCIES
   ros-apartment
   rspec-rails (~> 4.0.2)
   shoulda-matchers (~> 4.5.1)
+  simplecov
   spring
   spring-watcher-listen (~> 2.0.0)
   term-ansicolor

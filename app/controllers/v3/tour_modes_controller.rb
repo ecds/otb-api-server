@@ -15,5 +15,5 @@ module V3
   #     tour_mode = TourMode.find(params[:id])
   #     render json: tour_mode
   #   end
-  # end
+  end
 end

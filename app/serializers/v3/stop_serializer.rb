@@ -23,9 +23,6 @@ class V3::StopSerializer < ActiveModel::Serializer
              :direction_intro,
              :direction_notes,
              :splash,
-             :insecure_splash,
-             :splash_width,
-             :splash_height,
              :orphaned,
              :icon_color
 end

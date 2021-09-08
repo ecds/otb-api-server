@@ -5,7 +5,7 @@ class TourSet < ApplicationRecord
   before_save :set_subdir
   around_update :attach_file
   after_create :create_tenant
-  # after_create :create_defaults
+  after_create :create_defaults
   before_destroy :drop_tenant
 
   validates :name, presence: true, uniqueness: true
@@ -54,7 +54,11 @@ class TourSet < ApplicationRecord
 
   def logo_url
     Apartment::Tenant.switch! 'public'
-    return logo.url if logo.attached?
+    begin
+      return logo.url if logo.attached?
+    rescue URI::InvalidURIError
+      # FIXME: This seems to be a problem when testing?
+    end
 
     nil
   end
@@ -117,7 +121,7 @@ class TourSet < ApplicationRecord
     #
     #
     def attach_file
-      return if base_sixty_four.nil? && !logo.attached?
+      return if base_sixty_four.nil? #&& !logo.attached?
 
       headers, self.base_sixty_four = base_sixty_four.split(',')
       # content_type = Regexp.last_match(1).split(';base64').first

@@ -7,8 +7,7 @@ class V3::ToursController < V3Controller
   def index
     @records = if (params[:slug])
       @record = Slug.find_by(slug: params[:slug]).tour
-      allowed?
-      if @record.published || @allowed
+      if @record.published || crud_allowed?
         @record
       else
         nil
@@ -38,7 +37,7 @@ class V3::ToursController < V3Controller
       { centerLng: -84.38979, centerLat: 33.75432 }
     end
 
-    if @record&.published || allowed?
+    if @record&.published || crud_allowed?
       render json: @record, loc: request_loc
     else
       render json: { data: { id: 0, type: 'tours', attributes: { title: '....' } } }
@@ -47,7 +46,7 @@ class V3::ToursController < V3Controller
 
   # POST /tours
   def create
-    if @allowed
+    if crud_allowed?
       @record = Tour.new(tour_params)
       if @record.save
         render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}"
@@ -61,7 +60,7 @@ class V3::ToursController < V3Controller
 
   # PATCH/PUT /tours/1
   def update
-    if @allowed
+    if crud_allowed?
       if @record.update(tour_params)
         render json: @record, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}"
       else
@@ -93,8 +92,12 @@ class V3::ToursController < V3Controller
         @record = _record&.published || @allowed ? _record : Tour.new(id: params[:id])
       end
 
-      def allowed?
+      # def allowed?
+      #   @allowed = crud_allowed? ||
+      # end
+
+      def crud_allowed?
         set_record if @record.nil? && params[:id].present?
-        @allowed = current_user&.current_tenant_admin? || current_user.tours.include?(@record)
+        current_user&.current_tenant_admin? || current_user.tours.include?(@record)
       end
 end

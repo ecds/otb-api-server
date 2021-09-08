@@ -25,105 +25,218 @@ require 'rails_helper'
 
 RSpec.describe V3::TourMediaController, type: :controller do
 
-  # This should return the minimal set of attributes required to create a valid
-  # TourMedium. As you add validations to TourMedium, be sure to
-  # adjust the attributes here as well.
-  let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
-  }
+  describe 'GET #index' do
+    before(:each) { Tour.all.each { |tour| tour.update(published: false) } }
 
-  let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
-  }
+    context 'unauthenticated' do
+      it 'returns a success response but zeor TourMedium objects' do
 
-  # This should return the minimal set of values that should be in the session
-  # in order to pass any filters (e.g. authentication) defined in
-  # TourMediaController. Be sure to keep this updated too.
-  let(:valid_session) { {} }
-
-  describe "GET #index" do
-    it "returns a success response" do
-      tour_medium = TourMedium.create! valid_attributes
-      get :index, params: {}, session: valid_session
-      expect(response).to be_success
-    end
-  end
-
-  describe "GET #show" do
-    it "returns a success response" do
-      tour_medium = TourMedium.create! valid_attributes
-      get :show, params: {id: tour_medium.to_param}, session: valid_session
-      expect(response).to be_success
-    end
-  end
-
-  describe "POST #create" do
-    context "with valid params" do
-      it "creates a new TourMedium" do
-        expect {
-          post :create, params: {v3_tour_medium: valid_attributes}, session: valid_session
-        }.to change(TourMedium, :count).by(1)
+        tour_medium = create(:tour_medium, tour: create(:tour, published: false))
+        get :index, params: { tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(0)
+        expect(TourMedium.count).to be > 0
       end
 
-      it "renders a JSON response with the new v3_tour_medium" do
-
-        post :create, params: {v3_tour_medium: valid_attributes}, session: valid_session
-        expect(response).to have_http_status(:created)
-        expect(response.content_type).to eq('application/json')
-        expect(response.location).to eq(v3_tour_medium_url(TourMedium.last))
+      it 'returns a success response but zeor TourMedium objects' do
+        tour_medium = create(:tour_medium, tour: create(:tour, published: true))
+        get :index, params: { tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(1)
       end
     end
 
-    context "with invalid params" do
-      it "renders a JSON response with errors for the new v3_tour_medium" do
+    context 'authenticated unauthorized' do
 
-        post :create, params: {v3_tour_medium: invalid_attributes}, session: valid_session
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq('application/json')
+      it 'returns zero TourMedium objects, not current tenant admin, non tour author' do
+        original_tenant = Apartment::Tenant.current
+        tour_medium = create(:tour_medium, tour: create(:tour, published: false))
+        tour_set = create(:tour_set)
+        user = create(:user, super: false)
+        user.tour_sets << tour_set
+        signed_cookie(user)
+        get :index, params: { tenant: original_tenant }
+        Apartment::Tenant.switch! original_tenant
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(0)
+        expect(TourMedium.count).to be > 0
+      end
+
+      it 'returns zero TourMedium objects, not current tenant admin, non tour author' do
+        original_tenant = Apartment::Tenant.current
+        tour_medium = create(:tour_medium, tour: create(:tour, published: false))
+        tour_set = create(:tour_set)
+        Apartment::Tenant.switch! tour_set.subdir
+        user = create(:user, super: false)
+        user.tours << create(:tour)
+        signed_cookie(user)
+        Apartment::Tenant.switch! original_tenant
+        get :index, params: { tenant: original_tenant }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(0)
+        expect(TourMedium.count).to be > 0
       end
     end
-  end
 
-  describe "PUT #update" do
-    context "with valid params" do
-      let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
-      }
-
-      it "updates the requested v3_tour_medium" do
-        tour_medium = TourMedium.create! valid_attributes
-        put :update, params: {id: tour_medium.to_param, v3_tour_medium: new_attributes}, session: valid_session
-        tour_medium.reload
-        skip("Add assertions for updated state")
+    context 'authenticated and authorized' do
+      it 'returns all TourMedium objects to super' do
+        create_list(:tour_medium, 4)
+        user = create(:user, super: true)
+        signed_cookie(user)
+        get :index, params: { tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(TourMedium.count)
       end
 
-      it "renders a JSON response with the v3_tour_medium" do
-        tour_medium = TourMedium.create! valid_attributes
-
-        put :update, params: {id: tour_medium.to_param, v3_tour_medium: valid_attributes}, session: valid_session
-        expect(response).to have_http_status(:ok)
-        expect(response.content_type).to eq('application/json')
-      end
-    end
-
-    context "with invalid params" do
-      it "renders a JSON response with errors for the v3_tour_medium" do
-        tour_medium = TourMedium.create! valid_attributes
-
-        put :update, params: {id: tour_medium.to_param, v3_tour_medium: invalid_attributes}, session: valid_session
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq('application/json')
+      it 'returns all TourMedium objects to tenant admin' do
+        create_list(:tour_medium, 4)
+        user = create(:user, super: false)
+        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        signed_cookie(user)
+        get :index, params: { tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(TourMedium.count)
       end
     end
   end
 
-  describe "DELETE #destroy" do
-    it "destroys the requested v3_tour_medium" do
-      tour_medium = TourMedium.create! valid_attributes
+  describe 'GET #show' do
+    context 'unauthenticated' do
+      it 'returns a success response but empty TourMedium objects' do
+
+        tour_medium = create(:tour_medium, tour: create(:tour, published: false))
+        get :show, params: { id: tour_medium.id, tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(200)
+        expect(relationships[:medium][:data]).to be nil
+        expect(relationships[:tour][:data]).to be nil
+        expect(tour_medium.tour).not_to be nil
+        expect(tour_medium.medium).not_to be nil
+        expect(TourMedium.count).to be > 0
+      end
+
+      # it 'returns a success response but empty TourMedium objects' do
+      #   tour_medium = create(:tour_medium, tour: create(:tour, published: true))
+      #   get :index, params: { id: tour_medium.id, tenant: Apartment::Tenant.current }
+      #   expect(response.status).to eq(200)
+      #   expect(json.count).to eq(1)
+      # end
+    end
+
+    context 'authenticated unauthorized' do
+
+      it 'returns empty TourMedium objects, not current tenant admin, non tour author' do
+        original_tenant = Apartment::Tenant.current
+        tour_medium = create(:tour_medium, tour: create(:tour, published: false))
+        tour_set = create(:tour_set)
+        user = create(:user, super: false)
+        user.tour_sets << tour_set
+        signed_cookie(user)
+        Apartment::Tenant.switch! original_tenant
+        get :show, params: { id: tour_medium.id, tenant: original_tenant }
+        expect(response.status).to eq(200)
+        expect(relationships[:medium][:data]).to be nil
+        expect(relationships[:tour][:data]).to be nil
+        expect(tour_medium.tour).not_to be nil
+        expect(tour_medium.medium).not_to be nil
+        expect(TourMedium.count).to be > 0
+      end
+
+      it 'returns empty TourMedium objects, not current tenant admin, non tour author' do
+        original_tenant = Apartment::Tenant.current
+        tour_medium = create(:tour_medium, tour: create(:tour, published: false))
+        tour_set = create(:tour_set)
+        Apartment::Tenant.switch! tour_set.subdir
+        user = create(:user, super: false)
+        user.tours << create(:tour)
+        signed_cookie(user)
+        Apartment::Tenant.switch! original_tenant
+        get :show, params: { id: tour_medium.id, tenant: original_tenant }
+        expect(response.status).to eq(200)
+        expect(relationships[:medium][:data]).to be nil
+        expect(relationships[:tour][:data]).to be nil
+        expect(TourMedium.count).to be > 0
+      end
+    end
+
+    context 'authenticated and authorized' do
+      it 'returns all TourMedium objects to super' do
+        create_list(:tour_medium, 4)
+        user = create(:user, super: true)
+        signed_cookie(user)
+        get :show, params: { id: TourMedium.last.id, tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(TourMedium.count)
+      end
+    end
+  end
+
+  describe 'POST #create' do
+    it 'returns does not create a new TourMedium' do
       expect {
-        delete :destroy, params: {id: tour_medium.to_param}, session: valid_session
-      }.to change(TourMedium, :count).by(-1)
+        post :create, params: { tenant: Apartment::Tenant.current }
+      }.to change(TourMedium, :count).by(0)
+    end
+
+    it 'returns 401' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      post :create, params: { data: { type: 'tour_media', attributes: { tour_id: 1, medium_id: 1, position: 1 } }, tenant: Apartment::Tenant.current }
+      expect(response.status).to eq(401)
     end
   end
 
+  describe 'PUT #update' do
+    context 'with valid params' do
+  #     let(:new_attributes) {
+  #       skip('Add a hash of attributes valid for your model')
+  #     }
+
+  #     it 'updates the requested v3_tour_medium' do
+  #       tour_medium = TourMedium.create! valid_attributes
+  #       put :update, params: {id: tour_medium.to_param, v3_tour_medium: new_attributes}, session: valid_session
+  #       tour_medium.reload
+  #       skip('Add assertions for updated state')
+  #     end
+
+      it 'renders a JSON response with the v3_tour_medium' do
+        tour_medium = create(:tour_medium, position: 1)
+        expect(tour_medium.position).not_to eq(100)
+        user = create(:user, super: true)
+        signed_cookie(user)
+        put :update, params: { id: tour_medium.id, data: { type: 'tour_media', attributes: { tour_id: tour_medium.tour.id, medium_id: tour_medium.medium.id, position: 100 } }, tenant: Apartment::Tenant.current }
+        expect(response).to have_http_status(:ok)
+        expect(attributes[:position]).to eq(100)
+        expect(TourMedium.find(tour_medium.id).position).to eq(100)
+      end
+    end
+
+  #   context 'with invalid params' do
+  #     it 'renders a JSON response with errors for the v3_tour_medium' do
+  #       tour_medium = TourMedium.create! valid_attributes
+
+  #       put :update, params: {id: tour_medium.to_param, v3_tour_medium: invalid_attributes}, session: valid_session
+  #       expect(response).to have_http_status(:unprocessable_entity)
+  #       expect(response.content_type).to eq('application/json')
+  #     end
+  #   end
+  end
+
+  describe 'DELETE #destroy' do
+    it 'does not destroy the requested v3_tour_medium' do
+      tour_medium = create(:tour_medium)
+      user = create(:user, super: true)
+      signed_cookie(user)
+      expect {
+        delete :destroy, params: { id: tour_medium.to_param, tenant: Apartment::Tenant.current }
+      }.to change(TourMedium, :count).by(0)
+    end
+
+    it 'responds with 405' do
+      tour_medium = create(:tour_medium)
+      user = create(:user, super: true)
+      signed_cookie(user)
+      delete :destroy, params: { id: tour_medium.to_param, tenant: Apartment::Tenant.current }
+      expect(response.status).to eq(405)
+    end
+  end
 end

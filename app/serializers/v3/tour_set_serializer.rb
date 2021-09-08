@@ -7,6 +7,11 @@ class V3::TourSetSerializer < ActiveModel::Serializer
   attributes :id, :name, :subdir, :published_tours, :mapable_tours, :logo_url, :logo
 
   def admins
-    object.admins if current_user.super || current_user.current_tenant_admin?
+    begin
+      object.admins if current_user&.super || current_user&.current_tenant_admin?
+    rescue NameError
+      # This is a problem when using the serializer directly
+      nil
+    end
   end
 end

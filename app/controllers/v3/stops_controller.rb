@@ -2,7 +2,7 @@
 
 # /app/controllers/v3/stops_controller.rb
 # module V3
-class V3::StopsController < V3Controller
+class V3::StopsController < V3::TourRelationsController
   # GET /stops
   def index
     @records = if current_user.current_tenant_admin?
@@ -15,14 +15,9 @@ class V3::StopsController < V3Controller
     render json: @records
   end
 
-  # GET /stops/1
-  def show
-    render json: @record
-  end
-
   # POST /stops
   def create
-    if @allowed
+    if crud_allowed?
       @record = Stop.new(stop_params)
       if @record.save
         render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
@@ -34,12 +29,22 @@ class V3::StopsController < V3Controller
 
   # PATCH/PUT /stops/1
   def update
-    if @allowed
+    if crud_allowed?
       if @record&.update(stop_params)
         render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
       end
     else
       head 401
+    end
+  end
+
+  def destroy
+    if !crud_allowed?
+      head 401
+    elsif crud_allowed? && @record.orphaned
+      @record.destroy
+    elsif crud_allowed? && !@record.orphaned
+      head 405
     end
   end
 
@@ -59,14 +64,9 @@ class V3::StopsController < V3Controller
             )
       end
 
-      # Use callbacks to share common setup or constraints between actions.
-
+      # Callbacks
       def set_record
         _record = Stop.find_by(id: params[:id])
         @record = _record&.published || @allowed ? _record : Stop.new(id: params[:id])
-      end
-
-      def allowed?
-        @allowed = current_user&.current_tenant_admin? || current_user.tours&.any? { |tour| Tour.all.include?(tour) }
       end
 end

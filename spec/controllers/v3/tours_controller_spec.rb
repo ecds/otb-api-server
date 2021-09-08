@@ -68,11 +68,11 @@ RSpec.describe V3::ToursController, type: :controller do
 
   describe 'GET #show' do
     it 'returns a 200 response' do
-      tour = create(:tour)
-      tour.update(published: true)
+      tour = create(:tour, published: true, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, rand(3..5)))
       get :show, params: { tenant: tour.tenant, id: tour.id }
       expect(response.status).to eq(200)
       expect(attributes[:title]).to eq(tour.title)
+      expect(attributes[:est_time]).to eq('About 2 hours bicycling')
     end
 
     # This is for when an authenticated person is viewing an unpublished tour.
@@ -91,7 +91,7 @@ RSpec.describe V3::ToursController, type: :controller do
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
       tour = create(:tour, published: false)
-      tour.update(published: false)
+      tour.update(published: false, media: create_list(:medium, 3))
       user = create(:user)
       user.tour_sets = []
       user.tours << tour
@@ -102,7 +102,7 @@ RSpec.describe V3::ToursController, type: :controller do
     end
 
     it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
-      tour = create(:tour, published: false)
+      tour = create(:tour, published: false, medium: create(:medium))
       tour.update(published: false)
       user = create(:user)
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)

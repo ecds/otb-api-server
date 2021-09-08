@@ -1,0 +1,16 @@
+{
+  "destination_addresses": ["Lexington, MA, USA", "Concord, MA, USA"],
+  "origin_addresses": ["Boston, MA, USA", "Charlestown, Boston, MA, USA"],
+  "rows":
+    [
+      {
+        "elements":
+          [
+            {
+              "status": "ZERO_RESULTS"
+            }
+          ]
+      }
+    ],
+  "status": "OK"
+}

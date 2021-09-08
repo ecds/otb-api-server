@@ -48,4 +48,10 @@ Rails.application.configure do
   # This is needed for the tests to request tests to pass when subdomain is set.
   config.action_dispatch.tld_length = 0
 
+  # config.active_storage.service = :test
+  # config.consider_all_requests_local = true
+  # config.action_controller.perform_caching = false
+  # config.host = 'localhost:3030'
+  # config.action_controller.default_url_options = { host: 'localhost:3030' }
+
 end

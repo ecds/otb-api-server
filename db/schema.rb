@@ -12,12 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2021_09_02_164843) do
 
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "pgcrypto"
-  enable_extension "plpgsql"
-  enable_extension "uuid-ossp"
-
-  create_table "active_storage_attachments", force: :cascade do |t|
+  create_table "active_storage_attachments", charset: "utf8", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
     t.bigint "record_id", null: false
@@ -27,7 +22,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
-  create_table "active_storage_blobs", force: :cascade do |t|
+  create_table "active_storage_blobs", charset: "utf8", force: :cascade do |t|
     t.string "key", null: false
     t.string "filename", null: false
     t.string "content_type"
@@ -39,13 +34,13 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
-  create_table "active_storage_variant_records", force: :cascade do |t|
+  create_table "active_storage_variant_records", charset: "utf8", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "ecds_rails_auth_engine_logins", force: :cascade do |t|
+  create_table "ecds_rails_auth_engine_logins", charset: "utf8", force: :cascade do |t|
     t.string "who"
     t.string "token"
     t.string "provider"
@@ -55,7 +50,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["user_id"], name: "index_ecds_rails_auth_engine_logins_on_user_id"
   end
 
-  create_table "flat_pages", force: :cascade do |t|
+  create_table "flat_pages", charset: "utf8", force: :cascade do |t|
     t.string "title"
     t.text "body"
     t.datetime "created_at", null: false
@@ -63,7 +58,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.integer "position"
   end
 
-  create_table "logins", force: :cascade do |t|
+  create_table "logins", charset: "utf8", force: :cascade do |t|
     t.string "identification", null: false
     t.string "password_digest"
     t.string "oauth2_token", null: false
@@ -77,14 +72,14 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["user_id"], name: "index_logins_on_user_id"
   end
 
-  create_table "map_icons", force: :cascade do |t|
+  create_table "map_icons", charset: "utf8", force: :cascade do |t|
     t.text "base_sixty_four"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "filename"
   end
 
-  create_table "map_overlays", force: :cascade do |t|
+  create_table "map_overlays", charset: "utf8", force: :cascade do |t|
     t.decimal "south", precision: 10, scale: 6
     t.decimal "north", precision: 10, scale: 6
     t.decimal "east", precision: 10, scale: 6
@@ -99,7 +94,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_map_overlays_on_tour_id"
   end
 
-  create_table "media", force: :cascade do |t|
+  create_table "media", charset: "utf8", force: :cascade do |t|
     t.string "title"
     t.text "caption"
     t.string "original_image"
@@ -123,18 +118,18 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.integer "lqip_width"
   end
 
-  create_table "modes", force: :cascade do |t|
+  create_table "modes", charset: "utf8", force: :cascade do |t|
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "icon"
   end
 
-  create_table "roles", force: :cascade do |t|
+  create_table "roles", charset: "utf8", force: :cascade do |t|
     t.string "title"
   end
 
-  create_table "slugs", force: :cascade do |t|
+  create_table "slugs", charset: "utf8", force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
     t.datetime "created_at", null: false
@@ -142,7 +137,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_slugs_on_tour_id"
   end
 
-  create_table "stop_media", force: :cascade do |t|
+  create_table "stop_media", charset: "utf8", force: :cascade do |t|
     t.bigint "stop_id"
     t.bigint "medium_id"
     t.datetime "created_at", null: false
@@ -152,7 +147,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["stop_id"], name: "index_stop_media_on_stop_id"
   end
 
-  create_table "stop_slugs", force: :cascade do |t|
+  create_table "stop_slugs", charset: "utf8", force: :cascade do |t|
     t.string "slug"
     t.bigint "stop_id"
     t.datetime "created_at", null: false
@@ -162,7 +157,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_stop_slugs_on_tour_id"
   end
 
-  create_table "stops", force: :cascade do |t|
+  create_table "stops", charset: "utf8", force: :cascade do |t|
     t.string "title"
     t.text "description"
     t.string "meta_description", limit: 500
@@ -186,7 +181,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["medium_id"], name: "index_stops_on_medium_id"
   end
 
-  create_table "taggings", id: :serial, force: :cascade do |t|
+  create_table "taggings", id: { type: :bigint, unsigned: true }, charset: "utf8", force: :cascade do |t|
     t.integer "tag_id"
     t.string "taggable_type"
     t.integer "taggable_id"
@@ -195,6 +190,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.string "context", limit: 128
     t.datetime "created_at"
     t.index ["context"], name: "index_taggings_on_context"
+    t.index ["id"], name: "id", unique: true
     t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
     t.index ["taggable_id", "taggable_type", "context"], name: "index_taggings_on_taggable_id_and_taggable_type_and_context"
@@ -205,26 +201,26 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tagger_id"], name: "index_taggings_on_tagger_id"
   end
 
-  create_table "themes", force: :cascade do |t|
+  create_table "themes", charset: "utf8", force: :cascade do |t|
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "tour_authors", force: :cascade do |t|
+  create_table "tour_authors", charset: "utf8", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "user_id"
     t.index ["tour_id"], name: "index_tour_authors_on_tour_id"
     t.index ["user_id"], name: "index_tour_authors_on_user_id"
   end
 
-  create_table "tour_collections", force: :cascade do |t|
+  create_table "tour_collections", charset: "utf8", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "tour_flat_pages", force: :cascade do |t|
+  create_table "tour_flat_pages", charset: "utf8", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "flat_page_id"
     t.integer "position"
@@ -234,7 +230,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_tour_flat_pages_on_tour_id"
   end
 
-  create_table "tour_media", force: :cascade do |t|
+  create_table "tour_media", charset: "utf8", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "medium_id"
     t.datetime "created_at", null: false
@@ -244,7 +240,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_tour_media_on_tour_id"
   end
 
-  create_table "tour_modes", force: :cascade do |t|
+  create_table "tour_modes", charset: "utf8", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "mode_id"
     t.datetime "created_at", null: false
@@ -253,7 +249,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_tour_modes_on_tour_id"
   end
 
-  create_table "tour_set_admins", force: :cascade do |t|
+  create_table "tour_set_admins", charset: "utf8", force: :cascade do |t|
     t.bigint "tour_set_id"
     t.bigint "user_id"
     t.bigint "role_id"
@@ -263,7 +259,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["user_id"], name: "index_tour_set_admins_on_user_id"
   end
 
-  create_table "tour_sets", force: :cascade do |t|
+  create_table "tour_sets", charset: "utf8", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -277,7 +273,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_tour_sets_on_tours_id"
   end
 
-  create_table "tour_stops", force: :cascade do |t|
+  create_table "tour_stops", charset: "utf8", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "stop_id"
     t.integer "position"
@@ -287,7 +283,7 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.index ["tour_id"], name: "index_tour_stops_on_tour_id"
   end
 
-  create_table "tours", force: :cascade do |t|
+  create_table "tours", charset: "utf8", force: :cascade do |t|
     t.string "title"
     t.text "description"
     t.text "article_link"
@@ -309,10 +305,11 @@ ActiveRecord::Schema.define(version: 2021_09_02_164843) do
     t.string "link_text"
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
+    t.index ["splash_image_medium_id"], name: "fk_rails_3a2d58abec"
     t.index ["theme_id"], name: "index_tours_on_theme_id"
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", charset: "utf8", force: :cascade do |t|
     t.string "display_name"
     t.bigint "login_id"
     t.datetime "created_at", null: false

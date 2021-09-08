@@ -79,6 +79,8 @@ RSpec.describe V3::MediaController, type: :controller do
 
       it 'returns the medium when unpublished but requested is authorized' do
         medium = create(:medium)
+        medium.save
+        expect(medium.file.attached?).to be true
         user = create(:user)
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         signed_cookie(user)
@@ -86,6 +88,17 @@ RSpec.describe V3::MediaController, type: :controller do
         expect(medium.published).to be false
         expect(response.status).to eq(200)
         expect(attributes[:title]).to eq(medium.title)
+      end
+
+      it 'returns the medium that if a gif and requested is authorized' do
+        medium = create(:medium, base_sixty_four: File.read(Rails.root.join('spec/factories/images/gif_base64.txt')), filename: Faker::File.file_name(dir: '', ext: 'gif', directory_separator: ''))
+        medium.save
+        expect(medium.file.attached?).to be true
+        user = create(:user, super: true)
+        signed_cookie(user)
+        get :show, params: { tenant: Apartment::Tenant.current, id: medium.id }
+        expect(response.status).to eq(200)
+        expect(attributes[:files][:mobile]).to end_with 'gif'
       end
     end
 

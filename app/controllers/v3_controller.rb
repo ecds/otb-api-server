@@ -5,9 +5,19 @@ class V3Controller < ApplicationController
   before_action :allowed?, only: [:show, :create, :update, :destroy]
   before_action :set_record, only: [:show, :update, :destroy]
 
+  # GET /<record>/1
+  def show
+    render json: @record
+  end
+
+  # POST /v3/tour_media
+  def create
+    render json: {}, status: :unauthorized
+  end
+
   # PATCH/PUT /media/1
   def update
-    if @allowed
+    if crud_allowed?
       if @record.update(record_params)
         render json: @record
       else
@@ -19,10 +29,10 @@ class V3Controller < ApplicationController
   end
 
   def destroy
-    if @allowed
+    if crud_allowed?
       @record.destroy
     else
-      head 401
+      render json: {}, status: :unauthorized
     end
   end
 
@@ -48,6 +58,10 @@ class V3Controller < ApplicationController
   private
 
     def allowed?
-      @allowed = current_user&.current_tenant_admin? || current_user.tours.present?
+      @allowed = @record&.published || crud_allowed?
+    end
+
+    def crud_allowed?
+      current_user&.current_tenant_admin? || current_user.tours.present?
     end
 end

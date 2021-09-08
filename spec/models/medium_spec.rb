@@ -41,5 +41,40 @@ RSpec.describe Medium, type: :model do
       expect(medium.file.attached?).to be true
       expect(medium.title).to eq('Emory Center for Digital Scholarship')
     end
+
+    it 'replaces file for video' do
+      medium = create(:medium, video: 'F9ULbmCvmxY', base_sixty_four: nil, video_provider: 'youtube')
+      original_checksum = medium.file.blob.checksum
+      expect(original_checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/0.jpg')).base64digest)
+      medium.update(base_sixty_four: File.read(Rails.root.join('spec/factories/images/png_base64.txt')))
+      expect(medium.file.blob.checksum).not_to eq(original_checksum)
+      expect(medium.file.blob.checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest)
+    end
+  end
+
+
+  context 'createing images' do
+    it 'sets widths for variants' do
+      medium = create(
+        :medium,
+        filename: Faker::File.file_name(dir: '', ext: 'jpg', directory_separator: ''),
+        base_sixty_four: File.read(Rails.root.join('spec/factories/images/atl_base64.txt')),
+        video: nil
+      )
+
+      medium.save
+      expect(medium.lqip_width).not_to be nil
+    end
+
+    it 'saves a gif' do
+      medium = create(
+        :medium,
+        filename: Faker::File.file_name(dir: '', ext: 'gif', directory_separator: ''),
+        base_sixty_four: File.read(Rails.root.join('spec/factories/images/gif_base64.txt')),
+        video: nil
+      )
+
+      expect(medium.file.blob.checksum).to eq('4fqkSXu+qjQuQWCms8xBBQ==')
+    end
   end
 end

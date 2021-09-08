@@ -71,18 +71,24 @@ RSpec.configure do |config|
 
   # start the transaction strategy as examples are run
   config.around(:each) do |example|
-    # DatabaseCleaner.cleaning do
-      example.run
-    # end
+    example.run
   end
 
   config.before(:each) do
+    MiniMagick.configure do |config|
+      config.validate_on_create = false
+    end
     # Start transaction for this test
     # DatabaseCleaner.start
     # Switch into the default tenant
     Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
+
+    # Set the host for ActiveStorage urls
+    ActiveStorage::Current.host = 'http://test.host'
     # host! 'atlanta.lvh.me'
     # load Rails.root + 'db/seeds.rb'
+
+    # Stub a network requests
     stub_request(:get, 'https://placehold.it/300x300.png_1000x1000')
       .to_return(
         body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
@@ -127,7 +133,7 @@ RSpec.configure do |config|
 
     stub_request(:get, /http:\/\/test\.host\/rails\/active_storage\/.*/)
     .to_return(
-      body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
+      body: File.open(Rails.root + 'spec/factories/images/atl.png'),
       status: 200
     )
 
@@ -179,6 +185,15 @@ RSpec.configure do |config|
       )
 
     stub_request(:get, /http:\/\/127\.0\.0\.1:.*\/json\/version/).to_return(body: '{}', status: 200)
+
+    stub_request(:get, /https:\/\/maps\.googleapis\.com\/maps\/api\/.*bicycling.*/)
+      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200)
+
+    stub_request(:get, /https:\/\/maps\.googleapis\.com\/maps\/api\/.*walking.*/)
+      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200)
+
+    stub_request(:get, /https:\/\/maps\.googleapis\.com\/maps\/api\/.*driving.*/)
+      .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200)
   end
 
   config.after(:each) do

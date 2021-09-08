@@ -5,9 +5,7 @@ module V3
   class ThemesController < V3Controller
     # GET /themes
     def index
-      @records = Theme.all
-
-      render json: @records
+      render json: Theme.all
     end
 
     # GET /themes/1
@@ -17,35 +15,21 @@ module V3
 
     # POST /themes
     def create
-      @record = Theme.new(theme_params)
-
-      if @record.save
-        render json: @record, status: :created, location: @record
-      else
-        render json: serialize_errors, status: :unprocessable_entity
-      end
+      head 405
     end
 
     # PATCH/PUT /themes/1
     def update
-      if @record.update(theme_params)
-        render json: @record
-      else
-        render json: serialize_errors, status: :unprocessable_entity
-      end
+      head 405
     end
 
     # DELETE /themes/1
     def destroy
-      @record.destroy
+      head 405
     end
 
   private
     # Only allow a trusted parameter "white list" through.
-    def theme_params
-      params.fetch(:theme, {})
-    end
-
     def set_record
       @record = Theme.find(params[:id])
     end

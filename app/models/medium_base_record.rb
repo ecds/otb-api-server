@@ -11,11 +11,11 @@ class MediumBaseRecord < ApplicationRecord
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
   has_one_attached 'file'
 
-  def image_url
-    return nil unless file.attached?
+  # def image_url
+  #   return nil unless file.attached?
 
-    file.url
-  end
+  #   file.url
+  # end
 
   def tmp_file_path
     return Rails.root.join('public', 'storage', 'tmp', filename) if self.filename

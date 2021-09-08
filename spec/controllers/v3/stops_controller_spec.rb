@@ -306,7 +306,9 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
       stop_count = Stop.count
+      Stop.last.update(tours: [])
       post :destroy, params: { id: Stop.last.id, tenant: Apartment::Tenant.current }
+      Stop.last.update(tours: [])
       expect(response.status).to eq(204)
       expect(Stop.count).to eq(stop_count - 1)
     end
@@ -317,24 +319,37 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets = []
       user.update(super: true)
       signed_cookie(user)
+      Stop.first.update(tours: [])
       stop_count = Stop.count
       post :destroy, params: { id: Stop.first.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(204)
       expect(Stop.count).to eq(stop_count - 1)
     end
 
-    it 'return 204 and one less tour when authenciated by tour author' do
+    it 'return 204 and one less stop when authenciated by tour author and Stop does not belong to a Tour' do
       tour = create(:tour)
       user = create(:user)
       user.update(super: false)
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
-      new_title = Faker::Name.unique.name
+      Stop.last.update(tours: [])
       stop_count = Stop.count
       post :destroy, params: { id: Stop.last.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(204)
       expect(Stop.count).to eq(stop_count - 1)
+    end
+
+    it 'return 405 and does not delete Stop when Stop belongs to a Tour and requested by super' do
+      tour = create(:tour)
+      user = create(:user)
+      user.update(super: true)
+      Stop.last.tours << tour if Stop.last.tours.empty?
+      signed_cookie(user)
+      stop_count = Stop.count
+      post :destroy, params: { id: Stop.last.id, tenant: Apartment::Tenant.current }
+      expect(response.status).to eq(405)
+      expect(Stop.count).to eq(stop_count)
     end
   end
 end

@@ -49,14 +49,6 @@ class Stop < ApplicationRecord
     nil
   end
 
-  def splash_height
-    splash.nil? ? nil : 700 #splash.desktop_height
-  end
-
-  def splash_width
-    splash.nil? ? nil : 700 #splash.desktop_width
-  end
-
   def insecure_splash
     # if !stop_media.empty?
     #   return medium.nil? ? stop_media.order(:position).first.medium.insecure : medium.insecure

@@ -8,6 +8,8 @@ FactoryBot.define do
     published { Faker::Boolean.boolean(true_ratio: 0.5) }
     theme { Theme.create! }
     mode { Mode.create! }
+    link_address { Faker::Internet.url }
+    is_geo { true }
 
     factory :tour_with_stops do
       transient do

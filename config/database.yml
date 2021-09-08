@@ -9,11 +9,13 @@ default: &default
   password: <%= ENV['DB_PASSWORD' || 'password'] %>
   database: <%= ENV['DB_NAME'] || 'otb' %>
 
-# mysql: &mysql
-#   database: <%= Rails.application.credentials.dig(:dbTest, :mysql, :db) %>
-#   username: <%= Rails.application.credentials.dig(:dbTest, :mysql, :user) %>
-#   password: <%= Rails.application.credentials.dig(:dbTest, :mysql, :pw) %>
-#   host: <%= Rails.application.credentials.dig(:dbTest, :mysql, :host) %>
+mysql: &mysql
+  <<: *default
+  adapter: mysql2
+  database: public
+  username: <%= Rails.application.credentials.dig(:dbTest, :mysql, :user) %>
+  password: <%= Rails.application.credentials.dig(:dbTest, :mysql, :pw) %>
+  host: <%= Rails.application.credentials.dig(:dbTest, :mysql, :host) %>
 
 
 development:

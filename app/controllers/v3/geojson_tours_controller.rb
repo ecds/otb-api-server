@@ -7,7 +7,11 @@ module V3
   class GeojsonToursController < ApplicationController
     def show
       @tour = Tour.find(params[:id])
-      render json: { type: 'FeatureCollection', features: @tour.stops.map { |s| feature(s) } }.to_json
+      if @tour.published
+        render json: { type: 'FeatureCollection', features: @tour.stops.map { |s| feature(s) } }.to_json
+      else
+        head 401
+      end
     end
 
     private

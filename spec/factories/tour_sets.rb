@@ -5,5 +5,7 @@ FactoryBot.define do
   factory :tour_set do
     # This is to really make sure the name of the tenant is unique.
     name { Faker::Name.unique.name }
+    base_sixty_four { nil }
+    logo_title { nil }
   end
 end

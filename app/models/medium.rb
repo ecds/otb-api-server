@@ -4,6 +4,7 @@
 class Medium < MediumBaseRecord
   include VideoProps
   include Rails.application.routes.url_helpers
+
   before_create :props
   before_save :add_widths
   before_update :replace_video
@@ -40,46 +41,26 @@ class Medium < MediumBaseRecord
 
   def files
     return nil if !self.file.attached?
-    begin
-      if file.content_type.include?('gif')
-        height = ActiveStorage::Analyzer::ImageAnalyzer.new(file).metadata[:height]
-        return {
-          lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-          mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-          tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-          desktop: file.variant(resize_to_limit: [750, 750], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
-        }
-      end
-      {
-        lqip: file.variant(resize_to_limit: [50, 50]).processed.url,
-        mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
-        tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
-        desktop: file.variant(resize_to_limit: [750, 750]).processed.url
+
+    if file.content_type.include?('gif')
+      height = ActiveStorage::Analyzer::ImageAnalyzer.new(file).metadata[:height]
+      return {
+        lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+        mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+        tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
+        desktop: file.variant(resize_to_limit: [750, 750], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
       }
-    rescue ActiveStorage::FileNotFoundError => error
-      { mobile: nil, tablet: nil, desktop: nil }
     end
+    {
+      lqip: file.variant(resize_to_limit: [5, 5]).processed.url,
+      mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
+      tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
+      desktop: file.variant(resize_to_limit: [750, 750]).processed.url
+    }
   end
 
   def orphaned
     tours.empty? && stops.empty?
-  end
-
-  def srcset
-    nil
-    # "#{ENV['BASE_URL']}#{self.mobile} #{mobile_width}w, \
-    # #{ENV['BASE_URL']}#{self.tablet} #{tablet_width}w, \
-    # #{ENV['BASE_URL']}#{self.desktop} #{desktop_width}w"
-  end
-
-  def srcset_sizes
-    nil
-    # "(max-width: 680px) #{mobile_width}px, (max-width: 880px) #{tablet_width}px, #{desktop_width}px"
-  end
-
-  def insecure
-    nil
-    # "#{ENV['INSECURE_IMAGE_BASE_URL']}#{self.desktop}"
   end
 
   def replace_video

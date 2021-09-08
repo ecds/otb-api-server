@@ -3,17 +3,17 @@
 # app/controllers/v3/tour_modes_controller.rb
 module V3
   class TourModesController < ApplicationController
-    # GET /tour_sets
-    def index
-      @tour_modes = TourMode.all
+  #   # GET /tour_sets
+  #   def index
+  #     @tour_modes = TourMode.all
 
-      render json: @tour_modes
-    end
+  #     render json: @tour_modes
+  #   end
 
-    # GET /v3/tour_media/1
-    def show
-      tour_mode = TourMode.find(params[:id])
-      render json: tour_mode
-    end
-  end
+  #   # GET /v3/tour_media/1
+  #   def show
+  #     tour_mode = TourMode.find(params[:id])
+  #     render json: tour_mode
+  #   end
+  # end
 end

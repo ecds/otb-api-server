@@ -18,4 +18,8 @@ class TourMedium < ApplicationRecord
       self.medium.tours.length == 1 ? self.medium.destroy! : nil
     end
   end
+
+  def published
+    tour&.published
+  end
 end

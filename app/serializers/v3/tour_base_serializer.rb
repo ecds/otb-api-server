@@ -20,7 +20,6 @@ class V3::TourBaseSerializer < ActiveModel::Serializer
              :stop_count,
              :map_type,
              :splash,
-             :insecure_splash,
              :use_directions,
              :default_lng,
              :stop_count,

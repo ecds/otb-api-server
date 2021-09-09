@@ -84,13 +84,6 @@ class Tour < ApplicationRecord
     nil
   end
 
-  def insecure_splash
-    # if !tour_media.empty?
-    #   return medium.nil? ? tour_media.order(:position).first.medium.insecure : medium.insecure
-    # end
-    nil
-  end
-
   def stop_count
     self.stops.count
   end

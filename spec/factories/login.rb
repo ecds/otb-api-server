@@ -7,5 +7,7 @@ require 'jwt'
 FactoryBot.define do
   factory :login, class: EcdsRailsAuthEngine::Login do
     token { JWT.encode(Faker::Beer.style, Faker::Address.zip, 'HS256') }
+    provider { Faker::Internet.domain_name }
+    user_id { nil }
   end
 end

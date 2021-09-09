@@ -49,17 +49,6 @@ class Stop < ApplicationRecord
     nil
   end
 
-  def insecure_splash
-    # if !stop_media.empty?
-    #   return medium.nil? ? stop_media.order(:position).first.medium.insecure : medium.insecure
-    # end
-    nil
-  end
-
-  def is_published
-    tours.published.present?
-  end
-
   def orphaned
     tours.empty?
   end

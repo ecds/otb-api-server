@@ -22,6 +22,10 @@ class MediumBaseRecord < ApplicationRecord
     nil
   end
 
+  def original_image_url
+    file.url
+  end
+
   #
   # Create and attach file from Base64 string.
   #

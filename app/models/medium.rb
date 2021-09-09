@@ -35,10 +35,6 @@ class Medium < MediumBaseRecord
     tours.any? { |tour| tour.published } || stops.any? { |stop| stop.published }
   end
 
-  def original_image_url
-    file.url
-  end
-
   def files
     return nil if !self.file.attached?
 

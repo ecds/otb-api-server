@@ -9,7 +9,13 @@ class MapOverlay < MediumBaseRecord
   belongs_to :tour, optional: true
   belongs_to :stop, optional: true
 
+  def published
+    tour.published
+  end
+
   def set_initial_bounds
+    return if tour&.bounds.nil?
+
     if tour
       self.south = self.tour.bounds[:south]
       self.north = self.tour.bounds[:north]

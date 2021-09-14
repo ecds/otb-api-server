@@ -4,6 +4,10 @@
 # module V3
 class V3::TourRelationsController < V3Controller
 
+  def destroy
+    head 405
+  end
+
   def allowed?
     set_record if @record.nil? && params[:id].present?
     @allowed = @record&.published || crud_allowed?

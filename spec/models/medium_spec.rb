@@ -50,6 +50,11 @@ RSpec.describe Medium, type: :model do
       expect(medium.file.blob.checksum).not_to eq(original_checksum)
       expect(medium.file.blob.checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest)
     end
+
+    it 'skips video_props when provider in nil' do
+      medium = create(:medium, video: 'ACod3', base_sixty_four: nil)
+      expect(medium.file.attached?).to be false
+    end
   end
 
 

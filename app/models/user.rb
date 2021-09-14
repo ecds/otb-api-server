@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   has_many :tour_authors
   has_many :tours, through: :tour_authors
 
+  validates :email, presence: true
+
   # scope :search, -> (search) { joins(:login).where("users.display_name ILIKE '%#{search}%' OR logins.identification ILIKE '%#{search}%'")}
 
   #

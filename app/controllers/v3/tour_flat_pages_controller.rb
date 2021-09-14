@@ -1,38 +1,40 @@
 # frozen_string_literal: true
 
+# /app/controllers/v3/tour_stops_controller.rb
 class V3::TourFlatPagesController < V3Controller
-  # GET /v3/tour_flat_pages
+  # GET /stops
   def index
-    @records = TourFlatPage.all
+    @tour_flat_pages = TourFlatPage.all
 
-    render json: @records
-  end
-
-  # GET /v3/tour_flat_pages/1
-  def show
-    render json: @record
-  end
-
-  # POST /v3/tour_flat_pages
-  def create
-    if @allowed
-      @record = TourFlatPage.new(tour_flat_page_params)
-
-      if @record.save
-        render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@record.id}"
-      else
-        render json: serialize_errors, status: :unprocessable_entity
-      end
-    else
-      head 401
+    unless current_user&.current_tenant_admin? || current_user.tours.present?
+      @tour_flat_pages = @tour_flat_pages.reject { |tour_flat_page| !tour_flat_page.tour.published }
     end
+
+    render json: @tour_flat_pages
   end
 
-  # PATCH/PUT /v3/tour_flat_pages/1
+  # GET /stops/1
+  def show
+    if @record&.tour.published || allowed?
+      render json: @record
+    else
+      render json: { data: {} }
+    end
+    # render json: { data: {} } if @record.nil?
+    # render json: @record, include: ['stop']
+  end
+
+  # POST /stops
+  def create
+    # Not created via the API
+    head 405
+  end
+
+  # PATCH/PUT /stops/1
   def update
     if @allowed
-      if @record.update(tour_flat_page_params)
-        render json: @record
+      if @record.update(tour_stop_params)
+        render json: @record, location: "/#{Apartment::Tenant.current}/tour_stops/#{@record.id}"
       else
         render json: serialize_errors, status: :unprocessable_entity
       end
@@ -41,27 +43,30 @@ class V3::TourFlatPagesController < V3Controller
     end
   end
 
-  # DELETE /v3/tour_flat_pages/1
+  # DELETE /stops/1
   def destroy
-    if @allowed
-      @record.destroy
-    else
-      head 401
-    end
+    # Not deleted via the API
+    head 405
   end
 
-  private
-    # Only allow a trusted parameter "white list" through.
-    def tour_flat_page_params
-      ActiveModelSerializers::Deserialization
-          .jsonapi_parse(
-            params, only: [
-                  :tour, :flat_page, :position
-              ]
-          )
-    end
+    private
 
-    def set_record
-      @record = TourFlatPage.find(params[:id])
-    end
+      # Only allow a trusted parameter "white list" through.
+      def tour_stop_params
+        ActiveModelSerializers::Deserialization
+            .jsonapi_parse(
+              params, only: [
+                    :stop, :tour, :position
+                ]
+            )
+      end
+
+      def set_record
+        @record = TourFlatPage.find(params[:id])
+      end
+
+      def allowed?
+        @allowed = current_user&.current_tenant_admin? || current_user.tours&.any? { |tour| Tour.all.include?(tour) }
+        return @allowed
+      end
 end

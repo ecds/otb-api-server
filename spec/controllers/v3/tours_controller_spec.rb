@@ -64,6 +64,27 @@ RSpec.describe V3::ToursController, type: :controller do
       expect(response.status).to eq(200)
       expect(attributes[:title]).to eq(tour.title)
     end
+
+    it 'returns all Tour objects when requested by tenant admin' do
+      create_list(:tour, rand(4..5))
+      user = create(:user, super: false)
+      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      signed_cookie(user)
+      get :index, params: { tenant: Apartment::Tenant.current }
+      expect(json.count).to eq(Tour.count)
+    end
+
+    it 'returns only tours where requester is an author' do
+      Tour.first.update(published: true)
+      new_tours = create_list(:tour, rand(4..6), published: false)
+      user = create(:user, super: false)
+      user.tour_sets = []
+      user.tours << [Tour.published.first, new_tours.first, new_tours.last]
+      signed_cookie(user)
+      get :index, params: { tenant: Apartment::Tenant.current }
+      expect(json.count).to eq((user.tours + Tour.published).uniq.count)
+      expect(json.count).to be < Tour.count
+    end
   end
 
   describe 'GET #show' do
@@ -111,6 +132,16 @@ RSpec.describe V3::ToursController, type: :controller do
       expect(response.status).to eq(200)
       expect(attributes[:title]).to eq(tour.title)
     end
+
+    it 'retuns a tour with center lat/lng based on request' do
+      request.env['ipinfo'] = MockIpinfo.new
+      tour = create(:tour, stops: [])
+      user = create(:user, super: true)
+      signed_cookie(user)
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.id }
+      expect(attributes[:bounds][:centerLat]).not_to eq(33.75432)
+      expect(attributes[:bounds][:centerLng]).not_to eq(-84.38979)
+    end
   end
 
   describe 'POST #create' do
@@ -149,6 +180,16 @@ RSpec.describe V3::ToursController, type: :controller do
         post :create, params: { data: { type: 'tours', attributes: { title: 'Burrito Tour' } }, tenant: Apartment::Tenant.current }
         expect(response.status).to eq(201)
         expect(Tour.count).to eq(original_tour_count + 1)
+      end
+
+      it 'returns 422 when invalid attributes' do
+        user = create(:user, super: true)
+        signed_cookie(user)
+        original_tour_count = Tour.count
+        post :create, params: { data: { type: 'tours', attributes: { title: nil } }, tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(422)
+        expect(Tour.count).to eq(original_tour_count)
+        expect(errors).to include('Title can\'t be blank')
       end
     end
   end
@@ -271,6 +312,17 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(Tour.find(tour.id).stops).not_to include(Stop.find(stop[:id]))
         expect(relationships[:stops][:data].count).to eq(original_stop_count - 1)
         expect(relationships[:tour_stops][:data].count).to eq(original_tour_stop_count - 1)
+      end
+
+      it 'returns 422 when title in nil' do
+        tour = create(:tour)
+        serialized_tour = JSON.parse(ActiveModelSerializers::Adapter::JsonApi.new(V3::TourSerializer.new(tour)).to_json).with_indifferent_access
+        serialized_tour[:data][:attributes][:title] = nil
+        user = create(:user, super: true)
+        signed_cookie(user)
+        post :update, params: { id: tour.id, data: serialized_tour[:data], tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(422)
+        expect(errors).to include('Title can\'t be blank')
       end
     end
   end

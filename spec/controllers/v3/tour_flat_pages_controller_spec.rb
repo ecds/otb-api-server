@@ -2,14 +2,14 @@
 
 require 'rails_helper'
 
-RSpec.describe V3::TourStopsController, type: :controller do
-  def data(tour, stop, position = 1)
+RSpec.describe V3::TourFlatPagesController, type: :controller do
+  def data(tour, flat_page, position = 1)
     {
-      type: 'tour_stops',
+      type: 'tour_flat_pages',
       attributes: { position: position },
       relationships: {
         tour: { data: { type: 'tours', id: tour.id } },
-        stop: { data: { type: 'stops', id: stop.id } }
+        flat_page: { data: { type: 'flat_pages', id: flat_page.id } }
       }
     }
   end
@@ -22,187 +22,164 @@ RSpec.describe V3::TourStopsController, type: :controller do
       expect(response.status).to eq(200)
     end
 
-    it 'returns a 200 response and only tour stops that are part of a published tour' do
-      create_list(:tour_with_stops, 5, theme: create(:theme), mode: create(:mode))
+    it 'returns a 200 response and only tour flat_pages that are part of a published tour' do
+      create_list(:tour_with_flat_pages, 5, theme: create(:theme), mode: create(:mode))
       Tour.first.update(published: true) if Tour.published.empty?
       Tour.last.update(published: false) if Tour.published.count == Tour.count
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to eq(200)
-      expect(json.count).to eq(Tour.published.map { |tour| tour.tour_stops.count }.sum)
-    end
+      expect(json.count).to eq(Tour.published.map { |tour| tour.tour_flat_pages.count }.sum)
+     end
 
     it 'returns a 200 response when requeted by slug' do
-      tour = create(:tour_with_stops)
+      tour = create(:tour_with_flat_pages)
       tour.update(published: true)
-      get :index, params: { tenant: Apartment::Tenant.current, slug: tour.tour_stops.first.stop.slug, tour: tour.id }
+      get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to eq(200)
-      expect(included.first[:attributes][:title]).to eq(tour.tour_stops.first.stop.title)
+      expect(json.count).to eq(FlatPage.count)
     end
 
     it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
-      tour = create(:tour_with_stops, published: false)
+      tour = create(:tour_with_flat_pages, published: false)
       tour.update(published: false)
       user = create(:user)
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
-      get :index, params: { tenant: Apartment::Tenant.current, slug: tour.tour_stops.first.stop.slug, tour: tour.id }
+      get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to eq(200)
-      expect(included.first[:attributes][:title]).to eq(tour.tour_stops.first.stop.title)
+      expect(json.count).to eq(FlatPage.count)
     end
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
-      tour = create(:tour_with_stops, published: false)
+      tour = create(:tour_with_flat_pages, published: false)
       tour.update(published: false)
       user = create(:user)
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
-      get :index, params: { tenant: Apartment::Tenant.current, slug: tour.tour_stops.first.stop.slug, tour: tour.id }
-      expect(response.status).to eq(200)
-      expect(included.first[:attributes][:title]).to eq(tour.tour_stops.first.stop.title)
-    end
-
-    it 'returns empty TourStop when `fastboo` in params' do
-      create(:tour_with_stops, published: true)
-      get :index, params: { tenant: Apartment::Tenant.current, fastboot: 'true' }
-      expect(response.status).to eq(200)
-      expect(json[:id]).to eq(0)
-    end
-
-    it 'returns empty json when unauthenticated but tour is not published' do
-      tour = create(:tour_with_stops, published: false)
-      get :index, params: { tenant: Apartment::Tenant.current, slug: tour.tour_stops.first.stop.slug, tour: tour.id }
-      expect(json).to be nil
-    end
-
-    it 'returns all TourStops when requested by tenant admin' do
-      create_list(:tour_with_stops, rand(4..7))
-      user = create(:user, super: false)
-      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
-      signed_cookie(user)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(json.count).to eq(TourStop.count)
+      expect(response.status).to eq(200)
+      expect(json.count).to eq(FlatPage.count)
     end
   end
 
   describe 'GET #show' do
     it 'returns a 200 response' do
-      tours = create(:tour_with_stops)
-      tour = Tour.last
+      tour = create(:tour_with_flat_pages)
       tour.update(published: true)
-      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_stops.last.id }
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
       expect(response.status).to eq(200)
       expect(relationships[:tour][:data][:id]).to eq(tour.id.to_s)
     end
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
-      tour = create(:tour_with_stops)
+      tour = create(:tour_with_flat_pages)
       tour.update(published: false)
       user = create(:user)
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
-      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_stops.last.id }
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
       expect(response.status).to eq(200)
       expect(relationships[:tour][:data][:id]).to eq(tour.id.to_s)
     end
 
     it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
-      tour = create(:tour_with_stops)
+      tour = create(:tour_with_flat_pages)
       tour.update(published: false)
       user = create(:user)
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
-      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_stops.last.id }
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
       expect(response.status).to eq(200)
       expect(relationships[:tour][:data][:id]).to eq(tour.id.to_s)
     end
 
     it 'returns a 200 response and empty json when tour is unpublished and request is not authenticated' do
-      tour = create(:tour_with_stops)
+      tour = create(:tour_with_flat_pages)
       tour.update(published: false)
-      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_stops.last.id }
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
       expect(response.status).to eq(200)
       expect(json).to be_empty
     end
 
     it 'returns a 200 response and empty json when tour is unpublished and request is authenticated by someone who is nither a tenant admin or tour author' do
-      tour = create(:tour_with_stops)
+      tour = create(:tour_with_flat_pages)
       tour.update(published: false)
       user = create(:user)
       user.tours = []
       user.tour_sets = []
       signed_cookie(user)
-      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_stops.last.id }
+      get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
       expect(response.status).to eq(200)
       expect(json).to be_empty
     end
   end
 
-  # TourStop objects are NOT created via tha API. Every test should return 401
+  # TourFlatPage objects are NOT created via tha API. Every test should return 401
   describe 'POST #create' do
     context 'with valid params' do
       it 'return 405 when unauthenciated' do
         tour = create(:tour)
-        stop = create(:stop)
-        post :create, params: { data: data(tour, stop), tenant: TourSet.first.subdir }
+        flat_page = create(:flat_page)
+        post :create, params: { data: data(tour, flat_page), tenant: TourSet.first.subdir }
         expect(response.status).to eq(405)
       end
 
       it 'return 405 when authenciated but not an admin for current tenant' do
         tour = create(:tour)
-        stop = create(:stop)
-        original_tour_stop_count = TourStop.count
+        flat_page = create(:flat_page)
+        original_tour_flat_page_count = TourFlatPage.count
         user = create(:user)
         user.update(super: false)
         user.tour_sets = []
         user.tours = []
         signed_cookie(user)
-        post :create, params: { data:  data(tour, stop), tenant: Apartment::Tenant.current }
+        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
         expect(response.status).to eq(405)
-        expect(original_tour_stop_count).to eq(TourStop.count)
+        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
 
       it 'return 405 when authenciated but an admin for current tenant' do
         tour = create(:tour)
-        stop = create(:stop)
-        original_tour_stop_count = TourStop.count
+        flat_page = create(:flat_page)
+        original_tour_flat_page_count = TourFlatPage.count
         user = create(:user)
         user.update(super: false)
         user.tours = []
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         signed_cookie(user)
-        post :create, params: { data:  data(tour, stop), tenant: Apartment::Tenant.current }
+        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
         expect(response.status).to eq(405)
-        expect(original_tour_stop_count).to eq(TourStop.count)
+        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
 
       it 'return 405 when authenciated by super' do
         tour = create(:tour)
-        stop = create(:stop)
-        original_tour_stop_count = TourStop.count
+        flat_page = create(:flat_page)
+        original_tour_flat_page_count = TourFlatPage.count
         user = create(:user)
         user.tours = []
         user.tour_sets = []
         user.update(super: true)
         signed_cookie(user)
-        post :create, params: { data:  data(tour, stop), tenant: Apartment::Tenant.current }
+        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
         expect(response.status).to eq(405)
-        expect(original_tour_stop_count).to eq(TourStop.count)
+        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
 
       it 'return 405 when authenciated by tour author' do
         tour = create(:tour)
-        stop = create(:stop)
-        original_tour_stop_count = TourStop.count
+        flat_page = create(:flat_page)
+        original_tour_flat_page_count = TourFlatPage.count
         user = create(:user)
         user.tours << tour
         user.tour_sets = []
         user.update(super: false)
         signed_cookie(user)
-        post :create, params: { data:  data(tour, stop), tenant: Apartment::Tenant.current }
+        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
         expect(response.status).to eq(405)
-        expect(original_tour_stop_count).to eq(TourStop.count)
+        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
     end
   end
@@ -211,112 +188,106 @@ RSpec.describe V3::TourStopsController, type: :controller do
     context 'with valid params' do
       it 'return 401 when unauthenciated' do
         tour = create(:tour)
-        stop = create(:stop)
-        tour.stops << stop
-        request_data = data(tour, stop, 4)
-        request_data[:id] = TourStop.find_by(tour: tour, stop: stop).id
+        flat_page = create(:flat_page)
+        tour.flat_pages << flat_page
+        request_data = data(tour, flat_page, 4)
+        request_data[:id] = TourFlatPage.find_by(tour: tour, flat_page: flat_page).id
         post :update, params: { id: request_data[:id], data: request_data, tenant: TourSet.first.subdir }
         expect(response.status).to eq(401)
       end
 
       it 'return 401 when authenciated but not an admin for current tenant' do
         tour = create(:tour)
-        stop = create(:stop)
-        tour.stops << stop
+        flat_page = create(:flat_page)
+        tour.flat_pages << flat_page
         user = create(:user)
         user.update(super: false)
         user.tour_sets = []
         user.tours = []
         signed_cookie(user)
-        request_data = data(tour, stop, 5)
-        request_data[:id] = TourStop.find_by(tour: tour, stop: stop).id
+        request_data = data(tour, flat_page, 5)
+        request_data[:id] = TourFlatPage.find_by(tour: tour, flat_page: flat_page).id
         post :update, params: { id: request_data[:id], data: request_data, tenant: TourSet.first.subdir }
         expect(response.status).to eq(401)
       end
 
       it 'return 200 and updated tour when authenciated but an admin for current tenant' do
         tour = create(:tour)
-        stops = create_list(:stop, 5)
-        stops.each { |stop| tour.stops << stop }
+        flat_pages = create_list(:flat_page, 5)
+        flat_pages.each { |flat_page| tour.flat_pages << flat_page }
         tour.save
-        stop = Stop.find(stops.first.id)
-        tour.stops << stop
+        flat_page = FlatPage.find(flat_pages.first.id)
+        tour.flat_pages << flat_page
         user = create(:user)
         user.update(super: false)
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         user.tours = []
         signed_cookie(user)
-        tour_stop = TourStop.find_by(tour: tour, stop: stop)
-        tour_stop.update(position: 2)
-        expect(TourStop.find(tour_stop.id).position).to eq(2)
-        request_data = data(tour, stop, 5)
-        request_data[:id] = tour_stop.id
-        post :update, params: { id: tour_stop.id, data: request_data, tenant: TourSet.first.subdir }
+        tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+        tour_flat_page.update(position: 2)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(2)
+        request_data = data(tour, flat_page, 5)
+        request_data[:id] = tour_flat_page.id
+        post :update, params: { id: tour_flat_page.id, data: request_data, tenant: TourSet.first.subdir }
         expect(response.status).to eq(200)
         expect(attributes[:position]).not_to eq('5')
-        expect(TourStop.find(tour_stop.id).position).to eq(5)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(5)
       end
 
       it 'return 200 and updated tour when authenciated by super' do
         tour = create(:tour)
-        stops = create_list(:stop, 5)
-        stops.each { |stop| tour.stops << stop }
+        flat_pages = create_list(:flat_page, 5)
+        flat_pages.each { |flat_page| tour.flat_pages << flat_page }
         tour.save
-        stop = Stop.find(stops.first.id)
-        tour.stops << stop
+        flat_page = FlatPage.find(flat_pages.first.id)
+        tour.flat_pages << flat_page
         user = create(:user)
         user.update(super: true)
         user.tour_sets = []
         user.tours = []
         signed_cookie(user)
-        tour_stop = TourStop.find_by(tour: tour, stop: stop)
-        tour_stop.update(position: 3)
-        expect(TourStop.find(tour_stop.id).position).to eq(3)
-        request_data = data(tour, stop, 4)
-        request_data[:id] = tour_stop.id
-        post :update, params: { id: tour_stop.id, data: request_data, tenant: TourSet.first.subdir }
+        tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+        tour_flat_page.update(position: 3)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(3)
+        request_data = data(tour, flat_page, 4)
+        request_data[:id] = tour_flat_page.id
+        post :update, params: { id: tour_flat_page.id, data: request_data, tenant: TourSet.first.subdir }
         expect(response.status).to eq(200)
         expect(attributes[:position]).not_to eq('4')
-        expect(TourStop.find(tour_stop.id).position).to eq(4)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(4)
       end
 
       it 'return 200 and updated tour when authenciated by tour author' do
         tour = create(:tour)
-        stops = create_list(:stop, 5)
-        stops.each { |stop| tour.stops << stop }
+        flat_pages = create_list(:flat_page, 5)
+        flat_pages.each { |flat_page| tour.flat_pages << flat_page }
         tour.save
-        stop = Stop.find(stops.first.id)
-        tour.stops << stop
+        flat_page = FlatPage.find(flat_pages.first.id)
+        tour.flat_pages << flat_page
         user = create(:user)
         user.update(super: false)
         user.tour_sets = []
         user.tours << tour
         signed_cookie(user)
-        tour_stop = TourStop.find_by(tour: tour, stop: stop)
-        tour_stop.update(position: 6)
-        expect(TourStop.find(tour_stop.id).position).to eq(6)
-        request_data = data(tour, stop, 1)
-        request_data[:id] = tour_stop.id
-        post :update, params: { id: tour_stop.id, data: request_data, tenant: TourSet.first.subdir }
+        tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+        tour_flat_page.update(position: 6)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(6)
+        request_data = data(tour, flat_page, 1)
+        request_data[:id] = tour_flat_page.id
+        post :update, params: { id: tour_flat_page.id, data: request_data, tenant: TourSet.first.subdir }
         expect(response.status).to eq(200)
         expect(attributes[:position]).not_to eq('1')
-        expect(TourStop.find(tour_stop.id).position).to eq(1)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(1)
       end
 
-      it 'return 422 authenciated by super but tour stop and position are nil' do
-        tour = create(:tour, stops: create_list(:stop, rand(4..6)))
+      it 'returns 422 when params are invalid' do
+        tour_flat_page = create(:tour_flat_page)
         user = create(:user, super: true)
-        tour_stop = TourStop.find_by(tour: tour, stop: tour.stops.first)
-        request_data = data(tour, tour.stops.first, 4)
-        request_data[:relationships][:tour][:data] = nil
-        request_data[:relationships][:stop][:data] = nil
-        request_data[:attributes][:position] = nil
+        invalid_params = { type: 'tour_flat_pages',  attributes: {}, relationships: { tour: { data: nil }, flat_page: { data: nil } } }
         signed_cookie(user)
-        post :update, params: { id: tour_stop.id, data: request_data, tenant: TourSet.first.subdir }
+        post :update, params: { id: tour_flat_page.id, data: invalid_params, tenant: TourSet.first.subdir }
         expect(response.status).to eq(422)
         expect(errors).to include('Tour must exist')
-        expect(errors).to include('Stop must exist')
-        expect(errors).to include('Position can\'t be blank')
       end
     end
   end
@@ -324,64 +295,69 @@ RSpec.describe V3::TourStopsController, type: :controller do
   describe 'DELETE #destroy' do
     it 'return 405 when unauthenciated' do
       tour = create(:tour)
-      stop = create(:stop)
-      tour.stops << stop
-      tour_stop = TourStop.find_by(tour: tour, stop: stop)
-      post :destroy, params: { id: tour_stop.id, tenant: TourSet.first.subdir }
+      flat_page = create(:flat_page)
+      tour.flat_pages << flat_page
+      tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+      post :destroy, params: { id: tour_flat_page.id, tenant: TourSet.first.subdir }
       expect(response.status).to eq(405)
     end
 
     it 'return 405 when authenciated but not an admin for current tenant' do
       tour = create(:tour)
-      stop = create(:stop)
-      tour.stops << stop
-      tour_stop = TourStop.find_by(tour: tour, stop: stop)
-      user = create(:user, super: false)
+      flat_page = create(:flat_page)
+      tour.flat_pages << flat_page
+      tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+      user = create(:user)
+      user.update(super: false)
       user.tour_sets = []
       signed_cookie(user)
-      post :destroy, params: { id: tour_stop.id, tenant: TourSet.first.subdir }
+      post :destroy, params: { id: tour_flat_page.id, tenant: TourSet.first.subdir }
       expect(response.status).to eq(405)
     end
 
     it 'return 405 and one less tour when authenciated but an admin for current tenant' do
       tour = create(:tour)
-      stop = create(:stop)
-      tour.stops << stop
-      tour_stop = TourStop.find_by(tour: tour, stop: stop)
-      user = create(:user, super: false)
+      flat_page = create(:flat_page)
+      tour.flat_pages << flat_page
+      tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+      user = create(:user)
+      user.update(super: false)
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
       tour_count = Tour.count
-      post :destroy, params: { id: tour_stop.id, tenant: Apartment::Tenant.current }
+      post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(405)
       expect(Tour.count).to eq(tour_count)
     end
 
     it 'return 405 and one less tour when authenciated by super' do
       tour = create(:tour)
-      stop = create(:stop)
-      tour.stops << stop
-      tour_stop = TourStop.find_by(tour: tour, stop: stop)
-      user = create(:user, super: true)
+      flat_page = create(:flat_page)
+      tour.flat_pages << flat_page
+      tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+      user = create(:user)
+      user.tour_sets = []
+      user.update(super: true)
       signed_cookie(user)
       tour_count = Tour.count
-      post :destroy, params: { id: tour_stop.id, tenant: Apartment::Tenant.current }
+      post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(405)
       expect(Tour.count).to eq(tour_count)
     end
 
     it 'return 405 and one less tour when authenciated by tour author' do
       tour = create(:tour)
-      stop = create(:stop)
-      tour.stops << stop
-      tour_stop = TourStop.find_by(tour: tour, stop: stop)
-      user = create(:user, super: false)
+      flat_page = create(:flat_page)
+      tour.flat_pages << flat_page
+      tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
+      user = create(:user)
+      user.update(super: false)
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
       new_title = Faker::Name.unique.name
       tour_count = Tour.count
-      post :destroy, params: { id: tour_stop.id, tenant: Apartment::Tenant.current }
+      post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(405)
       expect(Tour.count).to eq(tour_count)
     end

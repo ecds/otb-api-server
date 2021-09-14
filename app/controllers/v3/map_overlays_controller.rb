@@ -1,34 +1,15 @@
 class V3::MapOverlaysController < V3Controller
-
-  def show
-    render json: @record
-  end
-
   def create
-    @record = MapOverlay.new(record_params)
-    if @record.save
-      render json: @record, status: :created
+    if crud_allowed?
+      @record = MapOverlay.new(record_params)
+      if @record.save
+        render json: @record, status: :created
+      else
+        render json: serialize_errors, status: :unprocessable_entity
+      end
     else
-      render json: serialize_errors, status: :unprocessable_entity
+      head 401
     end
-  end
-
-  # PATCH/PUT /stops/1
-  def update
-    if @record.update(record_params)
-      # render json: @stop
-      head :no_content
-    else
-      render json: serialize_errors, status: :unprocessable_entity
-    end
-  end
-
-  # DELETE /stops/1
-  def destroy
-    if @record
-      @record.destroy
-    end
-    head :no_content
   end
 
   private
@@ -44,6 +25,7 @@ class V3::MapOverlaysController < V3Controller
     end
 
     def set_record
-      @record = MapOverlay.find(params[:id])
+      _record = MapOverlay.find(params[:id])
+      @record = _record&.published || @allowed ? _record : MapOverlay.new(id: params[:id])
     end
 end

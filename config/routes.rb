@@ -13,9 +13,6 @@ Rails.application.routes.draw do
 
   resources :tour_set_admins
   scope ':tenant' do
-    scope module: :v1, constraints: ApiVersion.new('v1') do
-      resources :tours, only: :index
-    end
     scope module: :v3, constraints: ApiVersion.new('v3', true) do
       resources :tour_authors, path: 'tour-authors'
       resources :users

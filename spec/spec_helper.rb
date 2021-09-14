@@ -1,20 +1,39 @@
 # frozen_string_literal: true
 
-if ENV['COV'] == 'simple'
-  require 'simplecov'
-  SimpleCov.start do
-    add_filter '/config/'
-    add_filter '/spec/'
-    add_filter '/db/'
-    add_filter '/bin/'
-  end
-else
-  require 'coveralls'
-  Coveralls.wear!
-end
+# if ENV['COV'] == 'simple'
+#   require 'simplecov'
+# else
+#   require 'coveralls'
+#   Coveralls.wear!
+# end
 
-require 'simplecov'
+# require 'simplecov'
 # SimpleCov.start
+
+require 'coveralls'
+require 'simplecov'
+require 'simplecov-lcov'
+
+SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+  [
+    SimpleCov::Formatter::HTMLFormatter,
+    Coveralls::SimpleCov::Formatter,
+    SimpleCov::Formatter::LcovFormatter
+  ]
+)
+
+# SimpleCov.start 'rails'
+SimpleCov.start 'rails' do
+  add_filter [
+    '/lib/snippets.rb',
+    '/app/channels/',
+    '/app/mailers/',
+    '/app/jobs/',
+    '/app/uploaders/'
+]
+end
 
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)

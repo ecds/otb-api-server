@@ -38,11 +38,8 @@ class V3Controller < ApplicationController
 
   def serialize_errors
     errors = []
-    if @record.nil?
-      errors.push({ detail: 'Record not found', source: { pointer: 'data/attributes' } })
-      # head 404
-    else
-      @record.errors.messages[:base].each do |error|
+    if @record&.errors
+      @record.errors.full_messages.each do |error|
         errors.push({
           detail: error,
           source: {
@@ -50,7 +47,6 @@ class V3Controller < ApplicationController
           }
         })
       end
-      # head 422
     end
     { errors: errors }
   end

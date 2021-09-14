@@ -44,7 +44,7 @@ RSpec.configure do |config|
   # examples within a transaction, remove the following line or assign false
   # instead of true.
   if ENV['DB_ADAPTER'] == 'postgresql'
-    config.use_transactional_fixtures = true
+    # config.use_transactional_fixtures = true
   end
 
   config.include RequestSpecHelper, type: :request
@@ -234,5 +234,16 @@ RSpec.configure do |config|
 
   config.after(:suite) do
     # TourSet.all.each { |ts| ts.destroy }
+  end
+
+  # Class to mock IPinfo
+  class MockIpinfo
+    def longitude
+      Faker::Address.longitude
+    end
+
+    def latitude
+      Faker::Address.latitude
+    end
   end
 end

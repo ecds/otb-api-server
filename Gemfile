@@ -83,6 +83,7 @@ group :test do
   gem 'webmock'
   gem 'coveralls', require: false
   gem 'simplecov', require: false
+  gem 'simplecov-lcov', require: false
   gem 'term-ansicolor'
 end
 

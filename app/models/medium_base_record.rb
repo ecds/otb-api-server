@@ -3,6 +3,8 @@
 # Base class for models.
 class MediumBaseRecord < ApplicationRecord
   self.abstract_class = true
+  validate :check_content_type
+
   before_create :attach_file
   before_destroy :purge
 
@@ -10,6 +12,8 @@ class MediumBaseRecord < ApplicationRecord
 
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
   has_one_attached 'file'
+
+  attr_accessor :content_type
 
   # def image_url
   #   return nil unless file.attached?
@@ -40,14 +44,7 @@ class MediumBaseRecord < ApplicationRecord
 
     # file.blob.delete if file.attached?
 
-    if base_sixty_four.include?('data:')
-      headers, self.base_sixty_four = base_sixty_four.split(',')
-      headers =~ /^data:(.*?)$/
-      content_type = Regexp.last_match(1).split(';base64').first
-    else
-      content_type = 'image/jpeg'
-    end
-
+    self.parse_base64
     File.open(tmp_file_path, 'wb') do |f|
       f.write(Base64.decode64(base_sixty_four))
     end
@@ -55,7 +52,7 @@ class MediumBaseRecord < ApplicationRecord
     self.file.attach(
       io: File.open(tmp_file_path),
       filename: filename,
-      content_type: content_type
+      content_type: self.content_type
     )
 
     self.base_sixty_four = nil
@@ -69,4 +66,26 @@ class MediumBaseRecord < ApplicationRecord
     remove_tmp_file
     file.blob.delete if file.attached?
   end
+
+  def check_content_type
+    return if base_sixty_four.nil?
+
+    self.parse_base64
+
+    if self.content_type.include?('jp2')
+      errors.add(:base, 'JPEG 2000 fils are not supported. Plese convert the image to a reqular JPEG or WebP format.')
+    end
+  end
+
+  private
+
+    def parse_base64
+      if base_sixty_four.include?('data:')
+        headers, self.base_sixty_four = base_sixty_four.split(',')
+        headers =~ /^data:(.*?)$/
+        self.content_type = Regexp.last_match(1).split(';base64').first
+      else
+        self.content_type = 'image/jpeg'
+      end
+    end
 end

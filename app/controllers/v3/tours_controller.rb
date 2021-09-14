@@ -12,13 +12,10 @@ class V3::ToursController < V3Controller
       else
         nil
       end
-    elsif (current_user && params[:tourTenant])
-      Apartment::Tenant.switch! params[:tourTenant]
-      Tour.find(params[:tour])
     elsif (current_user && current_user.current_tenant_admin?)
       Tour.all
     elsif (current_user && current_user.id)
-      current_user.tours
+      (current_user.tours + Tour.published).uniq
     else
       Tour.published
     end

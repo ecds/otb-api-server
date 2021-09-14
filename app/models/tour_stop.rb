@@ -9,7 +9,6 @@ class TourStop < ApplicationRecord
 
   before_save :_ensure_stop_slug
   before_validation :_set_position
-  before_destroy :_delete_orphan
 
   def slug
     stop.slug
@@ -41,12 +40,6 @@ class TourStop < ApplicationRecord
       return if tour.nil?
 
       self.position = self.position || self.tour.stops.length + 1
-    end
-
-    def _delete_orphan
-      if self.stop.tours.length == 1
-        self.stop.destroy
-      end
     end
 
     def _ensure_stop_slug

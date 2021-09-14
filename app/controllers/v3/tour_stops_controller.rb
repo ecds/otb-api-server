@@ -40,7 +40,7 @@ class V3::TourStopsController < V3Controller
   # POST /stops
   def create
     # Not created via the API
-    head 401
+    head 405
   end
 
   # PATCH/PUT /stops/1
@@ -58,8 +58,7 @@ class V3::TourStopsController < V3Controller
 
   # DELETE /stops/1
   def destroy
-    # Not deleted via the API
-    head 401
+    head 405
   end
 
     private

@@ -18,8 +18,6 @@ module V3
         else
           render json: { data: [] }
         end
-      else
-        render json: { message: 'You are not autorized to to view this resource.' }.to_json, status: 401
       end
     end
 
@@ -35,35 +33,38 @@ module V3
     # TODO: Is this endpoint ever used?
     # POST /users
     def create
-      @record = User.new(user_params)
+      if current_user&.super
+        @record = User.new(user_params)
 
-      if @record.save
-        render json: @record, status: :created, location: @record
+        if @record.save
+          render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/users/#{@record.id}"
+        else
+          render json: serialize_errors, status: :unprocessable_entity
+        end
       else
-        render json: serialize_errors, status: :unprocessable_entity
+        head 401
       end
     end
 
     # PATCH/PUT /users/1
     def update
-      if @record.update(user_params)
-        render json: @record
+      if current_user&.super || current_user == @record
+        if @record.update(user_params)
+          render json: @record
+        else
+          render json: serialize_errors, status: :unprocessable_entity
+        end
       else
-        render json: serialize_errors, status: :unprocessable_entity
+        head 401
       end
     end
 
     # DELETE /users/1
     def destroy
-      @record.destroy
-    end
-
-    def me
-      user = @current_login.user
-      if user.nil?
-        render json: 'Invalid api token', status: :foo
+      if current_user&.super
+        @record.destroy
       else
-        render json: user
+        head 401
       end
     end
 
@@ -73,9 +74,9 @@ module V3
           ActiveModelSerializers::Deserialization
               .jsonapi_parse(
                 params, only: [
-                      :displayname, :identification, :password,
+                      :display_name, :identification, :password,
                       :password_confirmation, :uid, :tour_sets,
-                      :tours, :super
+                      :tours, :super, :email
                   ]
               )
         end

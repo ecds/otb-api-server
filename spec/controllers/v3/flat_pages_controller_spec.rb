@@ -203,6 +203,16 @@ RSpec.describe V3::FlatPagesController, type: :controller do
         expect(attributes[:title]).to eq('Elmyr')
         expect(FlatPage.count).to eq(original_flat_page_count + 1)
       end
+
+      it 'return 422 when missing title' do
+        user = create(:user, super: true)
+        signed_cookie(user)
+        original_flat_page_count = FlatPage.count
+        post :create, params: { data: { type: 'flat_pages', attributes: {} }, tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(422)
+        expect(errors).to include('Title can\'t be blank')
+        expect(FlatPage.count).to eq(original_flat_page_count)
+      end
     end
   end
 
@@ -269,6 +279,15 @@ RSpec.describe V3::FlatPagesController, type: :controller do
         expect(attributes[:title]).not_to eq(original_flat_page_title)
         expect(attributes[:title]).to eq(new_title)
         expect(FlatPage.find(tour.flat_pages.first.id).title).to eq(new_title)
+      end
+
+      it 'returns 422 when title in nil' do
+        flat_page = create(:flat_page)
+        user = create(:user, super: true)
+        signed_cookie(user)
+        post :update, params: { id: flat_page.id, data: { type: 'flat_pages', attributes: { title: nil } }, tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(422)
+        expect(errors).to include('Title can\'t be blank')
       end
     end
 

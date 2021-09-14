@@ -3,7 +3,8 @@
 # spec/factories/stop_media.rb
 FactoryBot.define do
   factory :stop_medium do
-    stop_id { nil }
-    medium_id { nil }
+    association :stop
+    association :medium
+    position { 1 }
   end
 end

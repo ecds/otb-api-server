@@ -154,6 +154,19 @@ RSpec.describe V3::MediaController, type: :controller do
           expect(response).to have_http_status(:unprocessable_entity)
           expect(response.content_type).to eq('application/json; charset=utf-8')
         end
+
+        it 'renders a JSON response with errors for the new medium when file is jp2' do
+          user = create(:user, super: true)
+          signed_cookie(user)
+          jp2_params = valid_params.clone
+          jp2_params[:data][:attributes] = {
+            base_sixty_four: File.read(Rails.root.join('spec/factories/images/jp2_base64.txt')),
+            filename: Faker::File.file_name(dir: '', ext: 'jp2', directory_separator: '')
+          }
+          post :create, params: jp2_params
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(errors).to include('JPEG 2000 fils are not supported. Plese convert the image to a reqular JPEG or WebP format.')
+        end
       end
 
       context 'with unauthenticated request' do

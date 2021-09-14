@@ -16,11 +16,6 @@ class V3::FlatPagesController < V3Controller
     render json: @records
   end
 
-  # GET /v3/records/1
-  def show
-    render json: @record
-  end
-
   # POST /v3/records
   def create
     if @allowed

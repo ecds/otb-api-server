@@ -4,6 +4,6 @@
 FactoryBot.define do
   factory :user do
     email { Faker::Internet.email }
-    # tour_sets { TourSet.where(subdir: 'atlanta') }
+    display_name { Faker::Music::Hiphop.artist }
   end
 end

@@ -29,7 +29,7 @@ RSpec.describe V3::TourMediaController, type: :controller do
     before(:each) { Tour.all.each { |tour| tour.update(published: false) } }
 
     context 'unauthenticated' do
-      it 'returns a success response but zeor TourMedium objects' do
+      it 'returns a success response but zero TourMedium objects' do
 
         tour_medium = create(:tour_medium, tour: create(:tour, published: false))
         get :index, params: { tenant: Apartment::Tenant.current }
@@ -38,7 +38,7 @@ RSpec.describe V3::TourMediaController, type: :controller do
         expect(TourMedium.count).to be > 0
       end
 
-      it 'returns a success response but zeor TourMedium objects' do
+      it 'returns a success response but zero TourMedium objects' do
         tour_medium = create(:tour_medium, tour: create(:tour, published: true))
         get :index, params: { tenant: Apartment::Tenant.current }
         expect(response.status).to eq(200)

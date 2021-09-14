@@ -11,13 +11,13 @@ class TourMedium < ApplicationRecord
     self.save
   end
 
-  before_destroy do
-    if self.medium.nil? || self.tour.nil?
-      nil
-    else
-      self.medium.tours.length == 1 ? self.medium.destroy! : nil
-    end
-  end
+  # before_destroy do
+  #   if self.medium.nil? || self.tour.nil?
+  #     nil
+  #   else
+  #     self.medium.tours.length == 1 ? self.medium.destroy! : nil
+  #   end
+  # end
 
   def published
     tour&.published

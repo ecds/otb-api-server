@@ -16,10 +16,6 @@ class V3::TourMediaController < V3::TourRelationsController
     render json: @tour_media
   end
 
-  def destroy
-    head 405
-  end
-
   private
     # Only allow a trusted parameter "white list" through.
     def record_params

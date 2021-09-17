@@ -112,20 +112,12 @@ class Tour < ApplicationRecord
 
     return nil if mode.title.nil?
 
-    gmaps = GoogleMapsService::Client.new
     destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
     origin = destinations.shift
 
-    begin
-      matrix = gmaps.distance_matrix(origin, destinations, mode: mode.title.downcase)
-      return nil if matrix[:rows].first[:elements].first[:status] == 'ZERO_RESULTS'
+    g_directions = GoogleDirections.new(origin, destinations, stops.count, mode.title)
 
-      durations = matrix[:rows].first[:elements].map { |e| e[:duration][:value] if e[:duration].present? }.reject { |d| d.nil? }
-      durations.sum + 600 + (stops.count * 600)
-      # ActiveSupport::Duration.build(seconds).parts
-    rescue GoogleMapsService::Error::ApiError, ArgumentError => error
-      nil
-    end
+    g_directions.duration
   end
 
   private

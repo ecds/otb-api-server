@@ -7,7 +7,7 @@ FactoryBot.define do
     description { "<p>#{Faker::TvShows::RickAndMorty.quote}</p><p>#{Faker::TvShows::RickAndMorty.quote}</p><p>#{Faker::TvShows::RickAndMorty.quote}</p>" }
     published { Faker::Boolean.boolean(true_ratio: 0.5) }
     theme { create(:theme) }
-    mode { create(:mode) }
+    mode { Mode.first }
     link_address { Faker::Internet.url }
     is_geo { true }
 

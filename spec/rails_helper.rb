@@ -186,14 +186,14 @@ RSpec.configure do |config|
 
     stub_request(:get, /http:\/\/127\.0\.0\.1:.*\/json\/version/).to_return(body: '{}', status: 200)
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*bicycling.*/)
-      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200)
+    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*BICYCLING.*/)
+      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*walking.*/)
-      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200)
+    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*WALKING.*/)
+      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*driving.*/)
-      .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200)
+    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*DRIVING.*/)
+      .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200, headers: { 'Content-Type': 'application/json' })
   end
 
   config.after(:each) do

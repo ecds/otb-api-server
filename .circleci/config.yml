@@ -1,4 +1,8 @@
 version: 2
+
+orbs:
+  browser-tools: circleci/browser-tools@1.2.2
+
 jobs:
   build:
     working_directory: ~/otb-api
@@ -6,7 +10,7 @@ jobs:
     # Primary container image where all commands run
 
     docker:
-      - image: circleci/ruby:2.7.4-node
+      - image: circleci/ruby:3.0.2-browsers
         environment:
           PGUSER: root
           RAILS_ENV: test
@@ -15,9 +19,8 @@ jobs:
           DB_PASSWORD: password
           TEST_DB_NAME: otb
           MYSQL_ALLOW_EMPTY_PASSWORD: true
-          COVERALLS_REPO_TOKEN: 0fq3v88yZLVryFZQbFWqHw5l6zrbRkHNf
 
-      - image: circleci/postgres:9.6.8-alpine-postgis
+      - image: circleci/postgres:9.6.9
         environment:
           POSTGRES_USER: user
           POSTGRES_DB: otb
@@ -39,9 +42,6 @@ jobs:
             sudo apt update
             sudo apt install -y postgresql-client || true
             sudo apt install -y libvips-dev
-            sudo apt install -y libappindicator1 fonts-liberation libasound2 libgbm1 xdg-utils
-            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-            sudo dpkg -i google-chrome*.deb
             bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
 
       - run:

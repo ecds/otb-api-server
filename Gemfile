@@ -27,8 +27,6 @@ gem 'actionview', '>= 5.2.2.1'
 
 # gem 'ecds_rails_auth_engine', path: '../ecds_auth_engine'
 gem 'ecds_rails_auth_engine', git: 'https://github.com/ecds/ecds_rails_auth_engine.git', branch: 'feature/fauxoauth'
-# gem 'ecds_rails_auth_engine', path: '/data/ecds_auth_engine'
-gem 'cancancan', '~> 2.0'
 
 # Active Storage will land in 5.2
 gem 'carrierwave', '~> 1.0'
@@ -63,7 +61,7 @@ group :development, :test do
 end
 
 group :development do
-  gem 'listen', '>= 3.0.5', '< 3.2'
+  gem 'listen'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'

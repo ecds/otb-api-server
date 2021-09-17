@@ -188,11 +188,12 @@ sites.each do |ts|
   Apartment::Tenant.switch! ts
   Stop.all.each do |s|
     if s.lat
-      s.update(lat: s.lat.round(6).to_f, lng: s.lng.round(6).to_f)
+      s.update(lat: s.lat.round(5).to_f, lng: s.lng.round(5).to_f)
     end
     if s.parking_lat
-      s.update(parking_lat: s.parking_lat.round(6).to_f, parking_lng: s.parking_lng.round(6).to_f)
+      s.update(parking_lat: s.parking_lat.round(5).to_f, parking_lng: s.parking_lng.round(5).to_f)
     end
+    s.save
   end
 end
 

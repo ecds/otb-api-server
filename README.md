@@ -6,13 +6,18 @@ The OpenTourBuilder API server provides a multi-tenant REST API for geographic t
 
 - rbenv
 - Ruby 2.7.2
-- PostgreSQL 9.6.9
-  - Plugins*
-    - pgcrypto
-    - uuid-ossp
-    - plpgsql
 
-\* Database plugins are enabled during the install process
+## Install PostgreSQL client
+
+~~~bash
+sudo apt install postgresql-client
+~~~
+
+## Install GDAL
+
+~~~bash
+sudo apt install libpq-dev gdal-bin libgdal-dev
+~~~
 
 ## Install Headless Chrome
 

@@ -9,16 +9,16 @@ class ApiVersion
     @default = default
   end
 
-  # # check whether version is specified or is default
-  # def matches?(request)
-  #   check_headers(request.headers) || default
-  # end
+  # check whether version is specified or is default
+  def matches?(request)
+    check_headers(request.headers) || default
+  end
 
-  #   private
+    private
 
-  #     def check_headers(headers)
-  #       # check version from Accept headers; expect custom media type `tours`
-  #       accept = headers[:accept]
-  #       accept && accept.include?("application/vnd.tours.#{version}+json")
-  #     end
+      def check_headers(headers)
+        # check version from Accept headers; expect custom media type `tours`
+        accept = headers[:accept]
+        accept && accept.include?("application/vnd.tours.#{version}+json")
+      end
 end

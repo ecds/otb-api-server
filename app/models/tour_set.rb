@@ -126,6 +126,8 @@ class TourSet < ApplicationRecord
       headers, self.base_sixty_four = base_sixty_four.split(',')
       # content_type = Regexp.last_match(1).split(';base64').first
 
+      return if base_sixty_four.nil? #&& !logo.attached?
+
       File.open(tmp_file_path, 'wb') do |f|
         f.write(Base64.decode64(base_sixty_four))
       end

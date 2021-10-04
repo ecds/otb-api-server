@@ -177,7 +177,7 @@ RSpec.describe V3::UsersController, type: :controller do
         user_to_update = create(:user)
         user.tour_sets << create(:tour_set)
         initial_display_name = user_to_update.display_name
-        new_display_name = Faker::Music::Hiphop.artist
+        new_display_name = "#{Faker::Music::Hiphop.artist}!"
         update_params = { id: user_to_update.to_param, tenant: 'public', data: { type: 'users', attributes: { display_name: new_display_name } } }
         signed_cookie(user)
         put :update, params: update_params

@@ -16,6 +16,8 @@ class GoogleDirections
       "https://maps.googleapis.com/maps/api/distancematrix/json?#{@query.to_query}"
     ).with_indifferent_access
 
+    return nil if response[:status] && response[:rows].nil?
+
     return nil if response[:rows].first[:elements].first[:status] == 'ZERO_RESULTS'
 
     response

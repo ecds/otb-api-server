@@ -70,7 +70,7 @@ module V3
     def allowed?
       set_record if @record.nil? && params[:id].present?
       @allowed = if @record.nil?
-         crud_allowed?
+      crud_allowed?
       else
         current_user&.current_tenant_admin? || @record.published_tours.present?
       end
@@ -85,7 +85,7 @@ module V3
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                  :name, :tours, :admins
+                  :name, :tours, :admins, :base_sixty_four
               ]
           )
     end

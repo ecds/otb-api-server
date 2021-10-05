@@ -5,7 +5,7 @@ The OpenTourBuilder API server provides a multi-tenant REST API for geographic t
 ## Requirements
 
 - rbenv
-- Ruby 2.7.2
+- Ruby 3.0.2
 
 ## Install PostgreSQL client
 

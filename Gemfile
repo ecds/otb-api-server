@@ -30,7 +30,6 @@ gem 'ecds_rails_auth_engine', git: 'https://github.com/ecds/ecds_rails_auth_engi
 
 # Active Storage will land in 5.2
 gem 'carrierwave', '~> 1.0'
-gem 'carrierwave-base64'
 gem 'mini_magick'
 gem 'image_processing', '~> 1.2'
 gem 'ferrum'

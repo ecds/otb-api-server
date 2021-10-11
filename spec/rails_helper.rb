@@ -189,6 +189,9 @@ RSpec.configure do |config|
     stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*BICYCLING.*/)
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
+    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*TRANSIT.*/)
+      .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix2.json'), status: 200, headers: { 'Content-Type': 'application/json' })
+
     stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*WALKING.*/)
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 

@@ -90,6 +90,7 @@ RSpec.describe V3::ToursController, type: :controller do
   describe 'GET #show' do
     it 'returns a 200 response' do
       tour = create(:tour, published: true, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, rand(3..5)))
+      tour.save
       get :show, params: { tenant: tour.tenant, id: tour.id }
       expect(response.status).to eq(200)
       expect(attributes[:title]).to eq(tour.title)

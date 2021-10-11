@@ -6,6 +6,8 @@ require 'uri'
 # Model class for a tour.
 class Tour < ApplicationRecord
   include HtmlSaintizer
+
+
   has_many :tour_stops, autosave: true, dependent: :destroy
   has_many :stops, -> { distinct }, through: :tour_stops
   has_many :tour_modes, autosave: true, dependent: :destroy
@@ -34,6 +36,8 @@ class Tour < ApplicationRecord
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }
   before_validation -> { self.title ||= 'untitled' }
+  before_validation :update_saved_stop_order
+  before_save :calculate_duration
   before_save :check_url
   after_save :ensure_slug
   after_create :add_modes
@@ -105,19 +109,23 @@ class Tour < ApplicationRecord
     }
   end
 
-  def duration
-    return nil if stops.count < 2
+  def calculate_duration
+    return unless published
 
-    return nil if mode.nil?
+    return if stops.count < 2
 
-    return nil if mode.title.nil?
+    return if mode.nil?
+
+    return if mode.title.nil?
+
+    return unless self.will_save_change_to_published? || self.will_save_change_to_saved_stop_order? || self.will_save_change_to_mode_id?
 
     destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
     origin = destinations.shift
 
     g_directions = GoogleDirections.new(origin, destinations, stops.count, mode.title)
 
-    g_directions.duration
+    self.duration = g_directions.duration
   end
 
   private
@@ -138,5 +146,9 @@ class Tour < ApplicationRecord
       uri = URI(link_address)
 
       self.link_address = "http://#{link_address}" if uri.scheme.nil?
+    end
+
+    def update_saved_stop_order
+      self.saved_stop_order = self.tour_stops.order(:position).map(&:stop_id)
     end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_16_170901) do
+ActiveRecord::Schema.define(version: 2021_10_11_122625) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -307,6 +307,8 @@ ActiveRecord::Schema.define(version: 2021_09_16_170901) do
     t.integer "default_lng", default: 0
     t.string "link_address"
     t.string "link_text"
+    t.integer "duration"
+    t.integer "saved_stop_order", array: true
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"

@@ -51,6 +51,22 @@ RSpec.describe Medium, type: :model do
       expect(medium.file.blob.checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest)
     end
 
+    it 'updates title and caption of video' do
+      medium = create(:medium, video: 'F9ULbmCvmxY', base_sixty_four: nil, video_provider: 'youtube')
+      original_checksum = medium.file.blob.checksum
+      expect(medium.title).to include('Goodie')
+      expect(medium.caption).to include('Goodie')
+      medium.update(title: 'Outkast')
+      medium.update(caption: 'GOATs')
+      expect(medium.title).not_to include('Goodie')
+      expect(medium.caption).not_to include('Goodie')
+      expect(medium.title).to include('Outkast')
+      expect(medium.caption).to include('GOATs')
+      # medium.update(base_sixty_four: File.read(Rails.root.join('spec/factories/images/png_base64.txt')))
+      # expect(medium.file.blob.checksum).not_to eq(original_checksum)
+      # expect(medium.file.blob.checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest)
+    end
+
     it 'skips video_props when provider in nil' do
       medium = create(:medium, video: 'ACod3', base_sixty_four: nil)
       expect(medium.file.attached?).to be false

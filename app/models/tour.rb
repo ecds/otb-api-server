@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-
-require 'google_maps_service'
 require 'uri'
 
 # Model class for a tour.

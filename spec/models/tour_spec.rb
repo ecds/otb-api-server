@@ -11,7 +11,8 @@ RSpec.describe Tour, type: :model do
   it { expect(Tour.reflect_on_association(:mode).macro).to eq(:belongs_to) }
 
   it 'gets a duration' do
-    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 3), published: true)
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 3), published: false)
+    tour.update(published: true)
     tour.save
     expect(tour.duration).to eq(6136)
   end

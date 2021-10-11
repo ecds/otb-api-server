@@ -1,11 +1,12 @@
 class GoogleDirections
 
   def initialize(origin, destinations, stops_count, mode)
+    google_key = ENV['RAILS_ENV'] == 'test' ? 'FAkeFaK-E_fAkeChv-P3nchtQYHoCLfFzn9ylr8' : Rails.application.credentials.dig(:g_maps_key)
     @query = {
       origins: origin.join(','),
       destinations: destinations.map { |d| d.join(',') }.join('|'),
       mode: mode,
-      key: Rails.application.credentials.dig(:g_maps_key)
+      key: google_key
     }
 
     @stops_count = stops_count

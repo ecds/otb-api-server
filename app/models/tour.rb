@@ -147,6 +147,13 @@ class Tour < ApplicationRecord
     end
 
     def update_saved_stop_order
-      self.saved_stop_order = self.tour_stops.order(:position).map(&:stop_id)
+      puts '---'
+      self.assign_attributes(saved_stop_order: self.tour_stops.order(:position).map(&:stop_id))
+      p self.tour_stops.map { |ts| [ts.stop.id, ts.position] }
+      p self.tour_stops.order(:position).map(&:stop_id)
+      p self.stops.count
+      p self.tour_stops.count
+      p self.saved_stop_order
+      puts '---'
     end
 end

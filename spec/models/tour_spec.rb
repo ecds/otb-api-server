@@ -61,12 +61,34 @@ RSpec.describe Tour, type: :model do
   end
 
   it 'gets no duration whin invalid request is made to Google' do
-    tour = create(:tour, mode: Mode.find_by(title: 'DRIVING'), stops: create_list(:stop, 5))
+    tour = create(:tour, mode: Mode.find_by(title: 'DRIVING'), stops: create_list(:stop, 5), published: true)
+    tour.save
     expect(tour.duration).to be nil
   end
 
   it 'gets no duration whin response has ZERO_RESULTS' do
-    tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 4))
+    tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 4), published: true)
+    tour.save
     expect(tour.duration).to be nil
+  end
+
+  it 'does not update the duration when other attributes are updaeted' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 3), published: true)
+    tour.save
+    expect(tour.duration).to eq(6136)
+    # Trick the network stub to fetch different distance matrix but doesn't presist a
+    # change to the tour's mode. In this case, it should NOT fetch. This is just to
+    # test that it does not actually make teh request when we don't want it to.
+    tour.mode.title = 'TRANSIT'
+    tour.update(
+      title: Faker::Music::Prince.band,
+      description: Faker::Music::Prince.lyric
+    )
+    expect(tour.saved_change_to_attribute?(:title)).to be true
+    expect(tour.saved_change_to_attribute?(:description)).to be true
+    expect(tour.saved_change_to_attribute?(:duration)).to be false
+    expect(tour.saved_change_to_attribute?(:published)).to be false
+    expect(tour.saved_change_to_attribute?(:saved_stop_order)).to be false
+    expect(tour.duration).to eq(6136)
   end
 end

@@ -38,7 +38,6 @@ gem 'aws-sdk-s3', '~> 1'
 # RGeo is a geospatial data library for Ruby.
 # https://github.com/rgeo/rgeo
 gem 'rgeo'
-gem 'google_maps_service'
 gem 'ipinfo-rails'
 
 

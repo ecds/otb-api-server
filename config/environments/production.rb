@@ -3,10 +3,10 @@
 Rails.application.configure do
   config.hosts << 'api.opentour.emory.edu'
   Rails.application.routes.default_url_options[:host] = 'https://api.opentour.emory.edu'
-# Settings specified here will take precedence over those in config/application.rb.
+  # Settings specified here will take precedence over those in config/application.rb.
 
   # Store uploaded files on the local file system in a temporary directory.
-  config.active_storage.service = :amazon
+  config.active_storage.service = :production
 
   # Code is not reloaded between requests.
   config.cache_classes = true

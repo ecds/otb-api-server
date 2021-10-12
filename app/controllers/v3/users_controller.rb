@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # app/controllers/v3/users_controller.rb
+#
+# Endpoints for User Model
+#
 module V3
-  #
-  # Endpoints for User Model
-  #
   class UsersController < V3Controller
     before_action :authenticate!, only: :me
 

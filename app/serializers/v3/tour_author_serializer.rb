@@ -1,5 +1,7 @@
-class V3::TourAuthorSerializer < ActiveModel::Serializer
-  belongs_to :tour
-  belongs_to :user
-  attributes :id
+module V3
+  class TourAuthorSerializer < ActiveModel::Serializer
+    belongs_to :tour
+    belongs_to :user
+    attributes :id
+  end
 end

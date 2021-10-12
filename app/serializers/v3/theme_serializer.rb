@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
-class V3::ThemeSerializer < ActiveModel::Serializer
-  attributes :id, :title
+module V3
+  class ThemeSerializer < ActiveModel::Serializer
+    attributes :id, :title
+  end
 end

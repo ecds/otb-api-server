@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/ecds/ecds_rails_auth_engine.git
-  revision: 511b5def2258980b5a23f78e63c2992fb04af93e
+  revision: 4a55d7e9ddb38e7c6422bc001874a30abd0162bd
   branch: feature/fauxoauth
   specs:
-    ecds_rails_auth_engine (0.1.6)
+    ecds_rails_auth_engine (0.2.0)
       cancancan
       httparty
       jwt
@@ -205,7 +205,7 @@ GEM
     jmespath (1.4.0)
     json (2.5.1)
     jsonapi-renderer (0.2.2)
-    jwt (2.2.3)
+    jwt (2.3.0)
     listen (3.7.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)

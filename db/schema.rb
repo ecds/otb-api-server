@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_11_122625) do
+ActiveRecord::Schema.define(version: 2021_10_12_142213) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -47,12 +47,18 @@ ActiveRecord::Schema.define(version: 2021_10_11_122625) do
 
   create_table "ecds_rails_auth_engine_logins", force: :cascade do |t|
     t.string "who"
-    t.string "token"
     t.string "provider"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_ecds_rails_auth_engine_logins_on_user_id"
+  end
+
+  create_table "ecds_rails_auth_engine_tokens", force: :cascade do |t|
+    t.string "token"
+    t.bigint "login_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "flat_pages", force: :cascade do |t|
@@ -308,7 +314,7 @@ ActiveRecord::Schema.define(version: 2021_10_11_122625) do
     t.string "link_address"
     t.string "link_text"
     t.integer "duration"
-    t.integer "saved_stop_order", array: true, default: []
+    t.integer "saved_stop_order", array: true
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"

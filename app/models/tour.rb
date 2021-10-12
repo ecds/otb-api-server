@@ -21,6 +21,11 @@ class Tour < ApplicationRecord
   has_many :slugs, dependent: :delete_all
   has_one :map_overlay
 
+  # TODO: why does the CircleCI env need to serialize here?
+  if ENV['CI'] == 'circleci'
+    serialize :saved_stop_order, Array
+  end
+
   # belongs_to :splash_image_medium_id, class_name: 'Medium'
   belongs_to :theme, default: -> { Theme.first }
 
@@ -147,13 +152,6 @@ class Tour < ApplicationRecord
     end
 
     def update_saved_stop_order
-      puts '---'
-      self.assign_attributes(saved_stop_order: self.tour_stops.order(:position).map(&:stop_id))
-      p self.tour_stops.map { |ts| [ts.stop.id, ts.position] }
-      p self.tour_stops.order(:position).map(&:stop_id)
-      p self.stops.count
-      p self.tour_stops.count
-      p self.saved_stop_order
-      puts '---'
+      self.saved_stop_order = self.tour_stops.order(:position).map(&:stop_id)
     end
 end

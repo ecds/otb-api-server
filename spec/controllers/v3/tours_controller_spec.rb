@@ -92,7 +92,6 @@ RSpec.describe V3::ToursController, type: :controller do
       tour = create(:tour, published: false, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, rand(5..7)))
       tour.update(published: true)
       tour.save
-      puts "spec #{tour.duration}, #{tour.published}, #{tour.mode.title}, #{tour.stops.count}"
       get :show, params: { tenant: tour.tenant, id: tour.id }
       expect(response.status).to eq(200)
       expect(attributes[:title]).to eq(tour.title)

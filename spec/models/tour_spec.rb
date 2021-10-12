@@ -43,13 +43,12 @@ RSpec.describe Tour, type: :model do
     tour.save
     expect(tour.duration).to eq(6336)
     expect(tour.saved_change_to_attribute?(:duration)).to be true
+    expect(tour.saved_change_to_attribute?(:saved_stop_order)).to be false
   end
 
   it 'updates duration when stop order chages' do
-    puts Apartment::Tenant.current
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), published: false)
     5.times { |i| create(:tour_stop, tour: tour, stop: create(:stop), position: i + 1) }
-    tour = Tour.find(tour.id)
     tour.update(published: true)
     tour.save
     expect(tour.duration).to eq(7336)
@@ -58,12 +57,11 @@ RSpec.describe Tour, type: :model do
     tour.mode.title = 'TRANSIT'
     tour.tour_stops.order(:position).last.update(position: 0)
     tour.validate
-    puts Apartment::Tenant.current
-    # Make sure duration isn't being updated because we changed the mode's title.
+    # Make sure duration isn't being updated because we changed the mode or published status.
     expect(tour.will_save_change_to_mode_id?).to be false
+    expect(tour.will_save_change_to_published?).to be false
     expect(tour.will_save_change_to_saved_stop_order?).to be true
     tour.save
-    expect(tour.saved_change_to_attribute?(:saved_stop_order)).to be true
     expect(tour.duration).to eq(6336)
     expect(tour.saved_change_to_attribute?(:duration)).to be true
   end

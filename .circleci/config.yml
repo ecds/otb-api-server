@@ -19,7 +19,7 @@ jobs:
           DB_PASSWORD: password
           TEST_DB_NAME: otb
           MYSQL_ALLOW_EMPTY_PASSWORD: true
-          COVERALLS_REPO_TOKEN: 0fq3v88yZLVryFZQbFWqHw5l6zrbRkHNf
+          CI: 'circleci'
 
       - image: circleci/postgres:10
         environment:
@@ -43,7 +43,8 @@ jobs:
           command: |
             sudo apt update
             sudo apt install -y postgresql-client || true
-            sudo apt install -y libvips-dev
+            sudo apt install -y imagemagick
+            gem install bundle
             bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
 
       - run:
@@ -60,18 +61,18 @@ jobs:
       # TODO: Figure out how to allow the database user to create new tenants in
       # the MySQL Docker instance. For now, we'll just test that it can setup the
       # initial database using MySQL.
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m
+      # - run:
+      #     name: Wait for DB
+      #     command: dockerize -wait tcp://127.0.0.1:3306 -timeout 1m
 
-      - run:
-          name: MySQL Setup
-          command: |
-            export DB_ADAPTER=mysql2
-            bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=mysql2
-            bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=mysql2
-            bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=mysql2
-            bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=mysql2
+      # - run:
+      #     name: MySQL Setup
+      #     command: |
+      #       export DB_ADAPTER=mysql2
+      #       bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=mysql2
+      #       bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=mysql2
+      #       bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=mysql2
+      #       bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=mysql2
 
       # Test using PostgreSQL
       - run:
@@ -85,4 +86,4 @@ jobs:
 
       - run:
           name: Parallel RSpec with PostgreSQL
-          command: DB_ADAPTER=postgresql bundle exec rspec spec/models/tour_spec.rb:48
+          command: DB_ADAPTER=postgresql bundle exec rspec spec/

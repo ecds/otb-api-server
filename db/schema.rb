@@ -308,7 +308,7 @@ ActiveRecord::Schema.define(version: 2021_10_11_122625) do
     t.string "link_address"
     t.string "link_text"
     t.integer "duration"
-    t.integer "saved_stop_order", array: true
+    t.integer "saved_stop_order", array: true, default: []
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"

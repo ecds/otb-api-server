@@ -3,7 +3,7 @@
 # Model class for tour sets. This is the main model for "instances" of Open Tour Builder.
 class TourSet < ApplicationRecord
   before_save :set_subdir
-  around_update :attach_file
+  before_save :attach_file
   after_create :create_tenant
   after_create :create_defaults
   before_destroy :drop_tenant
@@ -121,28 +121,33 @@ class TourSet < ApplicationRecord
     #
     #
     def attach_file
-      return if base_sixty_four.nil? #&& !logo.attached?
+      return if base_sixty_four.nil? && !logo.attached?
 
-      headers, self.base_sixty_four = base_sixty_four.split(',')
-      # content_type = Regexp.last_match(1).split(';base64').first
 
-      return if base_sixty_four.nil? #&& !logo.attached?
+      return if !self.will_save_change_to_base_sixty_four? && logo.attached?
 
-      File.open(tmp_file_path, 'wb') do |f|
-        f.write(Base64.decode64(base_sixty_four))
+      if base_sixty_four.nil? && logo.attached?
+        logo.purge
+      else
+        headers, self.base_sixty_four = base_sixty_four.split(',')
+
+        return if base_sixty_four.nil?
+
+        File.open(tmp_file_path, 'wb') do |f|
+          f.write(Base64.decode64(base_sixty_four))
+        end
+
+        image = MiniMagick::Image.open(tmp_file_path)
+
+        if image[:height] > 80
+          image.resize('300x80')
+          image.write(tmp_file_path)
+        end
+
+        self.logo.attach(
+          io: File.open(tmp_file_path),
+          filename: logo_title
+        )
       end
-      self.base_sixty_four = nil
-
-      image = MiniMagick::Image.open(tmp_file_path)
-
-      if image[:height] > 80
-        image.resize('300x80')
-        image.write(tmp_file_path)
-      end
-
-      self.logo.attach(
-        io: File.open(tmp_file_path),
-        filename: logo_title
-      )
     end
 end

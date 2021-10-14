@@ -85,7 +85,7 @@ module V3
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                  :name, :tours, :admins, :base_sixty_four
+                  :name, :tours, :admins, :base_sixty_four, :logo_title
               ]
           )
     end

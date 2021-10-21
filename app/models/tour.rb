@@ -30,8 +30,8 @@ class Tour < ApplicationRecord
   belongs_to :theme, default: -> { Theme.first }
 
   enum default_lng: {
-    en: 0, fr: 1, de: 2, pl: 3, nl: 4, fi: 5, sv: 6, it: 7, es: 8, pt: 9,
-    ru: 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, ja: 15, ko: 16
+    "en-US": 0, "fr-FR": 1, "de-DE": 2, "pl-PL": 3, "nl-NL": 4, "fi-FI": 5, "sv-SE": 6, "it-IT": 7, "es-ES": 8, "pt-PT": 9,
+    "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16
   }
 
   validates :title, presence: true

@@ -24,7 +24,7 @@ module V3
     # GET /users/1
     def show
       if current_user == @record || current_user.super
-        render json: @record
+        render json: @record, include_tours: true
       else
         render json: { message: 'You are not autorized to to view this resource.' }.to_json, status: 401
       end

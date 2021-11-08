@@ -34,11 +34,14 @@ RSpec.describe V3::UsersController, type: :controller do
 
       it 'returns list of users when requested by super' do
         create_list(:user, rand(4..7))
+        User.all.each {|user| user.tours << create_list(:tour, rand(0..3))}
         user = User.last
         user.update(super: true)
         signed_cookie(user)
         get :index, params: { tenant: Apartment::Tenant.current }
         expect(json.count).to eq(User.count)
+        expect(User.all.map(&:all_tours).all? { |tours| tours.empty? }).not_to be true
+        expect(json.map { |user| user[:attributes][:all_tours].empty? }).to all(be true)
       end
     end
   end
@@ -79,10 +82,12 @@ RSpec.describe V3::UsersController, type: :controller do
 
       it 'returns user when requested by super' do
         user.update(super: true)
+        other_user.tours << create_list(:tour, 3)
         signed_cookie(user)
         get :show, params: { id: other_user.to_param, tenant: Apartment::Tenant.current }
         expect(response.status).to eq(200)
         expect(json[:id]).to eq(other_user.id.to_s)
+        expect(json[:attributes][:all_tours].count).to eq(3)
       end
 
     end

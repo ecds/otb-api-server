@@ -11,5 +11,12 @@ module V3
     def current_tenant_admin
       object.current_tenant_admin?
     end
+
+    def all_tours
+      if @instance_options[:include_tours]
+        return object.all_tours
+      end
+      []
+    end
   end
 end

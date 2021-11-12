@@ -9,7 +9,7 @@ module V3
 
     def admins
       begin
-        object.admins if current_user&.super || current_user&.current_tenant_admin?
+        object.admins if current_user&.super || current_user&.tour_sets.include?(object)
       rescue NameError
         # This is a problem when using the serializer directly
         nil

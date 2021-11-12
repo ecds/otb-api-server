@@ -18,7 +18,9 @@ module V3
       if current_user.current_tenant_admin? || current_user.super
         render json: @records, include: [ 'admins' ]
       else
-        @records = @records.reject { |ts| ts.published_tours.empty? }
+        if current_user&.tour_sets.empty?
+          @records = @records.reject { |ts| ts.published_tours.empty? }
+        end
         render json: @records
       end
     end
@@ -72,7 +74,7 @@ module V3
       @allowed = if @record.nil?
         crud_allowed?
       else
-        current_user&.current_tenant_admin? || @record.published_tours.present?
+        current_user&.current_tenant_admin? || @record.published_tours.present? || current_user.tour_sets.include?(@record)
       end
     end
 

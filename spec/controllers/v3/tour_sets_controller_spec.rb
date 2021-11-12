@@ -70,6 +70,14 @@ RSpec.describe V3::TourSetsController, type: :controller do
       it 'returns TourSet objects when requested by admin' do
         user = create(:user, super: false)
         user.tour_sets << [TourSet.first, TourSet.last]
+
+        # Make sure no sets are included because of published tours.
+        [TourSet.first.subdir, TourSet.last.subdir].each do |ts|
+          Apartment::Tenant.switch! ts
+          Tour.all.update(published: false)
+        end
+
+        Apartment::Tenant.reset
         signed_cookie(user)
         get :index, params: { tenant: 'public' }
         expect(response.status).to eq(200)
@@ -101,6 +109,7 @@ RSpec.describe V3::TourSetsController, type: :controller do
           get :show, params: { tenant: 'public', id: TourSet.last.to_param }
           expect(response.status).to eq(200)
           expect(attributes[:name]).to eq(TourSet.last.name)
+          expect(relationships[:admins][:data]).to be_empty
         end
       end
 
@@ -132,6 +141,7 @@ RSpec.describe V3::TourSetsController, type: :controller do
           get :show, params: { tenant: 'public', id: TourSet.last.to_param }
           expect(response.status).to eq(200)
           expect(attributes[:name]).to eq(TourSet.last.name)
+          expect(relationships[:admins][:data].map { |admin| admin[:id] }).to include(user.id.to_s)
         end
 
         it 'returns a success response and TourSet when requested by super' do

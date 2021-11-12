@@ -71,17 +71,23 @@ RSpec.describe V3::TourSetsController, type: :controller do
         user = create(:user, super: false)
         user.tour_sets << [TourSet.first, TourSet.last]
 
-        # Make sure no sets are included because of published tours.
+        # Make sure a set doesn't slip in because of published tours.
         [TourSet.first.subdir, TourSet.last.subdir].each do |ts|
           Apartment::Tenant.switch! ts
           Tour.all.update(published: false)
         end
 
+        # Make a new set with published tour to make sure it's included.
+        published_set = create(:tour_set)
+        Apartment::Tenant.switch! published_set.subdir
+        create(:tour, published: true, stops: create_list(:stop, 2))
+
         Apartment::Tenant.reset
+        puts TourSet.all.reject { |tour_set| tour_set.published_tours.empty? }.count
         signed_cookie(user)
         get :index, params: { tenant: 'public' }
         expect(response.status).to eq(200)
-        expect(json.count).to eq(2)
+        expect(json.count).to be > 2
       end
 
       it 'returns no TourSet objects when requested by non admin' do

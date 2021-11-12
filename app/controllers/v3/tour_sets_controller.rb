@@ -9,17 +9,17 @@ module V3
       @records = []
       if params[:subdir] && params[:subdir] != 'public'
         @records = TourSet.where(subdir: params[:subdir])
-      elsif current_user.id.present? && !current_user.super
-        @records = current_user.tour_sets
+      elsif current_user&.tour_sets.present? && !current_user.super
+        @records = published.concat(current_user.tour_sets).uniq
       else
         @records = TourSet.all
       end
 
-      if current_user.current_tenant_admin? || current_user.super
+      if current_user.tour_sets.present? || current_user.super
         render json: @records, include: [ 'admins' ]
       else
         if current_user&.tour_sets.empty?
-          @records = @records.reject { |ts| ts.published_tours.empty? }
+          @records = published
         end
         render json: @records
       end
@@ -80,6 +80,10 @@ module V3
 
     def crud_allowed?
       current_user&.super
+    end
+
+    def published
+      TourSet.all.reject { |tour_set| tour_set.published_tours.empty? }
     end
 
     # Only allow a trusted parameter "white list" through.

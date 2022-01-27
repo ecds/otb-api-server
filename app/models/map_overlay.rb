@@ -14,7 +14,7 @@ class MapOverlay < MediumBaseRecord
   end
 
   def set_initial_bounds
-    return if tour&.bounds.nil?
+    return if tour&.bounds.nil? || tour&.stop_count < 2
 
     if tour
       self.south = self.tour.bounds[:south]

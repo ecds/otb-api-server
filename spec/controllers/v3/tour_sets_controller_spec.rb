@@ -83,7 +83,6 @@ RSpec.describe V3::TourSetsController, type: :controller do
         create(:tour, published: true, stops: create_list(:stop, 2))
 
         Apartment::Tenant.reset
-        puts TourSet.all.reject { |tour_set| tour_set.published_tours.empty? }.count
         signed_cookie(user)
         get :index, params: { tenant: 'public' }
         expect(response.status).to eq(200)

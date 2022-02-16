@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_12_142213) do
+ActiveRecord::Schema.define(version: 2022_02_11_142554) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -298,7 +298,7 @@ ActiveRecord::Schema.define(version: 2021_10_12_142213) do
     t.text "description"
     t.text "article_link"
     t.text "google_analytics"
-    t.boolean "is_geo"
+    t.boolean "is_geo", default: true
     t.boolean "published"
     t.bigint "theme_id"
     t.datetime "created_at", null: false
@@ -315,6 +315,9 @@ ActiveRecord::Schema.define(version: 2021_10_12_142213) do
     t.string "link_text"
     t.integer "duration"
     t.integer "saved_stop_order", array: true
+    t.boolean "restrict_bounds_to_overlay", default: false
+    t.boolean "blank_map", default: false
+    t.boolean "restrict_bounds", default: true
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"

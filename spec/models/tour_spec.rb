@@ -100,4 +100,63 @@ RSpec.describe Tour, type: :model do
     expect(tour.saved_change_to_attribute?(:saved_stop_order)).to be false
     expect(tour.duration).to eq(7336)
   end
+
+  it 'when restricted to overlay bounds, tour bounds mirror overlay' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
+    mo = create(:map_overlay, tour: tour)
+    mo.update(
+      south: '33.73324867399921',
+      north: '33.81498938289962',
+      east: '-84.25453244903566',
+      west: '-84.37135369046021'
+    )
+    tour.update(restrict_bounds_to_overlay: true)
+    expect(tour.bounds[:south]).to eq(33.723031085386665)
+  end
+
+  it 'has no bounds when no stops' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), published: false)
+    expect(tour.bounds).to be nil
+  end
+
+  it 'does not restrict bounds to overlay when no overlay' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), restrict_bounds_to_overlay: true)
+    expect(tour.restrict_bounds_to_overlay).to be false
+  end
+
+  it 'sets restrict_bounds to false when restricted to overlay bounds' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), restrict_bounds_to_overlay: true)
+    mo = create(:map_overlay, tour: tour)
+    expect(tour.restrict_bounds).to be true
+    tour.update(restrict_bounds_to_overlay: true)
+    expect(tour.restrict_bounds).to be false
+    expect(tour.restrict_bounds_to_overlay).to be true
+  end
+
+  it 'sets restrict_to_overlay_bounds when updated to restrict_bounds' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), restrict_bounds_to_overlay: true)
+    mo = create(:map_overlay, tour: tour)
+    expect(tour.restrict_bounds).to be true
+    tour.update(restrict_bounds_to_overlay: true)
+    expect(tour.restrict_bounds).to be false
+    expect(tour.restrict_bounds_to_overlay).to be true
+    tour.update(restrict_bounds: true)
+    expect(tour.restrict_bounds).to be true
+    expect(tour.restrict_bounds_to_overlay).to be false
+  end
+
+  it 'allows both restrictions to be false' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5))
+    mo = create(:map_overlay, tour: tour)
+    expect(tour.restrict_bounds).to be true
+    tour.update(restrict_bounds: false)
+    expect(tour.restrict_bounds).to be false
+    expect(tour.restrict_bounds_to_overlay).to be false
+  end
+
+  it 'will not allow restriction to overlay if no overlay' do
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5))
+    tour.update(restrict_bounds_to_overlay: true)
+    expect(tour.restrict_bounds_to_overlay).to be false
+  end
 end

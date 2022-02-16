@@ -42,6 +42,7 @@ class Tour < ApplicationRecord
   before_validation :update_saved_stop_order
   before_save :calculate_duration
   before_save :check_url
+  before_save :check_for_overlay
   after_save :ensure_slug
   after_create :add_modes
 
@@ -96,17 +97,33 @@ class Tour < ApplicationRecord
   end
 
   def bounds
-    return nil if stops.empty?
+    if self.restrict_bounds_to_overlay && self.map_overlay.present?
+      box = RGeo::Cartesian::BoundingBox.create_from_points(
+        RGeo::Geographic.spherical_factory.point(self.map_overlay.east.to_f, self.map_overlay.south.to_f),
+        RGeo::Geographic.spherical_factory.point(self.map_overlay.west.to_f, self.map_overlay.north.to_f)
+      )
+
+      return {
+        south: box.min_y - (box.y_span / 8),
+        north: box.max_y + (box.y_span / 8),
+        east: box.max_x + (box.x_span / 8),
+        west: box.min_x - (box.x_span / 8),
+        centerLat: box.center_y,
+        centerLng: box.center_x
+      }
+    elsif stops.empty?
+      return nil
+    end
 
     points = stops.map { |stop| RGeo::Geographic.spherical_factory.point(stop.lng, stop.lat) }
     box = RGeo::Cartesian::BoundingBox.create_from_points(points.pop, points.pop)
     points.each { |point| box.add(point) }
 
     {
-      south: box.min_y,
-      north: box.max_y,
-      east: box.max_x,
-      west: box.min_x,
+      south: box.min_y - (box.y_span / 8),
+      north: box.max_y + (box.y_span / 8),
+      east: box.max_x + (box.x_span / 8),
+      west: box.min_x - (box.x_span / 8),
       centerLat: box.center_y,
       centerLng: box.center_x
     }
@@ -153,5 +170,20 @@ class Tour < ApplicationRecord
 
     def update_saved_stop_order
       self.saved_stop_order = self.tour_stops.order(:position).map(&:stop_id)
+    end
+
+    def check_for_overlay
+      if self.restrict_bounds_to_overlay && self.map_overlay.nil?
+        self.restrict_bounds_to_overlay = false
+        # self.restrict_bounds = false
+      end
+
+      if !self.restrict_bounds_to_overlay_was && self.restrict_bounds_to_overlay && self.map_overlay.present?
+        self.restrict_bounds = false
+      end
+
+      if self.restrict_bounds && !self.restrict_bounds_was
+        self.restrict_bounds_to_overlay = false
+      end
     end
 end

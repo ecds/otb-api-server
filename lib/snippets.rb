@@ -5,7 +5,7 @@ sites.each do |ts|
   reload!
   ids = Medium.all.map(&:id)
   ids.each do |id|
-    Apartment::Tenant.switch! ts
+    # Apartment::Tenant.switch! ts
     m = Medium.find(id)
     next if m.video.nil?
     case m.provider
@@ -61,26 +61,67 @@ sites.each do |ts|
   end
 end
 
+# sites = TourSet.all.map(&:subdir)
+# sites.each do |ts|
+#   Apartment::Tenant.switch! ts
+#     reload!
+#     ids = Medium.all.map(&:id)
+#     ids.each do |id|
+#       m = Medium.find(id)
+#       next if m.file.attached?
+#       if m.original_image.path && File.exist?(m.original_image.path)
+#         m.file.attach(
+#           io: File.open(m.original_image.path),
+#           filename: m.original_image.path.split('/').last,
+#           content_type: m.original_image.content_type
+#         )
+#       end
+#     end
+# end
+
+require 'open-uri'
 sites = TourSet.all.map(&:subdir)
 sites.each do |ts|
   Apartment::Tenant.switch! ts
     reload!
-    ids = Medium.all.map(&:id)
-    ids.each do |id|
-      m = Medium.find(id)
-      next if m.file.attached?
-      if m.original_image.path && File.exist?(m.original_image.path)
-        m.file.attach(
-          io: File.open(m.original_image.path),
-          filename: m.original_image.path.split('/').last,
-          content_type: m.original_image.content_type
-        )
-      end
-    end
+ids = Medium.all.map(&:id)
+ids.each do |id|
+  m = Medium.find(id)
+  next if m.file.attached?
+  # if m.original_image.path && File.exist?(m.original_image.path)
+    m.file.attach(
+      io: URI.open("https://api.opentour.emory.edu#{m.original_image.url}"),
+      filename: m.original_image.path.split('/').last,
+      content_type: m.original_image.content_type
+    )
+  # end
+end
 end
 
-sites = TourSet.all.map(&:subdir)
+media = [{"id":1,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16315528664.png"},{"id":2,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/315299464.jpg"},{"id":4,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16315585158.jpeg"},{"id":11,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365689809.jpeg"},{"id":8,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16353452580.png"},{"id":9,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16353452967.png"},{"id":15,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365704670.jpeg"},{"id":19,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365748166.jpeg"},{"id":16,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365706674.jpeg"},{"id":17,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365708608.jpeg"},{"id":3,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16315583885.jpeg"},{"id":5,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16315587373.png"},{"id":6,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16341496140.jpeg"},{"id":14,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365694188.png"},{"id":10,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16353454287.jpeg"},{"id":7,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16341498295.png"},{"id":18,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365709114.jpeg"},{"id":12,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365693051.jpeg"},{"id":13,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365693188.jpeg"},{"id":22,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/671271790.jpg"},{"id":21,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/671271790.jpg"},{"id":23,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16442803933.png"},{"id":20,"url":"https://api.opentour.emory.edu/uploads/middle-passage-markers/16365785848.jpeg"}]
+ids = media.map {|m| m[:id]}
+ids = Medium.all.map(&:id)
+ids.each do |id|
+  Apartment::Tenant.switch! 'middle-passage-markers'
+  m = Medium.find(id)
+  m.file.purge
+  # next if m.file.attached?
+  # if m.original_image.path && File.exist?(m.original_image.path)
+  puts "https://api.opentour.emory.edu#{m.original_image.url}"
+  m.file.attach(
+    io: URI.open("https://api.opentour.emory.edu#{m.original_image.url}"),
+    filename: m.original_image.url.split('/').last,
+    content_type: m.original_image.content_type
+  )
+  puts m.original_image.url.split('/').last
+  m.filename = m.original_image.url.split('/').last
+    m.save!
+    puts m.file.attached?
+  # end
+end
 
+
+sites = TourSet.all.map(&:subdir)
 sites.each do |ts|
   Apartment::Tenant.switch! ts
   reload!

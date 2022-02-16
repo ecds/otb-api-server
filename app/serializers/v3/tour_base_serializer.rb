@@ -26,7 +26,10 @@ module V3
               :stop_count,
               :est_time,
               :link_address,
-              :link_text
+              :link_text,
+              :restrict_bounds,
+              :restrict_bounds_to_overlay,
+              :blank_map
 
     def est_time
       return nil if object.duration.nil?

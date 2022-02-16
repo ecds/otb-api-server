@@ -79,7 +79,8 @@ module V3
                       :mode, :meta_description, :stops,
                       :media, :users, :flat_pages, :map_type,
                       :theme, :use_directions, :default_lng,
-                      :link_address, :link_text
+                      :link_address, :link_text, :restrict_bounds,
+                      :restrict_bounds_to_overlay, :blank_map
                 ]
               )
         end

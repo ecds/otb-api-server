@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 Rails.application.configure do
-  config.hosts << 'api.opentour.emory.edu'
-  Rails.application.routes.default_url_options[:host] = 'https://api.opentour.emory.edu'
+  config.hosts << 'api.opentour.site'
+  Rails.application.routes.default_url_options[:host] = 'https://api.opentour.site'
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Store uploaded files on the local file system in a temporary directory.
@@ -87,7 +87,7 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  ENV['BASE_URL'] = 'https://api.opentour.emory.edu'
+  ENV['BASE_URL'] = 'https://api.opentour.site'
   ENV['INSECURE_IMAGE_BASE_URL'] = 'http://otbimages.ecdsdev.org'
 
 end

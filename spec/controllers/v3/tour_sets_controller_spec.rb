@@ -50,7 +50,21 @@ RSpec.describe V3::TourSetsController, type: :controller do
         expect(json.count).to eq(0)
       end
 
-      it 'returns a success response by and TourSet object by subdir when tour set has a published tour and not authorized' do
+      it 'returns a success response and only TourSet object by subdir when tour set has a published tour and not authorized' do
+        TourSet.all.each do |ts|
+          Apartment::Tenant.switch! ts.subdir
+          tour = create(:tour, published: true)
+          tour.stops << create(:stop)
+        end
+        Apartment::Tenant.reset
+        expect(TourSet.all.reject { |ts| ts.published_tours.empty? }.count).to be > 1
+        get :index, params: { tenant: 'public', subdir: TourSet.second.subdir }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(1)
+        expect(attributes.first[:name]).to eq(TourSet.second.name)
+      end
+
+      it 'returns a success response and only one TourSet object by subdir when tour set has a published tour and not authorized' do
         Apartment::Tenant.switch! TourSet.second.subdir
         tour = create(:tour, published: true)
         tour.stops << create(:stop)
@@ -96,6 +110,31 @@ RSpec.describe V3::TourSetsController, type: :controller do
         get :index, params: { tenant: 'public' }
         expect(response.status).to eq(200)
         expect(json.count).to eq(0)
+      end
+
+      it 'returns one unpublished TourSet object when requested by subdir and by super' do
+        user = create(:user, super: true)
+        signed_cookie(user)
+        Apartment::Tenant.switch! TourSet.second.subdir
+        Tour.all.each { |t| t.update(published: false) }
+        Apartment::Tenant.reset
+        get :index, params: { tenant: 'public', subdir: TourSet.second.subdir }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(1)
+        expect(attributes.first[:name]).to eq(TourSet.second.name)
+      end
+
+      it 'returns one unpublished TourSet object when requested by subdir and by super' do
+        user = create(:user, super: false)
+        user.tour_sets << TourSet.last
+        signed_cookie(user)
+        Apartment::Tenant.switch! TourSet.last.subdir
+        Tour.all.each { |t| t.update(published: false) }
+        Apartment::Tenant.reset
+        get :index, params: { tenant: 'public', subdir: TourSet.last.subdir }
+        expect(response.status).to eq(200)
+        expect(json.count).to eq(1)
+        expect(attributes.first[:name]).to eq(TourSet.last.name)
       end
     end
 

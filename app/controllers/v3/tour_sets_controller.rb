@@ -9,6 +9,12 @@ module V3
       @records = []
       if params[:subdir] && params[:subdir] != 'public'
         @records = TourSet.where(subdir: params[:subdir])
+        if !@records.first.published_tours.empty? || current_user&.tour_sets.include?(@records.first) || current_user&.super
+          render json: @records
+        else
+          render json: TourSet.none
+        end
+        return
       elsif current_user&.tour_sets.present? && !current_user.super
         @records = published.concat(current_user.tour_sets).uniq
       else

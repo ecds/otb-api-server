@@ -54,6 +54,15 @@ RSpec.describe V3::MediaController, type: :controller do
         expect(json.count).to eq(Medium.count)
         expect(Medium.count).to be > Tour.published.map { |t| t.media.count }.sum
       end
+
+      it 'returns a paginated list when page parameter is persent' do
+        user = create(:user, super: true)
+        signed_cookie(user)
+        published_tour = create(:tour, published: true)
+        create_list(:medium, 35).each { |m| published_tour.media << m }
+        get :index, params: { tenant: Apartment::Tenant.current, page: '2' }
+        expect(json.count).to eq(10)
+      end
     end
 
     describe 'GET #show' do

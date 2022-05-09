@@ -34,7 +34,7 @@ class Tour < ApplicationRecord
     "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16
   }
 
-  validates :title, presence: true
+  validates :title, presence: true, uniqueness: { case_sensitive: false }
 
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }

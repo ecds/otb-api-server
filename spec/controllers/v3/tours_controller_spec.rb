@@ -183,7 +183,9 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(response.status).to eq(201)
         expect(Tour.count).to eq(original_tour_count + 1)
       end
+    end
 
+    context 'with invalid params' do
       it 'returns 422 when invalid attributes' do
         user = create(:user, super: true)
         signed_cookie(user)
@@ -192,6 +194,16 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(response.status).to eq(422)
         expect(Tour.count).to eq(original_tour_count)
         expect(errors).to include('Title can\'t be blank')
+      end
+
+      it 'returns 422 when title already used' do
+        user = create(:user, super: true)
+        signed_cookie(user)
+        title = Faker::Movies::HitchhikersGuideToTheGalaxy.location
+        create(:tour, title: title)
+        post :create, params: { data: { type: 'tours', attributes: { title: title } }, tenant: Apartment::Tenant.current }
+        expect(response.status).to eq(422)
+        expect(Tour.where(title: title).count). to eq(1)
       end
     end
   end

@@ -17,14 +17,20 @@ sites.each do |ts|
   end
 end
 
-media = Medium.all.map(&:id)
+TourSet.all.each do |ts|
+  puts ts.subdir
+  Apartment::Tenant.switch! ts.subdir
+  Medium.all.each do |medium|
+    if !medium.file.attached?
+      # medium.delete
+      puts "#{medium.id} stops: #{medium.stops.count} tours: #{medium.tours.count}"
+    end
+  end
+end
 
-media.each do |m|
-  puts m
-  Apartment::Tenant.switch! 'july-22nd'
-  medium = Medium.find(m)
-  if !medium.file.attached?
-    medium.delete
+Medium.all.each do |m|
+  if !m.file.attached? and (!m.tours.empty? or !m.stops.empty?)
+    print m.id
   end
 end
 

@@ -177,7 +177,7 @@ RSpec.configure do |config|
         headers: {}
       )
 
-    stub_request(:get, 'https://i1.sndcdn.com/artworks-KsTDkyGJ8S6x-0-t500x500.jpg')
+    stub_request(:get, /https:\/\/i1\.sndcdn.com\/artworks-.*\.jpg/)
       .to_return(
         body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
         status: 200,

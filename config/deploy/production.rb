@@ -1,6 +1,9 @@
 set :branch, 'develop'
 
-server '44.192.30.237', user: 'deploy', roles: %w{app db web}, primary: :my_value
+# server '44.192.30.237', user: 'deploy', roles: %w{app db web}, primary: :my_value
+role :app, %w{34.239.167.5 54.174.249.237}, user: 'deploy'
+role :web, %w{34.239.167.5 54.174.249.237}, user: 'deploy'
+role :db,  %w{34.239.167.5 54.174.249.237}, user: 'deploy'
 
 set :deploy_to, '/data/otb-api-server'
 

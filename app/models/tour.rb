@@ -140,12 +140,18 @@ class Tour < ApplicationRecord
 
     return unless self.will_save_change_to_published? || self.will_save_change_to_saved_stop_order? || self.will_save_change_to_mode_id?
 
+    durations = []
     destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
-    origin = destinations.shift
 
-    g_directions = GoogleDirections.new(origin, destinations, stops.count, mode.title)
+    # The direction matrix API limits the number of destinations to 25.
+    # Calculate the duration in chunks to stay below the limit.
+    destinations.each_slice(24) do |group|
+      origin = group.shift
+      g_directions = GoogleDirections.new(origin, group, group.count + 1, mode.title)
+      durations.push(g_directions.duration)
+    end
 
-    self.duration = g_directions.duration
+    self.duration = durations.sum.zero? ? nil : durations.sum
   end
 
   private

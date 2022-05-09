@@ -9,9 +9,7 @@ class MapIcon < MediumBaseRecord
 
   def check_dimensions
     return if base_sixty_four.nil?
-    # puts base_sixty_four
 
-    # headers, tmp_base_sixty_four = base_sixty_four.split(',')
     file = MiniMagick::Image.read(Base64.decode64(base_sixty_four))
 
     if file[:height] > 80 || file[:width] > 80

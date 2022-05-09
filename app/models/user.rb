@@ -33,7 +33,6 @@ class User < ActiveRecord::Base
       next if tours.empty? || current_tenant_admin?
       Apartment::Tenant.switch! tour_set.subdir
       _tours = TourAuthor.where(user: self)
-      # puts tours.ma
       all.push(_tours.map { |ta| { id: ta.tour.id, tenant: ta.tour.tenant, title: ta.tour.title } })
     end
     Apartment::Tenant.reset

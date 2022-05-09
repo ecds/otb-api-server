@@ -4,7 +4,6 @@
 module RequestSpecHelper
   # Parse JSON response to ruby hash
   def json
-    puts response.headers
     JSON.parse(response.body).with_indifferent_access[:data]
   end
 

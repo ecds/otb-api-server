@@ -13,6 +13,14 @@ RSpec.describe Medium, type: :model do
       expect(medium.file.attached?).to be true
     end
 
+    it 'gets image from youtube when downloaded image is a StrinIO object and sets embed' do
+      file = File.open(Rails.root + 'spec/factories/images/atl.png')
+      string_io = StringIO.new(file.read)
+      base64 = VideoProps.encode_image(string_io)
+      medium = create(:medium, base_sixty_four: base64)
+      expect(medium.file.attached?).to be true
+    end
+
     it 'gets nothing when YouTube video is not found' do
       medium = create(:medium, video: 'CvmxYF9ULbm', base_sixty_four: nil, video_provider: 'youtube')
       expect(medium.embed).to be nil

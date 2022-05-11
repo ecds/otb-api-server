@@ -63,12 +63,21 @@ module VideoProps
     return if downloaded_image.nil?
 
     medium.filename = "#{medium.video}.jpg"
-    begin
-      medium.base_sixty_four = Base64.encode64(downloaded_image.open.read)
-      downloaded_image.unlink
-    rescue NoMethodError
-      medium.base_sixty_four = Base64.encode64(downloaded_image)
-    end
+    medium.base_sixty_four = encode_image(downloaded_image)
     medium.attach_file unless medium.file.attached?
+  end
+
+  def self.encode_image(downloaded_image)
+    begin
+      if downloaded_image.is_a? StringIO
+        base_sixty_four = Base64.encode64(downloaded_image.read)
+      else
+        base_sixty_four = Base64.encode64(downloaded_image.open.read)
+        downloaded_image.unlink
+      end
+    rescue NoMethodError
+      base_sixty_four = Base64.encode64(downloaded_image)
+    end
+    base_sixty_four
   end
 end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'uri'
 
 # Model class for a tour.
@@ -151,7 +152,7 @@ class Tour < ApplicationRecord
       durations.push(g_directions.duration)
     end
 
-    self.duration = durations.sum.zero? ? nil : durations.sum
+    self.duration = durations.compact.sum.zero? ? nil : durations.sum
   end
 
   private
@@ -167,7 +168,7 @@ class Tour < ApplicationRecord
     end
 
     def check_url
-      return if link_address.nil?
+      return if link_address.blank?
 
       uri = URI(link_address)
 

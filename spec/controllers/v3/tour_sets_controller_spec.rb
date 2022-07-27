@@ -292,13 +292,25 @@ RSpec.describe V3::TourSetsController, type: :controller do
           expect(response).to have_http_status(401)
         end
 
-        it 'does not update TourSet when not super but is a tenant admin' do
+        it 'allows update TourSet when not super but is a tenant admin' do
           user = create(:user, super: false)
           user.tour_sets << TourSet.second
           signed_cookie(user)
           put :update, params: valid_params.merge({ id: TourSet.second.to_param })
+          expect(response).to have_http_status(200)
+        end
+
+        it 'does not update TourSet when not super not a tenant admin but is a tour author' do
+          Apartment::Tenant.switch! TourSet.second.subdir
+          tour = create(:tour)
+          user = create(:user, super: false)
+          user.tour_sets = []
+          user.tours << tour
+          signed_cookie(user)
+          put :update, params: valid_params.merge({ id: TourSet.second.to_param })
           expect(response).to have_http_status(401)
         end
+
       end
 
       context 'when authenticated and authorized' do

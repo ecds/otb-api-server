@@ -84,7 +84,7 @@ RSpec.configure do |config|
     Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
 
     # Set the host for ActiveStorage urls
-    ActiveStorage::Current.host = 'http://test.host'
+    ActiveStorage::Current.url_options = { host: 'http://test.host' }
     # host! 'atlanta.lvh.me'
     # load Rails.root + 'db/seeds.rb'
 

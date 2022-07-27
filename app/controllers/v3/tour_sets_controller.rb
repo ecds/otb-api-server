@@ -85,7 +85,7 @@ module V3
     end
 
     def crud_allowed?
-      current_user&.super
+      current_user&.super || (current_user.present? && @record&.in?(current_user.tour_sets))
     end
 
     def published

@@ -39,7 +39,6 @@ class Medium < MediumBaseRecord
     return nil if !self.file.attached?
 
     if file.content_type.include?('gif')
-      height = ActiveStorage::Analyzer::ImageAnalyzer.new(file).metadata[:height]
       return {
         lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
         mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,

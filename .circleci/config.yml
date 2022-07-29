@@ -1,7 +1,7 @@
 version: 2
 
 orbs:
-  browser-tools: circleci/browser-tools@1.2.2
+  browser-tools: circleci/browser-tools@1.4.0
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
     # Primary container image where all commands run
 
     docker:
-      - image: circleci/ruby:3.0.2-browsers
+      - image: circleci/ruby:3.0-browsers
         environment:
           PGUSER: root
           RAILS_ENV: test
@@ -41,6 +41,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
             sudo apt update
             sudo apt install -y postgresql-client || true
             sudo apt install -y imagemagick

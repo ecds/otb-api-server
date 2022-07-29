@@ -76,7 +76,7 @@ module V3
                 params, only: [
                       :display_name, :identification, :password,
                       :password_confirmation, :uid, :tour_sets,
-                      :tours, :super, :email
+                      :tours, :super, :email, :terms_accepted
                   ]
               )
         end

@@ -37,4 +37,11 @@ RSpec.describe User, type: :model do
       expect(user.provider).to eq(login.provider)
     end
   end
+
+  context 'has default' do
+    it 'terms accepted defaults to false' do
+      user = create(:user)
+      expect(user.terms_accepted).to be(false)
+    end
+  end
 end

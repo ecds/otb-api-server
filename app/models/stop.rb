@@ -31,7 +31,7 @@ class Stop < ApplicationRecord
   end
 
   def slug
-    title ? title.parameterize : ''
+    title ? title.parameterize_intl : ''
   end
 
   def splash

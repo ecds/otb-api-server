@@ -56,7 +56,7 @@ class Tour < ApplicationRecord
   end
 
   def slug
-    title.parameterize
+    title.parameterize_intl
   end
 
   def tenant

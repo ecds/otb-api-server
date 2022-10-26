@@ -66,7 +66,7 @@ class TourSet < ApplicationRecord
   private
 
     def set_subdir
-      self.subdir = name.parameterize
+      self.subdir = name.parameterize_intl
     end
 
     def create_tenant

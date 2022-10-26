@@ -33,7 +33,7 @@ module V3
       def meta_content
         {
           title: @tour.title,
-          intro: sanitize(@tour.description)
+          intro: sanitize(@tour.description),
           images: tour.media.map do |m|
             {
               caption: m.caption,

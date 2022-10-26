@@ -34,6 +34,13 @@ module V3
         {
           title: @tour.title,
           intro: sanitize(@tour.description)
+          images: tour.media.map do |m|
+            {
+              caption: m.caption,
+              full: m.files[:desktop],
+              thumb: m.files[:mobile]
+            }
+          end
         }
       end
 

@@ -9,7 +9,9 @@ end
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.1.0'
+gem 'rails', '~> 7.0.4'
+# gem 'rails', '~> 6.1.0'
+
 gem 'rack', '>= 2.0.6'
 gem 'pg'
 gem 'mysql2'
@@ -88,3 +90,6 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+gem 'net-smtp', require: false
+gem 'net-imap', require: false
+gem 'net-pop', require: false

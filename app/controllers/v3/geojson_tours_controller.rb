@@ -33,8 +33,8 @@ module V3
       def meta_content
         {
           title: @tour.title,
-          intro: sanitize(@tour.description),
-          images: tour.media.map do |m|
+          description: sanitize(@tour.description),
+          images: @tour.media.map do |m|
             {
               caption: m.caption,
               full: m.files[:desktop],
@@ -54,7 +54,7 @@ module V3
           },
           properties: {
             title: stop.title,
-            description: stop.description,
+            description: sanitize(stop.description),
             position: position,
             images: stop.media.map do |m|
               {

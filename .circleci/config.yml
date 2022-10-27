@@ -10,7 +10,7 @@ jobs:
     # Primary container image where all commands run
 
     docker:
-      - image: circleci/ruby:3.0-browsers
+      - image: cimg/ruby:3.1.2-browsers
         environment:
           PGUSER: root
           RAILS_ENV: test

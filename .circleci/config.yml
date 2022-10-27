@@ -20,6 +20,7 @@ jobs:
           TEST_DB_NAME: otb
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           CI: 'circleci'
+          BROWSER_PATH: /usr/bin/google-chrome
 
       - image: circleci/postgres:10
         environment:
@@ -44,7 +45,9 @@ jobs:
             wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
             sudo apt update
             sudo apt install -y postgresql-client || true
-            sudo apt install -y imagemagick
+            sudo apt install -y imagemagick libappindicator1 fonts-liberation
+            wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            sudo dpkg -i google-chrome*.deb
             gem install bundle
             bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs 4 --retry 3
 

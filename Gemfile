@@ -19,7 +19,7 @@ gem 'apartment'
 gem 'active_model_serializers', '~> 0.10.0.rc3'
 gem 'acts-as-taggable-on', '~> 5.0'
 # Use Puma as the app server
-gem 'puma', '~> 4.3.0'
+gem 'puma', '~> 5.6.7'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '~> 3.0'
 gem "actionview", ">= 5.2.2.1"

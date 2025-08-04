@@ -9,14 +9,6 @@ GIT
       jwt
       rails
 
-GIT
-  remote: https://github.com/stympy/faker.git
-  revision: efc6a90d845a25a34ddbcc9280ed951ecd346163
-  branch: master
-  specs:
-    faker (2.22.0)
-      i18n (>= 1.8.11, < 2)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -159,6 +151,8 @@ GEM
     factory_bot_rails (6.2.0)
       factory_bot (~> 6.2.0)
       railties (>= 5.0.0)
+    faker (3.5.2)
+      i18n (>= 1.8.11, < 2)
     faraday (1.10.0)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
@@ -256,6 +250,8 @@ GEM
     net-ssh (7.0.1)
     netrc (0.11.0)
     nio4r (2.5.8)
+    nokogiri (1.13.8-aarch64-linux)
+      racc (~> 1.4)
     nokogiri (1.13.8-x86_64-linux)
       racc (~> 1.4)
     oauth (0.5.10)
@@ -388,6 +384,7 @@ GEM
     zeitwerk (2.6.0)
 
 PLATFORMS
+  aarch64-linux
   x86_64-linux
 
 DEPENDENCIES
@@ -403,7 +400,7 @@ DEPENDENCIES
   ecds_rails_auth_engine!
   factory_bot
   factory_bot_rails
-  faker!
+  faker
   ferrum
   image_processing (~> 1.2)
   ipinfo-rails

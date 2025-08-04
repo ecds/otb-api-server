@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+
+# Development files
+.env*
+
+# Dependencies
+node_modules
+vendor/bundle/.bundle
+
+# Build artifacts
+tmp/*
+log/*
+coverage/*
+public/storage/*
+storage/*
+
+# Test files
+spec/
+test/
+.rspec
+
+# Development tools
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Rails specific
+/log/*.log
+/tmp
+/storage
+/public/storage
+/coverage
+
+# Docker
+Dockerfile*
+docker-compose*

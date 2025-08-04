@@ -46,7 +46,7 @@ module OpenTourApi
     config.middleware.use(ActionDispatch::Cookies)
     config.middleware.use(ActionDispatch::Session::CookieStore)
     config.action_dispatch.cookies_serializer = :json
-    config.middleware.use(IPinfoMiddleware, { token: Rails.application.credentials.dig(:ipinfo) })
+    config.middleware.use(IPinfoMiddleware, { token: ENV['IPINFO_TOKEN'] || Rails.application.credentials.dig(:ipinfo) })
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.

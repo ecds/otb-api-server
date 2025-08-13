@@ -78,19 +78,12 @@ jobs:
 
     - name: Run RSpec tests
       run: |
-        DB_ADAPTER=postgresql bundle exec rspec --format progress --format RspecJunitFormatter --out tmp/rspec.xml
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: tmp/rspec.xml
+        DB_ADAPTER=postgresql bundle exec rspec --format progress
 
     - name: Upload coverage to Coveralls
       if: github.event_name == 'push'
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ./coverage/lcov.info
+        path-to-lcov: ./coverage/lcov/otb-api-server.lcov
       continue-on-error: true

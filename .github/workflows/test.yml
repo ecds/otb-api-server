@@ -35,22 +35,6 @@ jobs:
         ports:
           - 5432:5432
 
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_DATABASE: otb_test
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        ports:
-          - 3306:3306
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -64,7 +48,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev libappindicator1 fonts-liberation
+        sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation
         wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         sudo dpkg -i google-chrome-stable_current_amd64.deb || true
         sudo apt-get install -f -y
@@ -77,14 +61,10 @@ jobs:
         mkdir -p public/storage/tmp
         chmod 777 public/storage/tmp
 
-    - name: Wait for databases to be ready
+    - name: Wait for database to be ready
       run: |
         until pg_isready -h localhost -p 5432 -U postgres; do
           echo "Waiting for PostgreSQL..."
-          sleep 2
-        done
-        until mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ppassword --silent; do
-          echo "Waiting for MySQL..."
           sleep 2
         done
 

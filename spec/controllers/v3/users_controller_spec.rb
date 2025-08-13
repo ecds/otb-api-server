@@ -95,7 +95,7 @@ RSpec.describe V3::UsersController, type: :controller do
 
   describe 'POST #create' do
     let(:user) { create(:user, super: false) }
-    let(:valid_params) { { data: { type: 'users', attributes: { display_name: Faker::Music::Hiphop.artist, email: Faker::Internet.safe_email } }, tenant: 'public' } }
+    let(:valid_params) { { data: { type: 'users', attributes: { display_name: Faker::Music::Hiphop.artist, email: Faker::Internet.email } }, tenant: 'public' } }
 
     context 'unauthorized' do
       it 'does not create a new User when unauthenticated' do

@@ -79,11 +79,3 @@ jobs:
     - name: Run RSpec tests
       run: |
         DB_ADAPTER=postgresql bundle exec rspec --format progress
-
-    - name: Upload coverage to Coveralls
-      if: github.event_name == 'push'
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ./coverage/lcov/otb-api-server.lcov
-      continue-on-error: true

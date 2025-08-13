@@ -1,0 +1,142 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ develop, main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  RAILS_ENV: production
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: otb_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1.2
+        bundler-cache: true
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev
+
+    - name: Create directories
+      run: |
+        sudo mkdir -p /data/tmp
+        sudo chmod 777 /data/tmp
+        mkdir -p public/storage/tmp
+
+    - name: Set up database
+      run: |
+        export DB_ADAPTER=postgresql
+        until pg_isready -h localhost -p 5432 -U postgres; do sleep 2; done
+        bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
+        bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
+
+    - name: Run tests
+      run: |
+        DB_ADAPTER=postgresql bundle exec rspec --format progress
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    environment: 
+      name: ${{ 
+        github.event.inputs.environment || 
+        (github.ref == 'refs/heads/main' && 'production') || 
+        (github.ref == 'refs/heads/develop' && 'staging') 
+      }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.1.2
+        bundler-cache: true
+
+    - name: Determine deployment environment
+      id: deploy-env
+      run: |
+        if [[ "${{ github.event.inputs.environment }}" != "" ]]; then
+          echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "environment=production" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          echo "environment=staging" >> $GITHUB_OUTPUT
+        else
+          echo "No deployment environment determined"
+          exit 1
+        fi
+
+    - name: Configure SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        cat >> ~/.ssh/config << EOF
+        Host *
+          IdentityFile ~/.ssh/deploy_key
+          StrictHostKeyChecking no
+          UserKnownHostsFile /dev/null
+        EOF
+
+    - name: Add deployment servers to known hosts
+      run: |
+        ssh-keyscan -H 3.238.239.164 >> ~/.ssh/known_hosts
+        ssh-keyscan -H 3.86.138.59 >> ~/.ssh/known_hosts
+        ssh-keyscan -H 3.236.252.227 >> ~/.ssh/known_hosts
+
+    - name: Deploy with Capistrano
+      run: |
+        environment="${{ steps.deploy-env.outputs.environment }}"
+        echo "Deploying to environment: $environment"
+        bundle exec cap $environment deploy
+      env:
+        RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        environment="${{ steps.deploy-env.outputs.environment }}"
+        if [[ "${{ job.status }}" == "success" ]]; then
+          echo "Successfully deployed to $environment"
+        else
+          echo "Deployment to $environment failed"
+        fi

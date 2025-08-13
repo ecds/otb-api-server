@@ -1,8 +1,6 @@
-# Docker Compose Configuration for OpenTourBuilder API with HTTPS
-# This enables proper HTTPS support as intended by the project
+
 
 services:
-  # PostgreSQL Database with PostGIS
   postgres:
     image: postgis/postgis:14-3.2
     platform: linux/amd64
@@ -20,7 +18,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis for Action Cable
   redis:
     image: redis:7-alpine
     ports:
@@ -28,13 +25,11 @@ services:
     volumes:
       - redis_data:/data
 
-  # Rails Application with HTTPS
   web:
     build: .
     ports:
       - "3000:3000"
     environment:
-      # Database Configuration
       DB_ADAPTER: postgresql
       DB_HOSTNAME: postgres
       DB_USERNAME: user
@@ -42,23 +37,19 @@ services:
       DB_NAME: otb_development
       TEST_DB_NAME: otb_test
       
-      # Redis Configuration
       REDIS_URL: redis://redis:6379/1
       
-      # Rails Configuration
       RAILS_ENV: development
       RAILS_SERVE_STATIC_FILES: "true"
       
-      # SSL Configuration
       BASE_URL: "https://localhost:3000"
       
-      # Bypass credentials temporarily
       IPINFO_TOKEN: "development_token"
     volumes:
       - .:/rails
       - tmp_data:/data/tmp
       - storage_tmp:/rails/public/storage/tmp
-      - ssl_certs:/rails/ssl  # Mount for SSL certificates
+      - ssl_certs:/rails/ssl  
     depends_on:
       postgres:
         condition: service_healthy
@@ -87,4 +78,4 @@ volumes:
   redis_data:
   tmp_data:
   storage_tmp:
-  ssl_certs:  # Volume for SSL certificates
+  ssl_certs:  

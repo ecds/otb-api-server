@@ -1,4 +1,3 @@
-
 FROM ruby:3.1.2-slim
 
 RUN apt-get update -qq && \
@@ -30,4 +29,6 @@ RUN mkdir -p /data/tmp public/storage/tmp tmp/pids && \
 
 EXPOSE 3000
 
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]

@@ -10,7 +10,7 @@
 # end
 
 Rails.application.routes.draw do
-
+  root 'welcome#index'
   resources :tour_set_admins
   scope ':tenant' do
     scope module: :v3, constraints: ApiVersion.new('v3', true) do
@@ -34,8 +34,15 @@ Rails.application.routes.draw do
       resources :flat_pages, path: 'flat-pages'
       resources :tour_flat_pages, path: 'tour-flat-pages'
       resources :geojson_tours
-
     end
+      namespace :v4 do
+        namespace :public do          
+          resources :tours, only: [:index]
+          resources :stops, only: [:index]
+          resources :tour_sets, only: [:index], path: 'tour-sets'
+          get "media/:key", to: "media#show"
+        end
+      end
   end
   mount EcdsRailsAuthEngine::Engine, at: '/auth'
 end

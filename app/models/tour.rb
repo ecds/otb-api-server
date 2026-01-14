@@ -4,9 +4,10 @@ require 'uri'
 
 # Model class for a tour.
 class Tour < ApplicationRecord
-  include HtmlSaintizer
-
-
+  include ActionView::Helpers::DateHelper
+  include HtmlSanitizer
+  include Searchable
+  
   has_many :tour_stops, autosave: true, dependent: :destroy
   has_many :stops, -> { distinct }, through: :tour_stops
   has_many :tour_modes, autosave: true, dependent: :destroy
@@ -52,7 +53,7 @@ class Tour < ApplicationRecord
   scope :has_stops, -> { includes(:stops).where.not(stops: { id: nil }) }
 
   def sanitized_description
-    HtmlSaintizer.accessable(description)
+    HtmlSanitizer.accessible(description)
   end
 
   def slug
@@ -66,13 +67,6 @@ class Tour < ApplicationRecord
   def tenant_title
     Apartment::Tenant.current.titleize
   end
-
-  # def external_url
-  #   if Apartment::Tenant.current == 'public'
-  #     return nil
-  #   end
-  #   TourSet.find_by(subdir: Apartment::Tenant.current).external_url
-  # end
 
   def theme_title
     theme.title
@@ -155,6 +149,39 @@ class Tour < ApplicationRecord
     self.duration = durations.compact.sum.zero? ? nil : durations.sum
   end
 
+  def search_data
+    {
+      blank_map:,
+      bounds:,
+      default_lng:,
+      description:,
+      est_time: duration ? "#{distance_of_time_in_words(duration).capitalize} #{mode.title.downcase}" : nil,
+      flat_pages: tour_flat_pages.map { |fp| {title: fp.flat_page.title, position: fp.position, slug: fp.flat_page.slug, body: fp.flat_page.body} }.sort_by { |fp| fp[:position] },
+      id:,
+      is_geo:,
+      link_address:,
+      link_text:,
+      map_overlay: map_overlay_index,
+      map_type: map_type || 'hybrid',
+      media: media_index,
+      modes: modes.map { |m| {title: m.title, icon: m.icon, default: m == self.mode } },
+      published:,
+      restrict_bounds:,
+      restrict_bounds_to_overlay:,
+      sanitized_description:,
+      splash:,
+      slug:,
+      stop_count:,
+      stops: stop_index,
+      tenant:,
+      tenant_title:,
+      title:,
+      theme: theme.title,
+      type: 'tour',
+      use_directions:
+    }
+  end
+
   private
 
     def ensure_slug
@@ -192,5 +219,38 @@ class Tour < ApplicationRecord
       if self.restrict_bounds && !self.restrict_bounds_was
         self.restrict_bounds_to_overlay = false
       end
+    end
+
+    def media_index
+      indexed_media = tour_media.map do |m|
+        medium_index(m, tenant)
+      end
+      
+      indexed_media.sort_by { |m| m[:position] }
+    end
+
+    def stop_index
+      indexed_stops = tour_stops.map do |ts|
+        {
+          next: ts.next.present? ? { id: ts.next.stop.id, slug: ts.next.stop.slug, title: ts.next.stop.title } : nil,
+          position: ts.position,
+          previous: ts.previous.present? ? { id: ts.previous.stop.id, slug: ts.previous.stop.slug, title: ts.previous.stop.title } : nil,
+          **ts.stop.search_data
+        }
+      end
+      
+      return indexed_stops.sort_by { |s| s[:position] }
+    end
+
+    def map_overlay_index
+      return unless map_overlay.present?
+      
+      return {
+        east: map_overlay.east,
+        image_url: map_overlay.original_image_url,
+        north: map_overlay.north,
+        south: map_overlay.south,
+        west: map_overlay.west
+      }
     end
 end

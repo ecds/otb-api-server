@@ -271,3 +271,11 @@ sites.each do |ts|
   Apartment::Tenant.switch! ts
   Tour.all.each { |t| t.update(restrict_bounds: false) }
 end
+
+no_medium = []
+tenants.each do |t|
+  Apartment::Tenant.switch!(t)
+  TourMedium.all.each do |tm|
+    no_medium.push(tm) if tm.medium.nil?
+  end
+end

@@ -14,7 +14,7 @@ gem 'rails', '~> 6.1.0'
 
 gem 'rack', '>= 2.0.6'
 gem 'pg'
-gem 'mysql2'
+# gem 'mysql2'
 # Multitenancy for Rails and ActiveRecord
 gem 'ros-apartment', require: 'apartment'
 # For JSONAPI responses
@@ -45,6 +45,10 @@ gem 'aws-sdk-s3', '~> 1'
 gem 'rgeo'
 gem 'ipinfo-rails'
 
+# Elasticsearch
+gem 'elasticsearch', '~> 7.17.1'
+gem 'searchkick'
+gem 'faraday-httpclient', '~> 2.0'
 
 # Vidoe provider APIs
 gem 'vimeo'
@@ -68,7 +72,7 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
-  gem 'rspec-rails', '~> 5.1.2'
+  gem 'rspec-rails', '~> 6.1.0'
   # Use Capistrano for deployment
   gem 'capistrano-rails'
   gem 'capistrano-rbenv', '~> 2.0'

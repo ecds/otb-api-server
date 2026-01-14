@@ -2,11 +2,12 @@
 
 require 'rails_helper'
 
-RSpec.describe 'V3::Tours', type: :request do
-  describe 'GET /:tenant/tours' do
-    Tour.reindex
+RSpec.describe 'V4::Tours', type: :request do
+  describe 'GET /:tenant/v4/public/tours' do
     before {
-      get "/#{Apartment::Tenant.current}/tours", headers: { 'HTTP_USER_AGENT': 'bot' }
+      Apartment::Tenant.switch! TourSet.last.subdir
+      Tour.reindex
+      get "/#{Apartment::Tenant.current}/v4/public/tours", headers: { 'HTTP_USER_AGENT': 'bot' }
     }
 
     it 'returns only published tours' do

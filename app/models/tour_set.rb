@@ -2,6 +2,8 @@
 
 # Model class for tour sets. This is the main model for "instances" of Open Tour Builder.
 class TourSet < ApplicationRecord
+  include Searchable
+
   before_save :set_subdir
   before_save :attach_file
   after_create :create_tenant
@@ -24,13 +26,14 @@ class TourSet < ApplicationRecord
       Tour.published.has_stops.each do |t|
         tour = {
           title: t.title,
-          slug: t.slug
+          slug: t.slug,
+          location: { lat: t.bounds[:centerLat], lng: t.bounds[:centerLng] }
         }
         tours.push(tour)
       end
       tours
-    rescue Apartment::TenantNotFound => error
-      # self.delete
+    rescue Apartment::TenantNotFound => _
+      logger.warn('Tenant not found.')
     end
   end
 
@@ -47,8 +50,8 @@ class TourSet < ApplicationRecord
         tours.push(tour)
       end
       tours
-    rescue Apartment::TenantNotFound => error
-      # self.delete
+    rescue Apartment::TenantNotFound => _
+      logger.warn('Tenant not found.')
     end
   end
 
@@ -61,6 +64,23 @@ class TourSet < ApplicationRecord
     end
 
     nil
+  end
+
+  def should_index?
+    published_tours.count > 0
+  end
+
+  def search_data
+    {
+      external_url:,
+      footer_logo:,
+      name:,
+      logo_url:,
+      mapable_tours:,
+      published_tours:,
+      notes:,
+      subdir:,
+    }
   end
 
   private
@@ -114,7 +134,7 @@ class TourSet < ApplicationRecord
     #
     # Create and attach file from Base64 string.
     #
-    # This should only be called once when a new medium obeject is created via the API
+    # This should only be called once when a new medium object is created via the API
     # It assumes
     #
     # Some code taken from https://github.com/rootstrap/active-storage-base64/blob/v1.2.0/lib/active_storage_support/base64_attach.rb#L17-L32
@@ -129,7 +149,7 @@ class TourSet < ApplicationRecord
       if base_sixty_four.nil? && logo.attached?
         logo.purge
       else
-        headers, self.base_sixty_four = base_sixty_four.split(',')
+        _, self.base_sixty_four = base_sixty_four.split(',')
 
         return if base_sixty_four.nil?
 

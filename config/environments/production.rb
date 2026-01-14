@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.configure do
-  config.hosts << 'api.opentour.site'
+  config.hosts = nil
   Rails.application.routes.default_url_options[:host] = 'https://api.opentour.site'
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -10,6 +10,8 @@ Rails.application.configure do
 
   # Code is not reloaded between requests.
   config.cache_classes = true
+
+  config.force_ssl = false
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -47,8 +49,8 @@ Rails.application.configure do
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
-  config.log_level = :debug
-
+  config.log_level = :error
+  config.active_record.logger = nil
   # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
 

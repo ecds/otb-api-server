@@ -40,6 +40,12 @@ class Medium < MediumBaseRecord
 
     if file.content_type.include?('gif')
       return {
+        lqip: '',
+        mobile: '',
+        tablet: '',
+        desktop: ''
+      } if ENV['RAILS_ENV'] == 'development'
+      return {
         lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
         mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
         tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,

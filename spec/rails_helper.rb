@@ -75,9 +75,9 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    MiniMagick.configure do |config|
-      config.validate_on_create = false
-    end
+    # MiniMagick.configure do |config|
+    #   config.validate_on_create = false
+    # end
     # Start transaction for this test
     # DatabaseCleaner.start
     # Switch into the default tenant

@@ -115,6 +115,7 @@ RSpec.describe V3::ToursController, type: :controller do
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
       tour = create(:tour, published: false)
       tour.update(published: false, media: create_list(:medium, 3))
+      tour.save
       user = create(:user)
       user.tour_sets = []
       user.tours << tour

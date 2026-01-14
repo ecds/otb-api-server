@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_08_01_155837) do
+ActiveRecord::Schema.define(version: 2022_07_28_131300) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -49,9 +49,11 @@ ActiveRecord::Schema.define(version: 2022_08_01_155837) do
     t.string "who"
     t.string "provider"
     t.bigint "user_id"
+    t.bigint "{}_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_ecds_rails_auth_engine_logins_on_user_id"
+    t.index ["{}_id"], name: "index_ecds_rails_auth_engine_logins_on_{}_id"
   end
 
   create_table "ecds_rails_auth_engine_tokens", force: :cascade do |t|

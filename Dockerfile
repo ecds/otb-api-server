@@ -1,19 +1,21 @@
 FROM ruby:3.1.2-slim
 
+ENV RAILS_ENV=production
+
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
-      build-essential \
-      curl \
-      git \
-      postgresql-client \
-      libpq-dev \
-      libgdal-dev \
-      gdal-bin \
-      imagemagick \
-      libmagickwand-dev \
-      libvips \
-      pkg-config \
-      && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    curl \
+    git \
+    postgresql-client \
+    libpq-dev \
+    libgdal-dev \
+    gdal-bin \
+    imagemagick \
+    libmagickwand-dev \
+    libvips \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /rails
 

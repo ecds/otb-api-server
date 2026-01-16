@@ -1,4 +1,4 @@
-FROM ruby:3.1.2-slim
+FROM ruby:3.4.4-slim
 
 ENV RAILS_ENV=production
 
@@ -14,6 +14,7 @@ RUN apt-get update -qq && \
     imagemagick \
     libmagickwand-dev \
     libvips \
+    libyaml-dev \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 

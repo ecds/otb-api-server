@@ -13,7 +13,7 @@ class Stop < ApplicationRecord
   belongs_to :map_icon, optional: true
   has_many :stop_slugs, dependent: :delete_all
 
-  before_validation -> { self.title ||= 'untitled' }
+  before_validation -> { self.title ||= "untitled" }
 
   validates :title, presence: true
 
@@ -21,7 +21,7 @@ class Stop < ApplicationRecord
   before_create :ensure_icon_color
   after_save :ensure_slug
 
-  scope :by_slug_and_tour, lambda { |slug, tour_id| joins(:stop_slugs).joins(:tours).where('stop_slugs.slug = ?', slug).where('tour_stops.tour_id = ?', tour_id) }
+  scope :by_slug_and_tour, lambda { |slug, tour_id| joins(:stop_slugs).joins(:tours).where("stop_slugs.slug = ?", slug).where("tour_stops.tour_id = ?", tour_id) }
 
   def sanitized_description
     HtmlSanitizer.accessible(description)
@@ -32,7 +32,7 @@ class Stop < ApplicationRecord
   end
 
   def slug
-    title ? title.parameterize_intl : ''
+    title ? title.parameterize_intl : ""
   end
 
   def splash
@@ -71,20 +71,21 @@ class Stop < ApplicationRecord
       direction_notes:,
       icon: map_icon&.original_image_url,
       icon_color:,
-      lat:,
-      lng:,
+      id:,
+      lat: lat&.to_f,
+      lng: lng&.to_f,
       map_icon: map_icon&.original_image_url || nil,
       media: media_index,
       meta_description:,
-      parking_lat:,
-      parking_lng:,
+      parking_lat: parking_lat&.to_f,
+      parking_lng: parking_lng&.to_f,
       sanitized_description:,
       slug:,
       splash:,
       title:,
-      type: 'stop',
+      type: "stop",
       video_embed:,
-      video_poster:,
+      video_poster:
     }
   end
 
@@ -99,15 +100,14 @@ class Stop < ApplicationRecord
     end
 
     def ensure_icon_color
-      self.icon_color = '#D32F2F' if icon_color.nil?
+      self.icon_color = "#D32F2F" if icon_color.nil?
     end
 
     def media_index
       indexed_media = stop_media.map do |m|
         medium_index(m, tours.first.tenant)
       end
-      
+
       indexed_media.sort_by { |m| m[:position] }
     end
-
 end

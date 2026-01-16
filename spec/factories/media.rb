@@ -7,7 +7,6 @@ FactoryBot.define do
     caption { Faker::TvShows::RickAndMorty.quote }
     filename { Faker::File.file_name(dir: '', ext: 'png', directory_separator: '') }
     base_sixty_four { File.read(Rails.root.join('spec/factories/base64_image.txt')) }
-    created_at { Faker::Number.number(digits: 10) }
     video_provider { 'keiner' }
     video { nil }
   end

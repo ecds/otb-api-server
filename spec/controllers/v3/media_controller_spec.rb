@@ -88,7 +88,7 @@ RSpec.describe V3::MediaController, type: :controller do
 
       it 'returns the medium when unpublished but requested is authorized' do
         medium = create(:medium)
-        medium.save
+        # medium.save
         expect(medium.file.attached?).to be true
         user = create(:user)
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)

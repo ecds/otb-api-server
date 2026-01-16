@@ -38,7 +38,7 @@ end
 
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  config.fixture_paths = [ "#{::Rails.root}/spec/fixtures" ]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -84,7 +84,7 @@ RSpec.configure do |config|
     Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
 
     # Set the host for ActiveStorage urls
-    ActiveStorage::Current.host = 'http://test.host'
+    ActiveStorage::Current.url_options = { host: 'http://test.host' }
     # Switch to the below version for Rails 7
     # ActiveStorage::Current.url_options = { host: 'http://test.host' }
     # host! 'atlanta.lvh.me'

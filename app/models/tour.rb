@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'uri'
+require "uri"
 
 # Model class for a tour.
 class Tour < ApplicationRecord
   include ActionView::Helpers::DateHelper
   include HtmlSanitizer
   include Searchable
-  
+
   has_many :tour_stops, autosave: true, dependent: :destroy
   has_many :stops, -> { distinct }, through: :tour_stops
   has_many :tour_modes, autosave: true, dependent: :destroy
@@ -23,24 +23,15 @@ class Tour < ApplicationRecord
   has_many :slugs, dependent: :delete_all
   has_one :map_overlay
 
-  # TODO: why does the CircleCI env need to serialize here?
-  if ENV['CI'] == 'circleci'
-    serialize :saved_stop_order, Array
-  end
-
-  # belongs_to :splash_image_medium_id, class_name: 'Medium'
   belongs_to :theme, default: -> { Theme.first }
 
-  enum default_lng: {
-    "en-US": 0, "fr-FR": 1, "de-DE": 2, "pl-PL": 3, "nl-NL": 4, "fi-FI": 5, "sv-SE": 6, "it-IT": 7, "es-ES": 8, "pt-PT": 9,
-    "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16
-  }
+  enum :default_lng, { "en-US": 0, "fr-FR": 1, "de-DE": 2, "pl-PL": 3, "nl-NL": 4, "fi-FI": 5, "sv-SE": 6, "it-IT": 7, "es-ES": 8, "pt-PT": 9, "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16 }
 
   validates :title, presence: true, uniqueness: { case_sensitive: false }
 
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }
-  before_validation -> { self.title ||= 'untitled' }
+  before_validation -> { self.title ||= "untitled" }
   before_validation :update_saved_stop_order
   before_save :calculate_duration
   before_save :check_url
@@ -136,7 +127,7 @@ class Tour < ApplicationRecord
     return unless self.will_save_change_to_published? || self.will_save_change_to_saved_stop_order? || self.will_save_change_to_mode_id?
 
     durations = []
-    destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
+    destinations = tour_stops.order(:position).map { |tour_stop| [ tour_stop.stop.lat, tour_stop.stop.lng ] }
 
     # The direction matrix API limits the number of destinations to 25.
     # Calculate the duration in chunks to stay below the limit.
@@ -156,15 +147,16 @@ class Tour < ApplicationRecord
       default_lng:,
       description:,
       est_time: duration ? "#{distance_of_time_in_words(duration).capitalize} #{mode.title.downcase}" : nil,
-      flat_pages: tour_flat_pages.map { |fp| {title: fp.flat_page.title, position: fp.position, slug: fp.flat_page.slug, body: fp.flat_page.body} }.sort_by { |fp| fp[:position] },
+      flat_pages: tour_flat_pages.map { |fp| { id: fp.flat_page.id, title: fp.flat_page.title, position: fp.position, slug: fp.flat_page.slug, body: fp.flat_page.body } }.sort_by { |fp| fp[:position] },
       id:,
       is_geo:,
       link_address:,
       link_text:,
       map_overlay: map_overlay_index,
-      map_type: map_type || 'hybrid',
+      map_type: map_type || "hybrid",
       media: media_index,
-      modes: modes.map { |m| {title: m.title, icon: m.icon, default: m == self.mode } },
+      meta_description:,
+      modes: modes.map { |m| { id: m.id, title: m.title, icon: m.icon, default: m == self.mode } },
       published:,
       restrict_bounds:,
       restrict_bounds_to_overlay:,
@@ -176,8 +168,8 @@ class Tour < ApplicationRecord
       tenant:,
       tenant_title:,
       title:,
-      theme: theme.title,
-      type: 'tour',
+      theme: { id: theme.id, title: theme.title },
+      type: "tour",
       use_directions:
     }
   end
@@ -225,7 +217,7 @@ class Tour < ApplicationRecord
       indexed_media = tour_media.map do |m|
         medium_index(m, tenant)
       end
-      
+
       indexed_media.sort_by { |m| m[:position] }
     end
 
@@ -238,19 +230,20 @@ class Tour < ApplicationRecord
           **ts.stop.search_data
         }
       end
-      
-      return indexed_stops.sort_by { |s| s[:position] }
+
+      indexed_stops.sort_by { |s| s[:position] }
     end
 
     def map_overlay_index
       return unless map_overlay.present?
-      
-      return {
-        east: map_overlay.east,
+
+      {
+        id: map_overlay.id,
+        east: map_overlay.east.to_f,
         image_url: map_overlay.original_image_url,
-        north: map_overlay.north,
-        south: map_overlay.south,
-        west: map_overlay.west
+        north: map_overlay.north.to_f,
+        south: map_overlay.south.to_f,
+        west: map_overlay.west.to_f
       }
     end
 end

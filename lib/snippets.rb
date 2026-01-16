@@ -155,7 +155,7 @@ ids.each do |id|
 
   # next unless m.file.attached?
 
-  next unless File.exists? ActiveStorage::Blob.service.send(:path_for, m.file.key)
+  next unless File.exist? ActiveStorage::Blob.service.send(:path_for, m.file.key)
 Apartment::Tenant.switch! 'july-22nd'
   m.file.attach(
     io: File.open(ActiveStorage::Blob.service.send(:path_for, m.file.key)),
@@ -172,7 +172,7 @@ ids.each do |id|
   m = MapIcon.find(id)
   next unless m.file.attached?
 
-  next unless File.exists? ActiveStorage::Blob.service.send(:path_for, m.file.key)
+  next unless File.exist? ActiveStorage::Blob.service.send(:path_for, m.file.key)
 
   m.file.attach(
     io: File.open(ActiveStorage::Blob.service.send(:path_for, m.file.key)),

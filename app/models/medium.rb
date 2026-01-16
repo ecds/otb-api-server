@@ -21,8 +21,8 @@ class Medium < MediumBaseRecord
   has_many :tour_media
   has_many :tours, through: :tour_media
 
-  enum video_provider: { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
-
+  # enum video_provider: { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
+  enum :video_provider, { :keiner=>0, :vimeo=>1, :youtube=>2, :soundcloud=>3}
   attr_accessor :insecure
 
   def props
@@ -40,16 +40,10 @@ class Medium < MediumBaseRecord
 
     if file.content_type.include?('gif')
       return {
-        lqip: '',
-        mobile: '',
-        tablet: '',
-        desktop: ''
-      } if ENV['RAILS_ENV'] == 'development'
-      return {
-        lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        desktop: file.variant(resize_to_limit: [750, 750], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
+        lqip: file.url,
+        mobile: file.url,
+        tablet: file.url,
+        desktop: file.url
       }
     end
     {
@@ -73,9 +67,9 @@ class Medium < MediumBaseRecord
   def add_widths
     return unless file.attached?
 
-    self.lqip_width = MiniMagick::Image.open(files[:lqip])[:width] || 50
-    self.mobile_width = MiniMagick::Image.open(files[:mobile])[:width] || 300
-    self.tablet_width = MiniMagick::Image.open(files[:tablet])[:width] || 400
-    self.desktop_width = MiniMagick::Image.open(files[:desktop])[:width] || 750
+    self.lqip_width = 50
+    self.mobile_width = 300
+    self.tablet_width = 400
+    self.desktop_width = 750
   end
 end

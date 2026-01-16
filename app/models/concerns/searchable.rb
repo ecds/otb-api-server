@@ -6,7 +6,10 @@ module Searchable
 
   included do
     searchkick index_name: -> { "otb_#{Apartment::Tenant.current}_#{model_name.plural}_#{Rails.env}" },
-    callbacks: :async
+    callbacks: false,
+    deep_paging: true
+
+    after_commit :reindex_record
   end
 
   def medium_index(m, current_tenant)
@@ -21,8 +24,9 @@ module Searchable
         mobile: "#{http_path}?variant=mobile",
         tablet: "#{http_path}?variant=tablet",
         desktop: "#{http_path}?variant=desktop",
-        lqip: "#{http_path}?variant=lqip",
+        lqip: "#{http_path}?variant=lqip"
       },
+      id: m.medium.id,
       lqip_width: m.medium.lqip_width,
       mobile_width: m.medium.mobile_width,
       original_image: m.medium.original_image,
@@ -30,7 +34,13 @@ module Searchable
       provider: m.medium.provider,
       tablet_width: m.medium.tablet_width,
       title: m.medium.title,
-      video: m.medium.video,
+      video: m.medium.video
     }
+  end
+
+  private
+
+  def reindex_record
+    ReindexJob.perform_later(tenant: Apartment::Tenant.current, class_name: self.class.name, id:)
   end
 end

@@ -95,15 +95,15 @@ class TourSet < ApplicationRecord
       # auth engine. Hopfully this will be replaced when we
       # redo the auth engine.
       Apartment::Tenant.reset
-      schemas = ActiveRecord::SchemaMigration.all
+      # schemas = ActiveRecord::SchemaMigration.all
 
-      schemas.each do |schema|
-        Apartment::Tenant.switch!(subdir)
-        migration = ActiveRecord::SchemaMigration.find_by_version(schema.version)
-        if migration.nil?
-          ActiveRecord::SchemaMigration.create(version: schema.version)
-        end
-      end
+      # schemas.each do |schema|
+      #   Apartment::Tenant.switch!(subdir)
+      #   migration = ActiveRecord::SchemaMigration.find_by_version(schema.version)
+      #   if migration.nil?
+      #     ActiveRecord::SchemaMigration.create(version: schema.version)
+      #   end
+      # end
     end
 
     def create_defaults

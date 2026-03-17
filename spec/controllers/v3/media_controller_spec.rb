@@ -3,7 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe V3::MediaController, type: :controller do
-
   let(:valid_params) {
     {
       data: {
@@ -21,7 +20,6 @@ RSpec.describe V3::MediaController, type: :controller do
     skip('Fix this spec for MySQL. Something to do with it being transactional')
   else
     describe 'GET #index' do
-
       it 'returns a success response' do
         create_list(:medium, 5)
         tour = create(:tour, published: true)
@@ -55,7 +53,7 @@ RSpec.describe V3::MediaController, type: :controller do
         expect(Medium.count).to be > Tour.published.map { |t| t.media.count }.sum
       end
 
-      it 'returns a paginated list when page parameter is persent' do
+      it 'returns a paginated list when page parameter is present' do
         user = create(:user, super: true)
         signed_cookie(user)
         published_tour = create(:tour, published: true)
@@ -174,7 +172,7 @@ RSpec.describe V3::MediaController, type: :controller do
           }
           post :create, params: jp2_params
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(errors).to include('JPEG 2000 fils are not supported. Plese convert the image to a reqular JPEG or WebP format.')
+          expect(errors).to include('JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.')
         end
       end
 
@@ -198,7 +196,6 @@ RSpec.describe V3::MediaController, type: :controller do
 
     describe 'PUT #update' do
       context 'with valid params and request is authorized' do
-
         it 'renders a JSON response with the new medium when super' do
           medium = create(:medium)
           update_params = JSON.parse(ActiveModelSerializers::Adapter::JsonApi.new(V3::MediumSerializer.new(medium)).to_json).with_indifferent_access

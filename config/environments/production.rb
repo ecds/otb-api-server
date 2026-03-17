@@ -2,7 +2,7 @@
 
 Rails.application.configure do
   config.hosts = nil
-  Rails.application.routes.default_url_options[:host] = 'https://api.opentour.site'
+  Rails.application.routes.default_url_options[:host] = "https://api.opentour.site"
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Store uploaded files on the local file system in a temporary directory.
@@ -30,7 +30,7 @@ Rails.application.configure do
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
-  config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
+  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.action_controller.asset_host = 'http://assets.example.com'
@@ -52,7 +52,7 @@ Rails.application.configure do
   config.log_level = :error
   config.active_record.logger = nil
   # Prepend all log lines with the following tags.
-  config.log_tags = [:request_id]
+  config.log_tags = [ :request_id ]
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
@@ -65,6 +65,17 @@ Rails.application.configure do
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
+
+  # Use the Amazon SESV2 API in the us-east-1 region
+  config.action_mailer.delivery_method = :ses_v2
+  config.action_mailer.ses_v2_settings = {
+    credentials: Aws::Credentials.new(
+      Rails.application.credentials.dig(:s3Staging, :access_key_id),
+      Rails.application.credentials.dig(:s3Staging, :secret_access_key)
+    ),
+    region: "us-east-1"
+
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -80,7 +91,7 @@ Rails.application.configure do
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 
-  if ENV['RAILS_LOG_TO_STDOUT'].present?
+  if ENV["RAILS_LOG_TO_STDOUT"].present?
     logger = ActiveSupport::Logger.new(STDOUT)
     logger.formatter = config.log_formatter
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
@@ -89,7 +100,6 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  ENV['BASE_URL'] = 'https://api.opentour.site'
-  ENV['INSECURE_IMAGE_BASE_URL'] = 'http://otbimages.ecdsdev.org'
-
+  ENV["BASE_URL"] = "https://api.opentour.site"
+  ENV["INSECURE_IMAGE_BASE_URL"] = "http://otbimages.ecdsdev.org"
 end

@@ -12,7 +12,7 @@ RSpec.describe 'V4::TourSets', type: :request do
 
     it 'returns only published tours' do
       Apartment::Tenant.switch! 'public'
-      expect(json.size).to eq(TourSet.all.filter { |ts| ts.published_tours.count > 0 }.count)
+      expect(v4_json.size).to eq(TourSet.all.filter { |ts| ts.published_tours.count > 0 }.count)
     end
 
     it 'returns status code 200' do

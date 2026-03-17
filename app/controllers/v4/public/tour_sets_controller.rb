@@ -1,8 +1,9 @@
 module V4
-  module Public    
+  module Public
     class TourSetsController < V4Controller
       def index
-        render json: { data: Array(TourSet.search('*', load: false, limit: TourSet.count)).sort_by(&:name) }
+        @records = TourSet.search("*", load: false, limit: TourSet.count)
+        render json: Array(@records).sort_by(&:name)
       end
     end
   end

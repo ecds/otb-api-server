@@ -6,7 +6,7 @@ class FlatPage < ApplicationRecord
   validates :title, presence: true
 
   def slug
-    title ? title.parameterize_intl : ''
+    title ? title.parameterize_intl : ""
   end
 
   def orphaned
@@ -15,5 +15,16 @@ class FlatPage < ApplicationRecord
 
   def published
     tours.any? { |tour| tour.published }
+  end
+
+  def search_data
+    {
+      id:,
+      title:,
+      slug:,
+      body:,
+      orphaned:,
+      tour_count: tours.count
+    }
   end
 end

@@ -4,8 +4,9 @@ require "sidekiq/web"
 
 Rails.application.routes.draw do
   root "welcome#index"
+  get "health" => "rails/health#show", as: :rails_health_check
   resources :tour_set_admins
-  scope ":tenant" do
+  scope ":tenant", defaults: { format: :json } do
     scope module: :v3, constraints: ApiVersion.new("v3", true) do
       resources :tour_authors, path: "tour-authors"
       resources :users
@@ -30,13 +31,24 @@ Rails.application.routes.draw do
     end
       namespace :v4 do
         namespace :public do
-          resources :tours, only: [ :index, :show ]
+          resources :tours, only: [ :index ]
+          resources :modes, only: [ :index ]
           resources :stops, only: [ :index ]
           resources :tour_sets, only: [ :index ], path: "tour-sets"
+          get "tours/:slug", to: "tours#show"
+          get "stops/:slug", to: "stops#show"
           get "media/:key", to: "media#show"
         end
         namespace :admin do
           resources :crud
+          resources :access_requests
+          resources :tours, only: [ :index, :show ]
+          resources :flat_pages, only: [ :index ]
+          resources :tour_sets, only: [ :index ]
+          resources :media, only: [ :index ]
+          resources :stops, only: [ :index ]
+          resources :users, only: [ :index ]
+          get "tour_sets/:slug", to: "tour_sets#show"
         end
       end
   end

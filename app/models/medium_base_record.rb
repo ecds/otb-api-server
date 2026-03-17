@@ -41,7 +41,6 @@ class MediumBaseRecord < ApplicationRecord
   #
   def attach_file
     return if base_sixty_four.nil?
-
     # file.blob.delete if file.attached?
 
     self.parse_base64
@@ -74,7 +73,7 @@ class MediumBaseRecord < ApplicationRecord
     self.parse_base64
 
     if self.content_type.include?("jp2")
-      errors.add(:base, "JPEG 2000 fils are not supported. Plese convert the image to a reqular JPEG or WebP format.")
+      errors.add(:base, "JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.")
     end
   end
 

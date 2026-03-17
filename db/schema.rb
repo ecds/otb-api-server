@@ -10,12 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_28_131300) do
-
+ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "pgcrypto"
-  enable_extension "plpgsql"
-  enable_extension "uuid-ossp"
+  enable_extension "pg_catalog.plpgsql"
+  enable_extension "shared_extensions.pgcrypto"
+  enable_extension "shared_extensions.uuid-ossp"
+
+  create_table "access_requests", force: :cascade do |t|
+    t.string "tour_set", null: false
+    t.integer "tour"
+    t.bigint "user_id"
+    t.boolean "approved", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_access_requests_on_user_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -87,8 +96,8 @@ ActiveRecord::Schema.define(version: 2022_07_28_131300) do
 
   create_table "map_icons", force: :cascade do |t|
     t.text "base_sixty_four"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "filename"
   end
 
@@ -99,10 +108,11 @@ ActiveRecord::Schema.define(version: 2022_07_28_131300) do
     t.string "west"
     t.bigint "tour_id"
     t.bigint "stop_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.text "base_sixty_four"
     t.text "filename"
+    t.integer "rotation", default: 0
     t.index ["stop_id"], name: "index_map_overlays_on_stop_id"
     t.index ["tour_id"], name: "index_map_overlays_on_tour_id"
   end
@@ -165,9 +175,7 @@ ActiveRecord::Schema.define(version: 2022_07_28_131300) do
     t.bigint "stop_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "tour_id"
     t.index ["stop_id"], name: "index_stop_slugs_on_stop_id"
-    t.index ["tour_id"], name: "index_stop_slugs_on_tour_id"
   end
 
   create_table "stops", force: :cascade do |t|
@@ -336,9 +344,9 @@ ActiveRecord::Schema.define(version: 2022_07_28_131300) do
     t.index ["login_id"], name: "index_users_on_login_id", unique: true
   end
 
+  add_foreign_key "access_requests", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "stop_slugs", "tours"
   add_foreign_key "stops", "map_icons"
   add_foreign_key "stops", "media"
   add_foreign_key "tour_set_admins", "roles"

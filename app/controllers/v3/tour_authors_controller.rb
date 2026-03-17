@@ -1,6 +1,6 @@
 module V3
   class TourAuthorsController < ApplicationController
-    before_action :set_tour_author, only: [:show]
+    before_action :set_tour_author, only: [ :show ]
 
     # GET /tour_authors
     def index

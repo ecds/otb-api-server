@@ -28,10 +28,10 @@ module OpenTourApi
       def parse_tenant_name(request)
         # request is an instance of Rack::Request
         tenant_name = request.fullpath.split("/")[1]
+        tenants_to_ignore = [ "auth", "rails", "sidekiq", "favicon.ico", "health" ]
 
-        if tenant_name == "auth" || tenant_name == "rails" || tenant_name == "sidekiq"
-          return nil
-        end
+        return nil if tenants_to_ignore.include? tenant_name
+
         tenant_name
       end
     end

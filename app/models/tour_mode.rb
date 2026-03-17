@@ -4,4 +4,11 @@
 class TourMode < ApplicationRecord
   belongs_to :tour
   belongs_to :mode
+
+  def search_data
+    {
+      relation_id: id,
+      **mode.search_data
+    }
+  end
 end

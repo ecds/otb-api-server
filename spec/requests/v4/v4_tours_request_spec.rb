@@ -11,7 +11,7 @@ RSpec.describe 'V4::Tours', type: :request do
     }
 
     it 'returns only published tours' do
-      expect(json.size).to eq(Tour.published.count)
+      expect(v4_json.size).to eq(Tour.published.count)
     end
 
     it 'returns status code 200' do

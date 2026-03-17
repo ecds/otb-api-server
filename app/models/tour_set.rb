@@ -12,7 +12,7 @@ class TourSet < ApplicationRecord
 
   validates :name, presence: true, uniqueness: true
 
-  has_one_attached 'logo'
+  has_one_attached "logo"
 
   has_many :tour_set_admins
   has_many :admins, through: :tour_set_admins, source: :user
@@ -31,9 +31,11 @@ class TourSet < ApplicationRecord
         }
         tours.push(tour)
       end
+
+      Apartment::Tenant.switch! "public"
       tours
     rescue Apartment::TenantNotFound => _
-      logger.warn('Tenant not found.')
+      logger.warn("Tenant not found.")
     end
   end
 
@@ -49,19 +51,17 @@ class TourSet < ApplicationRecord
         }
         tours.push(tour)
       end
+
+      Apartment::Tenant.switch! "public"
       tours
     rescue Apartment::TenantNotFound => _
-      logger.warn('Tenant not found.')
+      logger.warn("Tenant not found.")
     end
   end
 
   def logo_url
-    Apartment::Tenant.switch! 'public'
-    begin
-      return logo.url if logo.attached?
-    rescue URI::InvalidURIError
-      # FIXME: This seems to be a problem when testing?
-    end
+    Apartment::Tenant.switch! "public"
+    return logo.url if logo.attached?
 
     nil
   end
@@ -72,6 +72,7 @@ class TourSet < ApplicationRecord
 
   def search_data
     {
+      id:,
       external_url:,
       footer_logo:,
       name:,
@@ -80,19 +81,21 @@ class TourSet < ApplicationRecord
       published_tours:,
       notes:,
       subdir:,
+      attached: logo.attached?
     }
   end
 
   private
 
     def set_subdir
+      TourSet.reindex
       self.subdir = name.parameterize_intl
     end
 
     def create_tenant
       Apartment::Tenant.create(subdir)
       # This is a bit of hack to fake the migrations from the
-      # auth engine. Hopfully this will be replaced when we
+      # auth engine. Hopefully this will be replaced when we
       # redo the auth engine.
       Apartment::Tenant.reset
       # schemas = ActiveRecord::SchemaMigration.all
@@ -111,11 +114,12 @@ class TourSet < ApplicationRecord
       # themes = Theme.all.collect(&:title)
       Apartment::Tenant.switch! subdir
       Mode.create([
-        { title: 'BICYCLING', icon: 'bicycle' },
-        { title: 'DRIVING', icon: 'car' },
-        { title: 'TRANSIT', icon: 'subway' },
-        { title: 'WALKING', icon: 'walking' }
+        { title: "BICYCLING", icon: "bicycle" },
+        { title: "DRIVING", icon: "car" },
+        { title: "TRANSIT", icon: "subway" },
+        { title: "WALKING", icon: "walking" }
       ])
+      Apartment::Tenant.switch! "public"
       # themes.each do |t|
       #   Theme.create(title: t)
       # end
@@ -128,7 +132,7 @@ class TourSet < ApplicationRecord
     def tmp_file_path
       return nil if logo_title.nil?
 
-      Rails.root.join('public', 'storage', 'tmp', logo_title)
+      Rails.root.join("public", "storage", "tmp", logo_title)
     end
 
     #
@@ -142,25 +146,23 @@ class TourSet < ApplicationRecord
     #
     def attach_file
       return if base_sixty_four.nil? && !logo.attached?
-
-
       return if !self.will_save_change_to_base_sixty_four? && logo.attached?
 
       if base_sixty_four.nil? && logo.attached?
         logo.purge
       else
-        _, self.base_sixty_four = base_sixty_four.split(',')
+        _, self.base_sixty_four = base_sixty_four.split(",")
 
         return if base_sixty_four.nil?
 
-        File.open(tmp_file_path, 'wb') do |f|
+        File.open(tmp_file_path, "wb") do |f|
           f.write(Base64.decode64(base_sixty_four))
         end
 
         image = MiniMagick::Image.open(tmp_file_path)
 
         if image[:height] > 80
-          image.resize('300x80')
+          image.resize("300x80")
           image.write(tmp_file_path)
         end
 

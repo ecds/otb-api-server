@@ -16,12 +16,12 @@ RSpec.describe V3::TourAuthorsController, type: :controller do
       end
 
       it 'returns 401 when authenticated but unauthorized' do
-        initial_tour_set = TourSet.find_by(subdir: Apartment::Tenant.current)
+        initial_tour_set = TourSet.find_by(subdir: TourSet.first.subdir)
         user = create(:user, super: false)
         user.tour_sets << create(:tour_set)
         expect(user.tour_sets).not_to include initial_tour_set
         signed_cookie(user)
-        Apartment::Tenant.switch! initial_tour_set.subdir
+        # Apartment::Tenant.switch! initial_tour_set.subdir
         get :index, params: { tenant: initial_tour_set.subdir }
         expect(response.status).to eq(401)
       end
@@ -29,11 +29,12 @@ RSpec.describe V3::TourAuthorsController, type: :controller do
 
     context 'authorized' do
       it 'responds with 200 and a list of TourAuthors when requested by tenant admin' do
+        Apartment::Tenant.switch! TourSet.last.subdir
         create_list(:tour_author, rand(3..4))
         user = create(:user, super: false)
-        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        user.tour_sets << TourSet.last
         signed_cookie(user)
-        get :index, params: { tenant: Apartment::Tenant.current }
+        get :index, params: { tenant: TourSet.last.subdir }
         expect(response.status).to eq(200)
         expect(json.first[:type]).to eq('tour_authors')
         expect(TourAuthor.count).to be > 1
@@ -62,8 +63,9 @@ RSpec.describe V3::TourAuthorsController, type: :controller do
       end
 
       it 'returns 401 when authenticated but not authorized' do
+        Apartment::Tenant.switch! TourSet.second.subdir
         tour_author = create(:tour_author)
-        initial_tour_set = TourSet.find_by(subdir: Apartment::Tenant.current)
+        initial_tour_set = TourSet.second
         user = create(:user, super: false)
         user.tour_sets << create(:tour_set)
         expect(user.tour_sets).not_to include initial_tour_set
@@ -76,11 +78,12 @@ RSpec.describe V3::TourAuthorsController, type: :controller do
 
     context 'authorized' do
       it 'responds with 200 and a list of TourAuthors when requested by tenant admin' do
-        tour_author = create(:tour_author)
         user = create(:user, super: false)
-        user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+        Apartment::Tenant.switch! TourSet.first.subdir
+        tour_author = create(:tour_author)
+        user.tour_sets << TourSet.first
         signed_cookie(user)
-        get :show, params: { tenant: Apartment::Tenant.current, id: tour_author.id }
+        get :show, params: { tenant: TourSet.first.subdir, id: tour_author.id }
         expect(response.status).to eq(200)
         expect(json[:type]).to eq('tour_authors')
         expect(json[:id]).to eq(tour_author.id.to_s)

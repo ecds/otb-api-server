@@ -21,7 +21,7 @@ class Tour < ApplicationRecord
   has_many :tour_authors
   has_many :users, through: :tour_authors
   has_many :slugs, dependent: :delete_all
-  has_one :map_overlay
+  has_one :map_overlay, dependent: :destroy
 
   belongs_to :theme, default: -> { Theme.first }
 
@@ -48,7 +48,7 @@ class Tour < ApplicationRecord
   end
 
   def slug
-    title.parameterize_intl
+    URI.encode_uri_component(title.parameterize_intl)
   end
 
   def tenant
@@ -72,10 +72,10 @@ class Tour < ApplicationRecord
       nil
     end
 
-    if splash_medium
-      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.files[:desktop] }
+    if splash_medium && splash_medium.files.present?
+      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.search_data[:files][:desktop] }
     end
-    nil
+    { title: "OpenTourBuilder", caption: "OpenTourBuilderLogo", url: "https://opentour.site/assets/images/otb-bg.png" }
   end
 
   def stop_count
@@ -83,7 +83,7 @@ class Tour < ApplicationRecord
   end
 
   def bounds
-    if self.restrict_bounds_to_overlay && self.map_overlay.present?
+    if self.map_overlay.present?
       box = RGeo::Cartesian::BoundingBox.create_from_points(
         RGeo::Geographic.spherical_factory.point(self.map_overlay.east.to_f, self.map_overlay.south.to_f),
         RGeo::Geographic.spherical_factory.point(self.map_overlay.west.to_f, self.map_overlay.north.to_f)
@@ -147,24 +147,26 @@ class Tour < ApplicationRecord
       default_lng:,
       description:,
       est_time: duration ? "#{distance_of_time_in_words(duration).capitalize} #{mode.title.downcase}" : nil,
-      flat_pages: tour_flat_pages.map { |fp| { id: fp.flat_page.id, title: fp.flat_page.title, position: fp.position, slug: fp.flat_page.slug, body: fp.flat_page.body } }.sort_by { |fp| fp[:position] },
+      flat_pages: tour_flat_pages.sort_by(&:position).map(&:search_data),
       id:,
       is_geo:,
       link_address:,
       link_text:,
-      map_overlay: map_overlay_index,
+      map_overlay: map_overlay&.search_data,
       map_type: map_type || "hybrid",
-      media: media_index,
-      meta_description:,
-      modes: modes.map { |m| { id: m.id, title: m.title, icon: m.icon, default: m == self.mode } },
+      media: tour_media.sort_by(&:position).map(&:search_data),
+      meta_description: search_meta_description,
+      mode: mode.search_data,
+      modes: tour_modes.map(&:search_data),
       published:,
       restrict_bounds:,
       restrict_bounds_to_overlay:,
       sanitized_description:,
       splash:,
       slug:,
+      slugs: slugs.map(&:slug),
       stop_count:,
-      stops: stop_index,
+      stops: tour_stops.sort_by(&:position).map(&:search_data),
       tenant:,
       tenant_title:,
       title:,
@@ -174,10 +176,17 @@ class Tour < ApplicationRecord
     }
   end
 
-  private
+    # private
 
     def ensure_slug
-      Slug.find_or_create_by(slug: self.slug, tour: self)
+      tour_slug = title.parameterize_intl
+      existing = Slug.find_by(slug: tour_slug)
+
+      if existing
+        existing.update(tour: self) unless existing.tour == self
+      else
+        slugs.create(slug: tour_slug)
+      end
     end
 
     def add_modes
@@ -213,37 +222,18 @@ class Tour < ApplicationRecord
       end
     end
 
-    def media_index
-      indexed_media = tour_media.map do |m|
-        medium_index(m, tenant)
-      end
-
-      indexed_media.sort_by { |m| m[:position] }
-    end
-
-    def stop_index
-      indexed_stops = tour_stops.map do |ts|
+    def flat_page_index
+      tour_flat_pages.sort_by(&:position).map do |fp|
         {
-          next: ts.next.present? ? { id: ts.next.stop.id, slug: ts.next.stop.slug, title: ts.next.stop.title } : nil,
-          position: ts.position,
-          previous: ts.previous.present? ? { id: ts.previous.stop.id, slug: ts.previous.stop.slug, title: ts.previous.stop.title } : nil,
-          **ts.stop.search_data
+          position: fp.position,
+          **fp.flat_page.search_data
         }
       end
-
-      indexed_stops.sort_by { |s| s[:position] }
     end
 
-    def map_overlay_index
-      return unless map_overlay.present?
+    def search_meta_description
+      return meta_description unless meta_description.nil?
 
-      {
-        id: map_overlay.id,
-        east: map_overlay.east.to_f,
-        image_url: map_overlay.original_image_url,
-        north: map_overlay.north.to_f,
-        south: map_overlay.south.to_f,
-        west: map_overlay.west.to_f
-      }
+      sanitized_description
     end
 end

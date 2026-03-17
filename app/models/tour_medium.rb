@@ -22,4 +22,12 @@ class TourMedium < ApplicationRecord
   def published
     tour&.published
   end
+
+  def search_data
+    {
+      relation_id: id,
+      position:,
+      **medium&.search_data
+    }
+  end
 end

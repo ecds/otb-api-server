@@ -3,7 +3,6 @@
 # Model class for a tour stop.
 class Stop < ApplicationRecord
   include HtmlSanitizer
-  include Searchable
 
   has_many :tour_stops, dependent: :destroy
   has_many :tours, -> { distinct }, through: :tour_stops
@@ -12,6 +11,7 @@ class Stop < ApplicationRecord
   belongs_to :medium, optional: true
   belongs_to :map_icon, optional: true
   has_many :stop_slugs, dependent: :delete_all
+  validates :title, presence: true, uniqueness: { case_sensitive: false }
 
   before_validation -> { self.title ||= "untitled" }
 
@@ -45,7 +45,7 @@ class Stop < ApplicationRecord
     end
 
     if splash_medium&.files
-      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.files[:desktop] }
+      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.search_data[:files][:desktop] }
     end
     nil
   end
@@ -69,18 +69,20 @@ class Stop < ApplicationRecord
       description:,
       direction_intro:,
       direction_notes:,
-      icon: map_icon&.original_image_url,
       icon_color:,
       id:,
       lat: lat&.to_f,
       lng: lng&.to_f,
       map_icon: map_icon&.original_image_url || nil,
-      media: media_index,
+      media: stop_media.sort_by(&:position).map(&:search_data),
       meta_description:,
+      orphaned:,
       parking_lat: parking_lat&.to_f,
       parking_lng: parking_lng&.to_f,
+      published:,
       sanitized_description:,
       slug:,
+      slugs: stop_slugs.map(&:slug),
       splash:,
       title:,
       type: "stop",
@@ -96,18 +98,17 @@ class Stop < ApplicationRecord
     end
 
     def ensure_slug
-      tour_stops.each { |ts| ts.save }
+      stop_slug = title.parameterize_intl
+      existing = StopSlug.find_by(slug: stop_slug)
+
+      if existing
+        existing.update(stop: self) unless existing.stop == self
+      else
+        stop_slugs.create(slug: stop_slug)
+      end
     end
 
     def ensure_icon_color
       self.icon_color = "#D32F2F" if icon_color.nil?
-    end
-
-    def media_index
-      indexed_media = stop_media.map do |m|
-        medium_index(m, tours.first.tenant)
-      end
-
-      indexed_media.sort_by { |m| m[:position] }
     end
 end

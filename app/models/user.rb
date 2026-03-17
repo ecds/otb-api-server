@@ -21,6 +21,18 @@ class User < ActiveRecord::Base
     tour_sets.map(&:subdir).include? Apartment::Tenant.current
   end
 
+  def search_data
+    {
+      id:,
+      display_name:,
+      super:,
+      current_tenant_admin: current_tenant_admin?,
+      tours: tours.map(&:id),
+      tour_sets: tour_sets.map(&:subdir),
+      terms_accepted:
+    }
+  end
+
   def provider
     return nil if login.nil?
     login.provider

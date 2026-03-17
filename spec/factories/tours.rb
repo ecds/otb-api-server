@@ -29,7 +29,7 @@ FactoryBot.define do
 
       # https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#transient-attributes
       after(:create) do |tour, evaluator|
-        create_list(:medium, evaluator.media_count, tours: [tour])
+        create_list(:medium, evaluator.media_count, tours: [ tour ])
       end
     end
 
@@ -40,7 +40,7 @@ FactoryBot.define do
 
       # https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#transient-attributes
       after(:create) do |tour, evaluator|
-        create_list(:flat_page, evaluator.flat_pages_count, tours: [tour])
+        create_list(:flat_page, evaluator.flat_pages_count, tours: [ tour ])
       end
     end
   end

@@ -4,4 +4,8 @@
 class Mode < ApplicationRecord
   has_many :tour_modes
   has_many :tours, through: :tour_modes
+
+  def search_data
+    { id:, title: }
+  end
 end

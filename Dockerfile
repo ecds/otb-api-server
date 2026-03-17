@@ -16,6 +16,7 @@ RUN apt-get update -qq && \
     libvips \
     libyaml-dev \
     pkg-config \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /rails

@@ -1,0 +1,8 @@
+<h1>Request for access to <%= @tour.title %> on OpenTour</h1>
+
+<p>
+  <%= @access_request.user.display_name %> (<%= @access_request.user.email %>) has requested access to edit <%= @tour.title %>.
+</p>
+<p>
+  <a href="https://opentour.site/admin/approve/<%= @access_request.id %>">View request to approve</a>.
+</p>

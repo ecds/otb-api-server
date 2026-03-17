@@ -1,13 +1,20 @@
 module V4
-  module Public    
+  module Public
     class StopsController < V4Controller
+      @model_class = Stop
+
       def index
-        @records = if (params[:slug])
-          Stop.search(params[:slug], fields: [:slug], load: false).first
-        else
-          Array(Stop.search('*', load: false))
-        end
-        render json: { data: @records }
+          head :unauthorized and return unless crud_allowed?
+          render json: { **Stop.all.map(&:search_data) }
+      end
+
+      def show
+        render json: { errors: [ "Not found" ] }, status: :not_found and return if @record.nil?
+        render json: @record.search_data if @record.published
+      end
+
+      def set_record
+        @record = StopSlug.find_by(slugs: params[:slug])&.stop
       end
     end
   end

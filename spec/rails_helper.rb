@@ -24,7 +24,6 @@ require 'database_cleaner'
 # require only the support files necessary.
 #
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
-
 # Checks for pending migration and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
 ActiveRecord::Migration.maintain_test_schema!
@@ -54,7 +53,10 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
   config.before(:suite) do
-    # DatabaseCleaner.clean_with(:truncation, except: [:modes, :roles])
+    Rails.application.routes.default_url_options = { host: 'www.example.com', protocol: 'https' }
+    ActiveStorage::Current.url_options = { protocol: "https", host: "example.com", port: 443 }
+    # ActiveStorage::Current.host = "https://example.com"
+    # DatabaseCleaner.clean_with(:truncation, except: [ :modes, :roles ])
     # DatabaseCleaner.strategy = :transaction
     # Truncating doesn't drop schemas, ensure we're clean here, app *may not* exist
     # begin
@@ -82,13 +84,10 @@ RSpec.configure do |config|
     # DatabaseCleaner.start
     # Switch into the default tenant
     Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
-
     # Set the host for ActiveStorage urls
     ActiveStorage::Current.url_options = { host: 'http://test.host' }
-    # Switch to the below version for Rails 7
-    # ActiveStorage::Current.url_options = { host: 'http://test.host' }
-    # host! 'atlanta.lvh.me'
-    # load Rails.root + 'db/seeds.rb'
+
+    # request.env["ipinfo"] = { city: Faker::Address.city, county: Faker::Address.country_code }
 
     # Stub a network requests
     stub_request(:get, 'https://placehold.it/300x300.png_1000x1000')
@@ -199,13 +198,29 @@ RSpec.configure do |config|
 
     stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*DRIVING.*/)
       .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200, headers: { 'Content-Type': 'application/json' })
+
+    stub_request(:get, /http.*:\/\/ipinfo\.io\/.*\/geo.*/)
+      .with(
+           headers: {
+          'Accept'=>'*/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent'=>'Ruby'
+           })
+      .to_return(status: 200, headers: {}, body: ip_info_body)
+
+    stub_request(:get, /http.*:\/\/ipinfo\.io\/.*\?token.*/)
+      .with(
+       headers: {
+       'Accept'=>'application/json',
+       'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+       'Authorization'=>'Bearer d3bb06e9a6567d',
+       'User-Agent'=>'IPinfoClient/Ruby/2.4.0'
+       }).
+     to_return(status: 200, body: ip_info_body, headers: {})
   end
 
   config.after(:each) do
     # Reset tentant back to `public`
-    # Apartment::Tenant.reset
-    # Rollback transaction
-    # DatabaseCleaner.clean
   end
 
   # RSpec Rails can automatically mix in different behaviours to your tests
@@ -234,6 +249,8 @@ RSpec.configure do |config|
     if Rails.env.test?
       FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/test/[^.]*"])
       FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/tmp/test/[^.]*"])
+      # Apartment::Tenant.reset
+      # DatabaseCleaner.clean
     end
   end
 
@@ -250,5 +267,19 @@ RSpec.configure do |config|
     def latitude
       Faker::Address.latitude
     end
+  end
+
+  def ip_info_body
+    {
+      ip: Faker::Internet.ip_v4_address,
+      hostname: Faker::Internet.domain_name,
+      city: Faker::Address.city,
+      region: Faker::Address.state,
+      country: Faker::Address.country_code,
+      loc: "#{Faker::Address.latitude},#{Faker::Address.longitude}",
+      org: Faker::Company.name,
+      postal: Faker::Address.zip,
+      timezone: Faker::Address.time_zone
+    }.to_json
   end
 end

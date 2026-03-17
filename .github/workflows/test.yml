@@ -14,7 +14,7 @@ env:
   DB_PASSWORD: postgres
   TEST_DB_NAME: otb_test
   CI: "github-actions"
-  BROWSER_PATH: /usr/bin/google-chrome
+  BROWSER_PATH: /usr/bin/chromium-browser
   RAILS_MASTER_KEY: ${{ secrets.MASTER_KEY }}
 
 jobs:
@@ -75,7 +75,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation libmagickwand-dev libvips
+          sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation libmagickwand-dev libvips chromium-browser
           wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome-stable_current_amd64.deb || true
           sudo apt-get install -f -y

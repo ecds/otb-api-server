@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 env:
   RAILS_ENV: test
@@ -13,13 +13,13 @@ env:
   DB_USERNAME: postgres
   DB_PASSWORD: postgres
   TEST_DB_NAME: otb_test
-  CI: 'github-actions'
+  CI: "github-actions"
   BROWSER_PATH: /usr/bin/google-chrome
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:13
@@ -36,46 +36,46 @@ jobs:
           - 5432:5432
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.1.2
-        bundler-cache: true
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.4
+          bundler-cache: true
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation
-        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo dpkg -i google-chrome-stable_current_amd64.deb || true
-        sudo apt-get install -f -y
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || true
+          sudo apt-get install -f -y
 
-    - name: Create required directories
-      run: |
-        sudo mkdir -p /data/tmp
-        sudo chmod 777 /data/tmp
-        sudo chown $USER:$USER /data/tmp
-        mkdir -p public/storage/tmp
-        chmod 777 public/storage/tmp
+      - name: Create required directories
+        run: |
+          sudo mkdir -p /data/tmp
+          sudo chmod 777 /data/tmp
+          sudo chown $USER:$USER /data/tmp
+          mkdir -p public/storage/tmp
+          chmod 777 public/storage/tmp
 
-    - name: Wait for database to be ready
-      run: |
-        until pg_isready -h localhost -p 5432 -U postgres; do
-          echo "Waiting for PostgreSQL..."
-          sleep 2
-        done
+      - name: Wait for database to be ready
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
 
-    - name: Set up PostgreSQL database
-      run: |
-        export DB_ADAPTER=postgresql
-        bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=postgresql || true
-        bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
-        bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
-        bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=postgresql
+      - name: Set up PostgreSQL database
+        run: |
+          export DB_ADAPTER=postgresql
+          bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=postgresql || true
+          bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
+          bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
+          bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=postgresql
 
-    - name: Run RSpec tests
-      run: |
-        DB_ADAPTER=postgresql bundle exec rspec --format progress
+      - name: Run RSpec tests
+        run: |
+          DB_ADAPTER=postgresql bundle exec rspec --format progress

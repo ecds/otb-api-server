@@ -24,6 +24,7 @@ jobs:
       postgres:
         image: postgres:13
         env:
+          RAILS_MASTER_KEY: ${{ secrets.MASTER_KEY }}
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: otb_test

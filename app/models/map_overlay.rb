@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 #
-# Model calss for map overlays.
+# Model class for map overlays.
 #
 class MapOverlay < MediumBaseRecord
-  before_create :set_initial_bounds
+  before_save :set_initial_bounds
 
   belongs_to :tour, optional: true
   belongs_to :stop, optional: true
@@ -14,13 +14,23 @@ class MapOverlay < MediumBaseRecord
   end
 
   def set_initial_bounds
-    return if tour&.bounds.nil? || tour&.stop_count < 2
+    return if tour.nil? || tour&.bounds.nil? || tour&.stop_count < 2
 
-    if tour
-      self.south = self.tour.bounds[:south]
-      self.north = self.tour.bounds[:north]
-      self.east = self.tour.bounds[:east]
-      self.west = self.tour.bounds[:west]
-    end
+    self.south = tour.bounds[:south] if south.to_f.zero?
+    self.north = tour.bounds[:north] if north.to_f.zero?
+    self.east = tour.bounds[:east] if east.to_f.zero?
+    self.west = tour.bounds[:west] if west.to_f.zero?
+  end
+
+  def search_data
+    {
+      id:,
+      east: east.to_f,
+      image_url: original_image_url,
+      north: north.to_f,
+      south: south.to_f,
+      west: west.to_f,
+      rotation:
+    }
   end
 end

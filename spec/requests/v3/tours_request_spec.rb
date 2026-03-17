@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'V3::Tours', type: :request do
   describe 'GET /:tenant/tours' do
+    Tour.reindex
     before {
       get "/#{Apartment::Tenant.current}/tours", headers: { 'HTTP_USER_AGENT': 'bot' }
     }

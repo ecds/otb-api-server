@@ -2,8 +2,8 @@
 
 class V3Controller < ApplicationController
   include EcdsRailsAuthEngine::CurrentUser
-  before_action :allowed?, only: [:show, :create, :update, :destroy]
-  before_action :set_record, only: [:show, :update, :destroy]
+  before_action :allowed?, only: [ :show, :create, :update, :destroy ]
+  before_action :set_record, only: [ :show, :update, :destroy ]
 
   # GET /<record>/1
   def show
@@ -43,7 +43,7 @@ class V3Controller < ApplicationController
         errors.push({
           detail: error,
           source: {
-            pointer: 'data/attributes'
+            pointer: "data/attributes"
           }
         })
       end

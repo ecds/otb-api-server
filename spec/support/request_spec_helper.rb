@@ -7,6 +7,10 @@ module RequestSpecHelper
     JSON.parse(response.body).with_indifferent_access[:data]
   end
 
+  def v4_json
+    JSON.parse(response.body, symbolize_names: true)
+  end
+
   def errors
     JSON.parse(response.body).with_indifferent_access[:errors].map { |e| e[:detail] }
   end

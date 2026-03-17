@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-require 'uri'
+require "uri"
 
 # Model class for a tour.
 class Tour < ApplicationRecord
-  include HtmlSaintizer
-
+  include ActionView::Helpers::DateHelper
+  include HtmlSanitizer
+  include Searchable
 
   has_many :tour_stops, autosave: true, dependent: :destroy
   has_many :stops, -> { distinct }, through: :tour_stops
@@ -20,26 +21,17 @@ class Tour < ApplicationRecord
   has_many :tour_authors
   has_many :users, through: :tour_authors
   has_many :slugs, dependent: :delete_all
-  has_one :map_overlay
+  has_one :map_overlay, dependent: :destroy
 
-  # TODO: why does the CircleCI env need to serialize here?
-  if ENV['CI'] == 'circleci'
-    serialize :saved_stop_order, Array
-  end
-
-  # belongs_to :splash_image_medium_id, class_name: 'Medium'
   belongs_to :theme, default: -> { Theme.first }
 
-  enum default_lng: {
-    "en-US": 0, "fr-FR": 1, "de-DE": 2, "pl-PL": 3, "nl-NL": 4, "fi-FI": 5, "sv-SE": 6, "it-IT": 7, "es-ES": 8, "pt-PT": 9,
-    "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16
-  }
+  enum :default_lng, { "en-US": 0, "fr-FR": 1, "de-DE": 2, "pl-PL": 3, "nl-NL": 4, "fi-FI": 5, "sv-SE": 6, "it-IT": 7, "es-ES": 8, "pt-PT": 9, "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16 }
 
   validates :title, presence: true, uniqueness: { case_sensitive: false }
 
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }
-  before_validation -> { self.title ||= 'untitled' }
+  before_validation -> { self.title ||= "untitled" }
   before_validation :update_saved_stop_order
   before_save :calculate_duration
   before_save :check_url
@@ -52,11 +44,11 @@ class Tour < ApplicationRecord
   scope :has_stops, -> { includes(:stops).where.not(stops: { id: nil }) }
 
   def sanitized_description
-    HtmlSaintizer.accessable(description)
+    HtmlSanitizer.accessible(description)
   end
 
   def slug
-    title.parameterize_intl
+    URI.encode_uri_component(title.parameterize_intl)
   end
 
   def tenant
@@ -66,13 +58,6 @@ class Tour < ApplicationRecord
   def tenant_title
     Apartment::Tenant.current.titleize
   end
-
-  # def external_url
-  #   if Apartment::Tenant.current == 'public'
-  #     return nil
-  #   end
-  #   TourSet.find_by(subdir: Apartment::Tenant.current).external_url
-  # end
 
   def theme_title
     theme.title
@@ -87,10 +72,10 @@ class Tour < ApplicationRecord
       nil
     end
 
-    if splash_medium
-      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.files[:desktop] }
+    if splash_medium && splash_medium.files.present?
+      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.search_data[:files][:desktop] }
     end
-    nil
+    { title: "OpenTourBuilder", caption: "OpenTourBuilderLogo", url: "https://opentour.site/assets/images/otb-bg.png" }
   end
 
   def stop_count
@@ -98,7 +83,7 @@ class Tour < ApplicationRecord
   end
 
   def bounds
-    if self.restrict_bounds_to_overlay && self.map_overlay.present?
+    if self.map_overlay.present?
       box = RGeo::Cartesian::BoundingBox.create_from_points(
         RGeo::Geographic.spherical_factory.point(self.map_overlay.east.to_f, self.map_overlay.south.to_f),
         RGeo::Geographic.spherical_factory.point(self.map_overlay.west.to_f, self.map_overlay.north.to_f)
@@ -142,7 +127,7 @@ class Tour < ApplicationRecord
     return unless self.will_save_change_to_published? || self.will_save_change_to_saved_stop_order? || self.will_save_change_to_mode_id?
 
     durations = []
-    destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
+    destinations = tour_stops.order(:position).map { |tour_stop| [ tour_stop.stop.lat, tour_stop.stop.lng ] }
 
     # The direction matrix API limits the number of destinations to 25.
     # Calculate the duration in chunks to stay below the limit.
@@ -155,10 +140,53 @@ class Tour < ApplicationRecord
     self.duration = durations.compact.sum.zero? ? nil : durations.sum
   end
 
-  private
+  def search_data
+    {
+      blank_map:,
+      bounds:,
+      default_lng:,
+      description:,
+      est_time: duration ? "#{distance_of_time_in_words(duration).capitalize} #{mode.title.downcase}" : nil,
+      flat_pages: tour_flat_pages.sort_by(&:position).map(&:search_data),
+      id:,
+      is_geo:,
+      link_address:,
+      link_text:,
+      map_overlay: map_overlay&.search_data,
+      map_type: map_type || "hybrid",
+      media: tour_media.sort_by(&:position).map(&:search_data),
+      meta_description: search_meta_description,
+      mode: mode.search_data,
+      modes: tour_modes.map(&:search_data),
+      published:,
+      restrict_bounds:,
+      restrict_bounds_to_overlay:,
+      sanitized_description:,
+      splash:,
+      slug:,
+      slugs: slugs.map(&:slug),
+      stop_count:,
+      stops: tour_stops.sort_by(&:position).map(&:search_data),
+      tenant:,
+      tenant_title:,
+      title:,
+      theme: { id: theme.id, title: theme.title },
+      type: "tour",
+      use_directions:
+    }
+  end
+
+    # private
 
     def ensure_slug
-      Slug.find_or_create_by(slug: self.slug, tour: self)
+      tour_slug = title.parameterize_intl
+      existing = Slug.find_by(slug: tour_slug)
+
+      if existing
+        existing.update(tour: self) unless existing.tour == self
+      else
+        slugs.create(slug: tour_slug)
+      end
     end
 
     def add_modes
@@ -192,5 +220,20 @@ class Tour < ApplicationRecord
       if self.restrict_bounds && !self.restrict_bounds_was
         self.restrict_bounds_to_overlay = false
       end
+    end
+
+    def flat_page_index
+      tour_flat_pages.sort_by(&:position).map do |fp|
+        {
+          position: fp.position,
+          **fp.flat_page.search_data
+        }
+      end
+    end
+
+    def search_meta_description
+      return meta_description unless meta_description.nil?
+
+      sanitized_description
     end
 end

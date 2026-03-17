@@ -21,7 +21,7 @@ RSpec.describe V3::ToursController, type: :controller do
       expect(json.count).to eq(Tour.published.count)
     end
 
-    it 'returns a 200 response when requeted by slug' do
+    it 'returns a 200 response when requested by slug' do
       tour = create(:tour)
       tour.update(published: true)
       get :index, params: { tenant: tour.tenant, slug: tour.slug }
@@ -79,7 +79,7 @@ RSpec.describe V3::ToursController, type: :controller do
       new_tours = create_list(:tour, rand(4..6), published: false)
       user = create(:user, super: false)
       user.tour_sets = []
-      user.tours << [Tour.published.first, new_tours.first, new_tours.last]
+      user.tours << [ Tour.published.first, new_tours.first, new_tours.last ]
       signed_cookie(user)
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(json.count).to eq((user.tours + Tour.published).uniq.count)
@@ -115,6 +115,7 @@ RSpec.describe V3::ToursController, type: :controller do
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
       tour = create(:tour, published: false)
       tour.update(published: false, media: create_list(:medium, 3))
+      tour.save
       user = create(:user)
       user.tour_sets = []
       user.tours << tour
@@ -148,12 +149,12 @@ RSpec.describe V3::ToursController, type: :controller do
 
   describe 'POST #create' do
     context 'with valid params' do
-      it 'return 401 when unauthenciated' do
+      it 'return 401 when unauthenticated' do
           post :create, params: { data: { type: 'tours', attributes: { title: 'Burrito Tour' } }, tenant: TourSet.first.subdir }
           expect(response.status).to eq(401)
         end
 
-      it 'return 401 when authenciated but not an admin for current tenant' do
+      it 'return 401 when authenticated but not an admin for current tenant' do
         user = create(:user)
         user.update(super: false)
         user.tour_sets = []
@@ -162,7 +163,7 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(response.status).to eq(401)
       end
 
-      it 'return 201 when authenciated but an admin for current tenant' do
+      it 'return 201 when authenticated but an admin for current tenant' do
         user = create(:user)
         user.update(super: false)
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
@@ -173,7 +174,7 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(Tour.count).to eq(original_tour_count + 1)
       end
 
-      it 'return 201 when authenciated by super' do
+      it 'return 201 when authenticated by super' do
         user = create(:user)
         user.tour_sets = []
         user.update(super: true)
@@ -210,13 +211,13 @@ RSpec.describe V3::ToursController, type: :controller do
 
   describe 'PUT #update' do
     context 'with valid params' do
-      it 'return 401 when unauthenciated' do
+      it 'return 401 when unauthenticated' do
         tour = create(:tour, published: false)
         post :update, params: { id: tour.id, data: { type: 'tours', attributes: { title: 'Burrito Tour' } }, tenant: TourSet.first.subdir }
         expect(response.status).to eq(401)
       end
 
-      it 'return 401 when authenciated but not an admin for current tenant' do
+      it 'return 401 when authenticated but not an admin for current tenant' do
         tour = create(:tour, published: false)
         user = create(:user)
         user.update(super: false)
@@ -226,7 +227,7 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(response.status).to eq(401)
       end
 
-      it 'return 200 and updated tour when authenciated but an admin for current tenant' do
+      it 'returns 200 and updated tour when authenticated but an admin for current tenant' do
         tour = create(:tour, published: false)
         user = create(:user)
         user.update(super: false)
@@ -240,7 +241,7 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(Tour.find(tour.id).title).to eq(new_title)
       end
 
-      it 'return 200 and updated tour when authenciated by super' do
+      it 'return 200 and updated tour when authenticated by super' do
         tour = create(:tour, published: false)
         user = create(:user)
         user.tour_sets = []
@@ -254,7 +255,7 @@ RSpec.describe V3::ToursController, type: :controller do
         expect(Tour.find(tour.id).title).to eq(new_title)
       end
 
-      it 'return 200 and updated tour when authenciated by tour author' do
+      it 'return 200 and updated tour when authenticated by tour author' do
         tour = create(:tour, published: false)
         user = create(:user)
         user.update(super: false)
@@ -342,13 +343,13 @@ RSpec.describe V3::ToursController, type: :controller do
   end
 
   describe 'DELETE #destroy' do
-    it 'return 401 when unauthenciated' do
+    it 'return 401 when unauthenticated' do
       tour = create(:tour, published: false)
       post :destroy, params: { id: tour.id, tenant: TourSet.first.subdir }
       expect(response.status).to eq(401)
     end
 
-    it 'return 401 when authenciated but not an admin for current tenant' do
+    it 'return 401 when authenticated but not an admin for current tenant' do
       tour = create(:tour, published: false)
       user = create(:user)
       user.update(super: false)
@@ -358,7 +359,7 @@ RSpec.describe V3::ToursController, type: :controller do
       expect(response.status).to eq(401)
     end
 
-    it 'return 204 and one less tour when authenciated but an admin for current tenant' do
+    it 'return 204 and one less tour when authenticated but an admin for current tenant' do
       tour = create(:tour, published: false)
       user = create(:user)
       user.update(super: false)
@@ -370,7 +371,7 @@ RSpec.describe V3::ToursController, type: :controller do
       expect(Tour.count).to eq(tour_count - 1)
     end
 
-    it 'return 204 and one less tour when authenciated by super' do
+    it 'return 204 and one less tour when authenticated by super' do
       tour = create(:tour, published: false)
       user = create(:user)
       user.tour_sets = []
@@ -382,7 +383,7 @@ RSpec.describe V3::ToursController, type: :controller do
       expect(Tour.count).to eq(tour_count - 1)
     end
 
-    it 'return 204 and one less tour when authenciated by tour author' do
+    it 'return 204 and one less tour when authenticated by tour author' do
       tour = create(:tour, published: false)
       user = create(:user)
       user.update(super: false)

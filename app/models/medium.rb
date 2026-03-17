@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "cgi"
+
 # Model for media associated with stops.
 class Medium < MediumBaseRecord
   include VideoProps
@@ -21,8 +23,7 @@ class Medium < MediumBaseRecord
   has_many :tour_media
   has_many :tours, through: :tour_media
 
-  enum video_provider: { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
-
+  enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
   attr_accessor :insecure
 
   def props
@@ -38,19 +39,19 @@ class Medium < MediumBaseRecord
   def files
     return nil if !self.file.attached?
 
-    if file.content_type.include?('gif')
+    if file.content_type.include?("gif")
       return {
-        lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        desktop: file.variant(resize_to_limit: [750, 750], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
+        lqip: file.url,
+        mobile: file.url,
+        tablet: file.url,
+        desktop: file.url
       }
     end
     {
-      lqip: file.variant(resize_to_limit: [5, 5]).processed.url,
-      mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
-      tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
-      desktop: file.variant(resize_to_limit: [750, 750]).processed.url
+      lqip: file.variant(resize_to_limit: [ 5, 5 ]).processed.url,
+      mobile: file.variant(resize_to_limit: [ 300, 300 ]).processed.url,
+      tablet: file.variant(resize_to_limit: [ 400, 400 ]).processed.url,
+      desktop: file.variant(resize_to_limit: [ 750, 750 ]).processed.url
     }
   end
 
@@ -58,8 +59,35 @@ class Medium < MediumBaseRecord
     tours.empty? && stops.empty?
   end
 
+  def search_data
+    http_path = "#{Rails.application.routes.default_url_options[:host]}/#{Apartment::Tenant.current}/v4/public/media/#{CGI.escape(file.key || "")}"
+    {
+      caption:,
+      desktop_width:,
+      embed:,
+      filename:,
+      files: {
+        original: http_path,
+        mobile: "#{http_path}?variant=mobile",
+        tablet: "#{http_path}?variant=tablet",
+        desktop: "#{http_path}?variant=desktop",
+        lqip: "#{http_path}?variant=lqip"
+      },
+      id: id,
+      lqip_width:,
+      mobile_width:,
+      original_image:,
+      provider:,
+      tablet_width:,
+      title:,
+      video:
+    }
+  end
+
+  private
+
   def replace_video
-    if video.present? && base_sixty_four.present?
+    if video.present?
       attach_file
     end
   end
@@ -67,9 +95,9 @@ class Medium < MediumBaseRecord
   def add_widths
     return unless file.attached?
 
-    self.lqip_width = MiniMagick::Image.open(files[:lqip])[:width] || 50
-    self.mobile_width = MiniMagick::Image.open(files[:mobile])[:width] || 300
-    self.tablet_width = MiniMagick::Image.open(files[:tablet])[:width] || 400
-    self.desktop_width = MiniMagick::Image.open(files[:desktop])[:width] || 750
+    self.lqip_width = 50
+    self.mobile_width = 300
+    self.tablet_width = 400
+    self.desktop_width = 750
   end
 end

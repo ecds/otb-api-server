@@ -11,7 +11,7 @@ class MediumBaseRecord < ApplicationRecord
   validates_presence_of :filename
 
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
-  has_one_attached 'file'
+  has_one_attached "file"
 
   attr_accessor :content_type
 
@@ -22,7 +22,7 @@ class MediumBaseRecord < ApplicationRecord
   # end
 
   def tmp_file_path
-    return Rails.root.join('public', 'storage', 'tmp', filename) if self.filename
+    return Rails.root.join("public", "storage", "tmp", filename) if self.filename
     nil
   end
 
@@ -41,12 +41,12 @@ class MediumBaseRecord < ApplicationRecord
   #
   def attach_file
     return if base_sixty_four.nil?
-
     # file.blob.delete if file.attached?
 
     self.parse_base64
-    File.open(tmp_file_path, 'wb') do |f|
+    File.open(tmp_file_path, "wb") do |f|
       f.write(Base64.decode64(base_sixty_four))
+      f.rewind
     end
 
     self.file.attach(
@@ -59,7 +59,7 @@ class MediumBaseRecord < ApplicationRecord
   end
 
   def remove_tmp_file
-    File.delete(tmp_file_path) if File.exists?(tmp_file_path)
+    File.delete(tmp_file_path) if File.exist?(tmp_file_path)
   end
 
   def purge
@@ -72,20 +72,20 @@ class MediumBaseRecord < ApplicationRecord
 
     self.parse_base64
 
-    if self.content_type.include?('jp2')
-      errors.add(:base, 'JPEG 2000 fils are not supported. Plese convert the image to a reqular JPEG or WebP format.')
+    if self.content_type.include?("jp2")
+      errors.add(:base, "JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.")
     end
   end
 
   private
 
     def parse_base64
-      if base_sixty_four.include?('data:')
-        headers, self.base_sixty_four = base_sixty_four.split(',')
+      if base_sixty_four.include?("data:")
+        headers, self.base_sixty_four = base_sixty_four.split(",")
         headers =~ /^data:(.*?)$/
-        self.content_type = Regexp.last_match(1).split(';base64').first
+        self.content_type = Regexp.last_match(1).split(";base64").first
       else
-        self.content_type = 'image/jpeg'
+        self.content_type = "image/jpeg"
       end
     end
 end

@@ -119,14 +119,14 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
   # TourFlatPage objects are NOT created via tha API. Every test should return 401
   describe 'POST #create' do
     context 'with valid params' do
-      it 'return 405 when unauthenciated' do
+      it 'return 405 when unauthenticated' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         post :create, params: { data: data(tour, flat_page), tenant: TourSet.first.subdir }
         expect(response.status).to eq(405)
       end
 
-      it 'return 405 when authenciated but not an admin for current tenant' do
+      it 'return 405 when authenticated but not an admin for current tenant' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         original_tour_flat_page_count = TourFlatPage.count
@@ -140,7 +140,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
 
-      it 'return 405 when authenciated but an admin for current tenant' do
+      it 'return 405 when authenticated but an admin for current tenant' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         original_tour_flat_page_count = TourFlatPage.count
@@ -154,7 +154,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
 
-      it 'return 405 when authenciated by super' do
+      it 'return 405 when authenticated by super' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         original_tour_flat_page_count = TourFlatPage.count
@@ -168,7 +168,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
       end
 
-      it 'return 405 when authenciated by tour author' do
+      it 'return 405 when authenticated by tour author' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         original_tour_flat_page_count = TourFlatPage.count
@@ -186,7 +186,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
 
   describe 'PUT #update' do
     context 'with valid params' do
-      it 'return 401 when unauthenciated' do
+      it 'return 401 when unauthenticated' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         tour.flat_pages << flat_page
@@ -196,7 +196,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(response.status).to eq(401)
       end
 
-      it 'return 401 when authenciated but not an admin for current tenant' do
+      it 'return 401 when authenticated but not an admin for current tenant' do
         tour = create(:tour)
         flat_page = create(:flat_page)
         tour.flat_pages << flat_page
@@ -211,7 +211,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(response.status).to eq(401)
       end
 
-      it 'return 200 and updated tour when authenciated but an admin for current tenant' do
+      it 'return 200 and updated tour when authenticated but an admin for current tenant' do
         tour = create(:tour)
         flat_pages = create_list(:flat_page, 5)
         flat_pages.each { |flat_page| tour.flat_pages << flat_page }
@@ -234,7 +234,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(TourFlatPage.find(tour_flat_page.id).position).to eq(5)
       end
 
-      it 'return 200 and updated tour when authenciated by super' do
+      it 'return 200 and updated tour when authenticated by super' do
         tour = create(:tour)
         flat_pages = create_list(:flat_page, 5)
         flat_pages.each { |flat_page| tour.flat_pages << flat_page }
@@ -257,7 +257,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         expect(TourFlatPage.find(tour_flat_page.id).position).to eq(4)
       end
 
-      it 'return 200 and updated tour when authenciated by tour author' do
+      it 'return 200 and updated tour when authenticated by tour author' do
         tour = create(:tour)
         flat_pages = create_list(:flat_page, 5)
         flat_pages.each { |flat_page| tour.flat_pages << flat_page }
@@ -293,7 +293,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
   end
 
   describe 'DELETE #destroy' do
-    it 'return 405 when unauthenciated' do
+    it 'return 405 when unauthenticated' do
       tour = create(:tour)
       flat_page = create(:flat_page)
       tour.flat_pages << flat_page
@@ -302,7 +302,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       expect(response.status).to eq(405)
     end
 
-    it 'return 405 when authenciated but not an admin for current tenant' do
+    it 'return 405 when authenticated but not an admin for current tenant' do
       tour = create(:tour)
       flat_page = create(:flat_page)
       tour.flat_pages << flat_page
@@ -315,7 +315,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       expect(response.status).to eq(405)
     end
 
-    it 'return 405 and one less tour when authenciated but an admin for current tenant' do
+    it 'return 405 and one less tour when authenticated but an admin for current tenant' do
       tour = create(:tour)
       flat_page = create(:flat_page)
       tour.flat_pages << flat_page
@@ -330,7 +330,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       expect(Tour.count).to eq(tour_count)
     end
 
-    it 'return 405 and one less tour when authenciated by super' do
+    it 'return 405 and one less tour when authenticated by super' do
       tour = create(:tour)
       flat_page = create(:flat_page)
       tour.flat_pages << flat_page
@@ -345,7 +345,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       expect(Tour.count).to eq(tour_count)
     end
 
-    it 'return 405 and one less tour when authenciated by tour author' do
+    it 'return 405 and one less tour when authenticated by tour author' do
       tour = create(:tour)
       flat_page = create(:flat_page)
       tour.flat_pages << flat_page
@@ -355,7 +355,6 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
-      new_title = Faker::Name.unique.name
       tour_count = Tour.count
       post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(405)

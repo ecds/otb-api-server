@@ -11,7 +11,7 @@ module V3
     # GET /users
     def index
       if current_user.present?
-        if params['me']
+        if params["me"]
           render json: current_user
         elsif current_user.current_tenant_admin?
           render json: User.all
@@ -26,7 +26,7 @@ module V3
       if current_user == @record || current_user.super
         render json: @record, include_tours: true
       else
-        render json: { message: 'You are not autorized to to view this resource.' }.to_json, status: 401
+        render json: { message: "You are not authorized to to view this resource." }.to_json, status: 401
       end
     end
 

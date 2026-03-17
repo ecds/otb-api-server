@@ -7,7 +7,7 @@ module V3
     # GET /tour_sets
     def index
       @records = []
-      if params[:subdir] && params[:subdir] != 'public'
+      if params[:subdir] && params[:subdir] != "public"
         @records = TourSet.where(subdir: params[:subdir])
         if !@records.first&.published_tours&.empty? || current_user&.tour_sets.include?(@records.first) || current_user&.super
           render json: @records
@@ -22,7 +22,7 @@ module V3
       end
 
       if current_user.tour_sets.present? || current_user.super
-        render json: @records, include: [ 'admins' ]
+        render json: @records, include: [ "admins" ]
       else
         if current_user&.tour_sets.empty?
           @records = published
@@ -36,7 +36,7 @@ module V3
       if @allowed
         render json: @record
       else
-        render json: { data: { id: 0, type: 'tour_sets', attributes: { name: '....' } } }
+        render json: { data: { id: 0, type: "tour_sets", attributes: { name: "...." } } }
       end
     end
 
@@ -97,7 +97,7 @@ module V3
       ActiveModelSerializers::Deserialization
           .jsonapi_parse(
             params, only: [
-                  :name, :tours, :admins, :base_sixty_four, :logo_title
+                  :name, :tours, :admins, :base_sixty_four, :logo_title, :logo
               ]
           )
     end

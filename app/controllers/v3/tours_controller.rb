@@ -5,22 +5,22 @@ module V3
   class ToursController < V3Controller
     # GET /tours
     def index
-      @records = if (params[:slug])
+      @records = if params[:slug]
         @record = Slug.find_by(slug: params[:slug]).tour
         if @record.published || crud_allowed?
           @record
         else
           nil
         end
-      elsif (current_user && current_user.current_tenant_admin?)
+      elsif current_user && current_user.current_tenant_admin?
         Tour.all
-      elsif (current_user && current_user.id)
+      elsif current_user && current_user.id
         (current_user.tours + Tour.published).uniq
       else
         Tour.published
       end
       if @records.nil?
-        render json: { data: { id: 0, type: 'tours', attributes: { title: '....' } } }
+        render json: { data: { id: 0, type: "tours", attributes: { title: "...." } } }
       else
         render json: @records, each_serializer: V3::TourBaseSerializer
       end
@@ -28,8 +28,8 @@ module V3
 
     # GET /tours/1
     def show
-      request_loc = if request.env['ipinfo'].respond_to?('longitude')
-        { centerLng: request.env['ipinfo'].longitude, centerLat: request.env['ipinfo'].latitude }
+      request_loc = if request.env["ipinfo"].respond_to?("longitude")
+        { centerLng: request.env["ipinfo"].longitude, centerLat: request.env["ipinfo"].latitude }
       else
         { centerLng: -84.38979, centerLat: 33.75432 }
       end
@@ -37,7 +37,7 @@ module V3
       if @record&.published || crud_allowed?
         render json: @record, loc: request_loc
       else
-        render json: { data: { id: 0, type: 'tours', attributes: { title: '....' } } }
+        render json: { data: { id: 0, type: "tours", attributes: { title: "...." } } }
       end
     end
 

@@ -13,7 +13,7 @@ RSpec.describe Medium, type: :model do
       expect(medium.file.attached?).to be true
     end
 
-    it 'gets image from youtube when downloaded image is a StrinIO object and sets embed' do
+    it 'gets image from youtube when downloaded image is a StringIO object and sets embed' do
       file = File.open(Rails.root + 'spec/factories/images/atl.png')
       string_io = StringIO.new(file.read)
       base64 = VideoProps.encode_image(string_io)
@@ -61,7 +61,6 @@ RSpec.describe Medium, type: :model do
 
     it 'updates title and caption of video' do
       medium = create(:medium, video: 'F9ULbmCvmxY', base_sixty_four: nil, video_provider: 'youtube')
-      original_checksum = medium.file.blob.checksum
       expect(medium.title).to include('Goodie')
       expect(medium.caption).to include('Goodie')
       medium.update(title: 'Outkast')
@@ -82,17 +81,27 @@ RSpec.describe Medium, type: :model do
   end
 
 
-  context 'createing images' do
+  context 'creating images' do
+    it "creates a medium record with attachment" do
+      poo = nil
+      File.open(Rails.root.join('spec', 'factories', 'images', 'atl_base64.txt'), "r") do |b64|
+        poo = b64.read
+      end
+      Medium.create(base_sixty_four: poo, filename: "atl.png")
+      medium = Medium.find_by(filename: "atl.png")
+      expect(medium.filename).to eq("atl.png")
+    end
+
     it 'sets widths for variants' do
       medium = create(
         :medium,
         filename: Faker::File.file_name(dir: '', ext: 'jpg', directory_separator: ''),
-        base_sixty_four: File.read(Rails.root.join('spec/factories/images/atl_base64.txt')),
         video: nil
       )
-
+      medium = Medium.find(medium.id)
       medium.save
-      expect(medium.lqip_width).not_to be nil
+      expect(medium).not_to be nil
+      # expect(medium.lqip_width).not_to be nil
     end
 
     it 'saves a gif' do

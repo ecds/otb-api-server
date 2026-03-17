@@ -46,13 +46,13 @@ RSpec.describe Tour, type: :model do
     expect(tour.saved_change_to_attribute?(:saved_stop_order)).to be false
   end
 
-  it 'updates duration when stop order chages' do
+  it 'updates duration when stop order changes' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), published: false)
     5.times { |i| create(:tour_stop, tour: tour, stop: create(:stop), position: i + 1) }
     tour.update(published: true)
     tour.save
     expect(tour.duration).to eq(7336)
-    # Trick the network stub to fetch different distance matrix but doesn't presist a
+    # Trick the network stub to fetch different distance matrix but doesn't persist a
     # change to the tour's mode.
     tour.mode.title = 'TRANSIT'
     tour.tour_stops.order(:position).last.update(position: 0)
@@ -147,7 +147,6 @@ RSpec.describe Tour, type: :model do
 
   it 'allows both restrictions to be false' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5))
-    mo = create(:map_overlay, tour: tour)
     expect(tour.restrict_bounds).to be true
     tour.update(restrict_bounds: false)
     expect(tour.restrict_bounds).to be false
@@ -158,5 +157,11 @@ RSpec.describe Tour, type: :model do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5))
     tour.update(restrict_bounds_to_overlay: true)
     expect(tour.restrict_bounds_to_overlay).to be false
+  end
+
+  it "will not allow a title with a duplicate name" do
+    title = Faker::Movies::HitchhikersGuideToTheGalaxy.location
+    create(:tour, title:)
+    expect(build(:tour, title:)).to_not be_valid
   end
 end

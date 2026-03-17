@@ -31,7 +31,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
       expect(json.count).to eq(Tour.published.map { |tour| tour.tour_stops.count }.sum)
     end
 
-    it 'returns a 200 response when requeted by slug' do
+    it 'returns a 200 response when requested by slug' do
       tour = create(:tour_with_stops)
       tour.update(published: true)
       get :index, params: { tenant: Apartment::Tenant.current, slug: tour.tour_stops.first.stop.slug, tour: tour.id }
@@ -87,7 +87,6 @@ RSpec.describe V3::TourStopsController, type: :controller do
 
   describe 'GET #show' do
     it 'returns a 200 response' do
-      tours = create(:tour_with_stops)
       tour = Tour.last
       tour.update(published: true)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_stops.last.id }
@@ -142,14 +141,14 @@ RSpec.describe V3::TourStopsController, type: :controller do
   # TourStop objects are NOT created via tha API. Every test should return 401
   describe 'POST #create' do
     context 'with valid params' do
-      it 'return 405 when unauthenciated' do
+      it 'return 405 when unauthenticated' do
         tour = create(:tour)
         stop = create(:stop)
         post :create, params: { data: data(tour, stop), tenant: TourSet.first.subdir }
         expect(response.status).to eq(405)
       end
 
-      it 'return 405 when authenciated but not an admin for current tenant' do
+      it 'return 405 when authenticated but not an admin for current tenant' do
         tour = create(:tour)
         stop = create(:stop)
         original_tour_stop_count = TourStop.count
@@ -163,7 +162,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(original_tour_stop_count).to eq(TourStop.count)
       end
 
-      it 'return 405 when authenciated but an admin for current tenant' do
+      it 'return 405 when authenticated but an admin for current tenant' do
         tour = create(:tour)
         stop = create(:stop)
         original_tour_stop_count = TourStop.count
@@ -177,7 +176,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(original_tour_stop_count).to eq(TourStop.count)
       end
 
-      it 'return 405 when authenciated by super' do
+      it 'return 405 when authenticated by super' do
         tour = create(:tour)
         stop = create(:stop)
         original_tour_stop_count = TourStop.count
@@ -191,7 +190,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(original_tour_stop_count).to eq(TourStop.count)
       end
 
-      it 'return 405 when authenciated by tour author' do
+      it 'return 405 when authenticated by tour author' do
         tour = create(:tour)
         stop = create(:stop)
         original_tour_stop_count = TourStop.count
@@ -209,7 +208,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
 
   describe 'PUT #update' do
     context 'with valid params' do
-      it 'return 401 when unauthenciated' do
+      it 'return 401 when unauthenticated' do
         tour = create(:tour)
         stop = create(:stop)
         tour.stops << stop
@@ -219,7 +218,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(response.status).to eq(401)
       end
 
-      it 'return 401 when authenciated but not an admin for current tenant' do
+      it 'return 401 when authenticated but not an admin for current tenant' do
         tour = create(:tour)
         stop = create(:stop)
         tour.stops << stop
@@ -234,7 +233,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(response.status).to eq(401)
       end
 
-      it 'return 200 and updated tour when authenciated but an admin for current tenant' do
+      it 'return 200 and updated tour when authenticated but an admin for current tenant' do
         tour = create(:tour)
         stops = create_list(:stop, 5)
         stops.each { |stop| tour.stops << stop }
@@ -257,7 +256,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(TourStop.find(tour_stop.id).position).to eq(5)
       end
 
-      it 'return 200 and updated tour when authenciated by super' do
+      it 'return 200 and updated tour when authenticated by super' do
         tour = create(:tour)
         stops = create_list(:stop, 5)
         stops.each { |stop| tour.stops << stop }
@@ -280,7 +279,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(TourStop.find(tour_stop.id).position).to eq(4)
       end
 
-      it 'return 200 and updated tour when authenciated by tour author' do
+      it 'return 200 and updated tour when authenticated by tour author' do
         tour = create(:tour)
         stops = create_list(:stop, 5)
         stops.each { |stop| tour.stops << stop }
@@ -303,7 +302,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
         expect(TourStop.find(tour_stop.id).position).to eq(1)
       end
 
-      it 'return 422 authenciated by super but tour stop and position are nil' do
+      it 'return 422 authenticated by super but tour stop and position are nil' do
         tour = create(:tour, stops: create_list(:stop, rand(4..6)))
         user = create(:user, super: true)
         tour_stop = TourStop.find_by(tour: tour, stop: tour.stops.first)
@@ -322,7 +321,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
   end
 
   describe 'DELETE #destroy' do
-    it 'return 405 when unauthenciated' do
+    it 'return 405 when unauthenticated' do
       tour = create(:tour)
       stop = create(:stop)
       tour.stops << stop
@@ -331,7 +330,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
       expect(response.status).to eq(405)
     end
 
-    it 'return 405 when authenciated but not an admin for current tenant' do
+    it 'return 405 when authenticated but not an admin for current tenant' do
       tour = create(:tour)
       stop = create(:stop)
       tour.stops << stop
@@ -343,7 +342,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
       expect(response.status).to eq(405)
     end
 
-    it 'return 405 and one less tour when authenciated but an admin for current tenant' do
+    it 'return 405 and one less tour when authenticated but an admin for current tenant' do
       tour = create(:tour)
       stop = create(:stop)
       tour.stops << stop
@@ -357,7 +356,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
       expect(Tour.count).to eq(tour_count)
     end
 
-    it 'return 405 and one less tour when authenciated by super' do
+    it 'return 405 and one less tour when authenticated by super' do
       tour = create(:tour)
       stop = create(:stop)
       tour.stops << stop
@@ -370,7 +369,7 @@ RSpec.describe V3::TourStopsController, type: :controller do
       expect(Tour.count).to eq(tour_count)
     end
 
-    it 'return 405 and one less tour when authenciated by tour author' do
+    it 'return 405 and one less tour when authenticated by tour author' do
       tour = create(:tour)
       stop = create(:stop)
       tour.stops << stop
@@ -379,7 +378,6 @@ RSpec.describe V3::TourStopsController, type: :controller do
       user.tour_sets = []
       user.tours << tour
       signed_cookie(user)
-      new_title = Faker::Name.unique.name
       tour_count = Tour.count
       post :destroy, params: { id: tour_stop.id, tenant: Apartment::Tenant.current }
       expect(response.status).to eq(405)

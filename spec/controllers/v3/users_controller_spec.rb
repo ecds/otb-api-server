@@ -154,7 +154,6 @@ RSpec.describe V3::UsersController, type: :controller do
     context 'unauthorized' do
       it 'does not update when unauthenticated' do
         user = create(:user, super: false)
-        initial_display_name = user.display_name
         new_display_name = Faker::Music::Hiphop.artist
         update_params = { id: user.to_param, tenant: 'public', data: { type: 'users', attributes: { display_name: new_display_name } } }
         put :update, params: update_params
@@ -167,7 +166,6 @@ RSpec.describe V3::UsersController, type: :controller do
         user = create(:user, super: false)
         user_to_update = create(:user)
         user.tour_sets << create(:tour_set)
-        initial_display_name = user_to_update.display_name
         new_display_name = Faker::Music::Hiphop.artist
         update_params = { id: user_to_update.to_param, tenant: 'public', data: { type: 'users', attributes: { display_name: new_display_name } } }
         signed_cookie(user)
@@ -181,7 +179,6 @@ RSpec.describe V3::UsersController, type: :controller do
         user = create(:user)
         user_to_update = create(:user)
         user.tour_sets << create(:tour_set)
-        initial_display_name = user_to_update.display_name
         new_display_name = "#{Faker::Music::Hiphop.artist}!"
         update_params = { id: user_to_update.to_param, tenant: 'public', data: { type: 'users', attributes: { display_name: new_display_name } } }
         signed_cookie(user)
@@ -202,14 +199,13 @@ RSpec.describe V3::UsersController, type: :controller do
         put :update, params: update_params
         expect(response.status).to eq(401)
         user_to_update.reload
-        expect(user_to_update.display_name).not_to eq(new_display_name)
+        expect(initial_display_name).not_to eq(new_display_name)
       end
     end
 
     context 'authorized' do
       it 'updates user when requested by self' do
         user = create(:user)
-        initial_display_name = Faker::Music::Hiphop.artist
         new_display_name = Faker::Music::Hiphop.artist
         update_params = { id: user.to_param, tenant: 'public', data: { type: 'users', attributes: { display_name: new_display_name } } }
         signed_cookie(user)
@@ -222,7 +218,6 @@ RSpec.describe V3::UsersController, type: :controller do
       it 'updates user when requested by super' do
         user = create(:user, super: true)
         user_to_update = create(:user)
-        initial_display_name = user_to_update.display_name
         new_display_name = Faker::Music::Hiphop.artist
         update_params = { id: user_to_update.to_param, tenant: 'public', data: { type: 'users', attributes: { display_name: new_display_name } } }
         signed_cookie(user)

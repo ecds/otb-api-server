@@ -22,6 +22,22 @@ jobs:
     runs-on: ubuntu-24.04-arm
 
     services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+        env:
+          STACK_VERSION: 7.17.1
+          xpack.security.enabled: false
+          cluster.name: otb-elasticsearch
+          http.port: 9200
+          discovery.type: single-node
+        options: >-
+          --health-cmd "curl http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 9200:9200
+
       postgres:
         image: postgres:13
         env:
@@ -35,6 +51,16 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
       - name: Checkout code

@@ -176,7 +176,7 @@ class Tour < ApplicationRecord
     }
   end
 
-    # private
+    private
 
     def ensure_slug
       tour_slug = title.parameterize_intl
@@ -219,15 +219,6 @@ class Tour < ApplicationRecord
 
       if self.restrict_bounds && !self.restrict_bounds_was
         self.restrict_bounds_to_overlay = false
-      end
-    end
-
-    def flat_page_index
-      tour_flat_pages.sort_by(&:position).map do |fp|
-        {
-          position: fp.position,
-          **fp.flat_page.search_data
-        }
       end
     end
 

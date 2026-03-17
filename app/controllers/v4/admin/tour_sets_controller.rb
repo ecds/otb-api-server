@@ -2,8 +2,8 @@ module V4
   module Admin
     class TourSetsController < V4Controller
       def index
-        render json: { error: "unauthorized" }, status: :unauthorized and return unless current_user.id
-        render json: TourSet.all.sort_by(&:name), status: :ok and return  if current_user.super
+        render json: { error: "unauthorized" }, status: :unauthorized and return if current_user.id.nil?
+        render json: TourSet.all.sort_by(&:name).map { |ts| { name: ts.name, subdir: ts.name } }, status: :ok and return  if current_user.id
         render json: current_user.tour_sets.sort_by(&:name), status: :ok
       end
 

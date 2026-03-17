@@ -24,13 +24,18 @@ RSpec.describe V4::Admin::TourSetsController, type: :controller do
     end
 
     it "returns only TourSets when assigned to user" do
+      # We want any authenticated user to get all the TourSets
+      # so they can request access.
+      Apartment::Tenant.switch! TourSet.first.subdir
+      Tour.all.each { |t| t.update(published: false) }
+      Apartment::Tenant.reset
       user = create(:user, super: false)
       user.tour_sets << create_list(:tour_set, 3)
       signed_cookie(user)
       get :index, params: { tenant: "public" }
       expect(response.status).to eq(200)
-      expect(v4_json.count).not_to eq(TourSet.count)
-      expect(v4_json.count).to eq(user.tour_sets.count)
+      expect(v4_json.count).to eq(TourSet.count)
+      expect(v4_json.count).to be > user.tour_sets.count
     end
   end
 

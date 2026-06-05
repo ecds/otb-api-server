@@ -38,15 +38,13 @@ class V3Controller < ApplicationController
 
   def serialize_errors
     errors = []
-    if @record&.errors
-      @record.errors.full_messages.each do |error|
-        errors.push({
-          detail: error,
-          source: {
-            pointer: 'data/attributes',
-          },
-        })
-      end
+    @record&.errors&.full_messages&.each do |error|
+      errors.push({
+        detail: error,
+        source: {
+          pointer: 'data/attributes',
+        },
+      })
     end
     { errors: errors }
   end

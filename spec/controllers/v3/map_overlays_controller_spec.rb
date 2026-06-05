@@ -12,7 +12,7 @@ RSpec.describe(V3::MapOverlaysController, type: :controller) do
         expect(response.status).to(eq(200))
         expect(json[:id]).to(eq(map_overlay.id.to_s))
         expect(attributes[:south]).not_to(eq(map_overlay.south.to_f.to_s))
-        expect(attributes[:east]).to(be(nil))
+        expect(attributes[:east]).to(be_nil)
       end
 
       it 'returns empty MapOverlay when not unauthenticated but unauthorized' do
@@ -28,7 +28,7 @@ RSpec.describe(V3::MapOverlaysController, type: :controller) do
         expect(response.status).to(eq(200))
         expect(json[:id]).to(eq(map_overlay.id.to_s))
         expect(attributes[:north]).not_to(eq(map_overlay.north.to_f.to_s))
-        expect(attributes[:west]).to(be(nil))
+        expect(attributes[:west]).to(be_nil)
       end
     end
 

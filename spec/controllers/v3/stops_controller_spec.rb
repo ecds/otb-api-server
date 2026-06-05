@@ -12,7 +12,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
       expect(response.status).to(eq(200))
       expect(Tour.count).to(be > Tour.published.count)
       json.each do |stop|
-        expect(Stop.find(stop[:id]).tours.any? { |tour| tour.published })
+        expect(Stop.find(stop[:id]).tours.any?(&:published))
       end
       expect(json.count).to(be < Stop.count)
     end
@@ -22,7 +22,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
       Tour.first.update(published: true) if Tour.published.empty?
       Tour.last.update(published: false) if Tour.published.count == Tour.count
       Tour.last.stops.tours = [] if Tour.last.stops.count > 1
-      Stop.last.update(tours: []) if Stop.all.all? { |s| s.published }
+      Stop.last.update(tours: []) if Stop.all.all?(&:published)
       user = create(:user)
       user.tour_sets = []
       user.tours = []
@@ -31,7 +31,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
       expect(response.status).to(eq(200))
       expect(Tour.count).to(be > Tour.published.count)
       json.each do |stop|
-        expect(Stop.find(stop[:id]).tours.any? { |tour| tour.published })
+        expect(Stop.find(stop[:id]).tours.any?(&:published))
       end
       expect(json.count).to(be < Stop.count)
     end
@@ -65,7 +65,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
     it 'returns a 200 response that is empty stop' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       # Make sure the stop is only associated with the newly created tour
       tour.stops.last.update(tours: [tour])
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
@@ -77,7 +77,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
     it 'returns a 200 response and stop when stop is part of published tour' do
       tour = create(:tour)
       tour.update(published: true)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.last.update(tours: [tour])
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
       expect(response.status).to(eq(200))
@@ -87,7 +87,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
     it 'returns a 200 response that is empty stop when request is authenticated by someone w/o permission' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.last.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -103,7 +103,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
     it 'returns a 200 response that is a stop when request is authenticated by a tour author' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.first.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -118,7 +118,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
     it 'returns a 200 response that is a stop when request is authenticated by a tenant admin' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.first.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -133,7 +133,7 @@ RSpec.describe(V3::StopsController, type: :controller) do
     it 'returns a 200 response that is a stop when request is authenticated by a super user' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.first.update(tours: [tour])
       user = create(:user)
       user.update(super: true)

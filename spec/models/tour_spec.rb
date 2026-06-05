@@ -7,8 +7,8 @@ RSpec.describe(Tour, type: :model) do
   # it { expect(subject).to validate_presence_of :title }
   it { expect(subject).to(have_many(:stops)) }
   it { expect(subject).to(have_many(:tour_stops)) }
-  it { expect(Tour.reflect_on_association(:theme).macro).to(eq(:belongs_to)) }
-  it { expect(Tour.reflect_on_association(:mode).macro).to(eq(:belongs_to)) }
+  it { expect(described_class.reflect_on_association(:theme).macro).to(eq(:belongs_to)) }
+  it { expect(described_class.reflect_on_association(:mode).macro).to(eq(:belongs_to)) }
 
   it 'gets a duration' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
@@ -21,13 +21,13 @@ RSpec.describe(Tour, type: :model) do
     tour = create(:tour, mode: Mode.find_by(title: 'TRANSIT'), stops: create_list(:stop, 5), published: false)
     tour.update(published: false)
     tour.save
-    expect(tour.duration).to(be(nil))
+    expect(tour.duration).to(be_nil)
   end
 
   it 'gets duration when tour is updated to published' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
     tour.update(published: false)
-    expect(tour.duration).to(be(nil))
+    expect(tour.duration).to(be_nil)
     tour.update(published: true)
     expect(tour.saved_change_to_attribute?(:published)).to(be(true))
     expect(tour.duration).to(eq(7336))
@@ -70,14 +70,14 @@ RSpec.describe(Tour, type: :model) do
     tour = create(:tour, mode: Mode.find_by(title: 'DRIVING'), stops: create_list(:stop, 5), published: false)
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(be(nil))
+    expect(tour.duration).to(be_nil)
   end
 
   it 'gets no duration whin response has ZERO_RESULTS' do
     tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 4), published: false)
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(be(nil))
+    expect(tour.duration).to(be_nil)
   end
 
   it 'does not update the duration when other attributes are updaeted' do
@@ -116,7 +116,7 @@ RSpec.describe(Tour, type: :model) do
 
   it 'has no bounds when no stops' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), published: false)
-    expect(tour.bounds).to(be(nil))
+    expect(tour.bounds).to(be_nil)
   end
 
   it 'does not restrict bounds to overlay when no overlay' do
@@ -157,16 +157,16 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.restrict_bounds_to_overlay).to(be(false))
   end
 
-  it 'will not allow restriction to overlay if no overlay' do
+  it 'does not allow restriction to overlay if no overlay' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5))
     tour.update(restrict_bounds_to_overlay: true)
     expect(tour.restrict_bounds_to_overlay).to(be(false))
   end
 
-  it 'will not allow a title with a duplicate name' do
+  it 'does not allow a title with a duplicate name' do
     title = Faker::Movies::HitchhikersGuideToTheGalaxy.location
     create(:tour, title:)
-    expect(build(:tour, title:)).to_not(be_valid)
+    expect(build(:tour, title:)).not_to(be_valid)
   end
 
   it 'takes the first stop medium for splash when tour has no media' do

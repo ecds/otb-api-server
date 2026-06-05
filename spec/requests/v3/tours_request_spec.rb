@@ -26,7 +26,7 @@ RSpec.describe('V3::Tours', type: :request) do
     end
 
     it 'returns status code 200' do
-      expect(response).to(have_http_status(200))
+      expect(response).to(have_http_status(:ok))
     end
   end
 end

@@ -21,9 +21,9 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
     let(:valid_params) { { data: { type: 'tour_sets', attributes: { name: Faker::Music::Hiphop.artist } }, tenant: 'public' } }
     let(:invalid_params) { { data: { type: 'tour_sets', attributes: { name: nil } }, tenant: 'public' } }
 
-    before(:each) do
+    before do
       Apartment::Tenant.reset
-      TourSet.all.each { |ts| ts.delete }
+      TourSet.all.find_each(&:delete)
       create_list(:tour_set, rand(3..5))
     end
 
@@ -50,7 +50,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
       end
 
       it 'returns a success response and only TourSet object by subdir when tour set has a published tour and not authorized' do
-        TourSet.all.each do |ts|
+        TourSet.all.find_each do |ts|
           Apartment::Tenant.switch!(ts.subdir)
           tour = create(:tour, published: true)
           tour.stops << create(:stop)
@@ -115,7 +115,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
         user = create(:user, super: true)
         signed_cookie(user)
         Apartment::Tenant.switch!(TourSet.second.subdir)
-        Tour.all.each { |t| t.update(published: false) }
+        Tour.all.find_each { |t| t.update(published: false) }
         Apartment::Tenant.reset
         get :index, params: { tenant: 'public', subdir: TourSet.second.subdir }
         expect(response.status).to(eq(200))
@@ -128,7 +128,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
         user.tour_sets << TourSet.last
         signed_cookie(user)
         Apartment::Tenant.switch!(TourSet.last.subdir)
-        Tour.all.each { |t| t.update(published: false) }
+        Tour.all.find_each { |t| t.update(published: false) }
         Apartment::Tenant.reset
         get :index, params: { tenant: 'public', subdir: TourSet.last.subdir }
         expect(response.status).to(eq(200))
@@ -202,12 +202,12 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
         it 'does not create a new TourSet when not super' do
           expect do
             post(:create, params: valid_params)
-          end.to(change(TourSet, :count).by(0))
+          end.not_to(change(TourSet, :count))
         end
 
         it 'returns 401' do
           post :create, params: valid_params
-          expect(response).to(have_http_status(401))
+          expect(response).to(have_http_status(:unauthorized))
         end
       end
 
@@ -217,14 +217,14 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
           signed_cookie(user)
           expect do
             post(:create, params: valid_params)
-          end.to(change(TourSet, :count).by(0))
+          end.not_to(change(TourSet, :count))
         end
 
         it 'returns 401 when not super' do
           user = create(:user, super: false)
           signed_cookie(user)
           post :create, params: valid_params
-          expect(response).to(have_http_status(401))
+          expect(response).to(have_http_status(:unauthorized))
         end
 
         it 'does not create a new TourSet when not super but is a tenant admin' do
@@ -233,7 +233,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
           signed_cookie(user)
           expect do
             post(:create, params: valid_params)
-          end.to(change(TourSet, :count).by(0))
+          end.not_to(change(TourSet, :count))
         end
 
         it 'returns 401 when not super but is a tenant admin' do
@@ -241,7 +241,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
           user.tour_sets << TourSet.first
           signed_cookie(user)
           post :create, params: valid_params
-          expect(response).to(have_http_status(401))
+          expect(response).to(have_http_status(:unauthorized))
         end
       end
 
@@ -279,7 +279,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
       context 'when unauthenticated and unauthorized' do
         it 'returns 401' do
           put :update, params: valid_params.merge({ id: TourSet.last.to_param })
-          expect(response).to(have_http_status(401))
+          expect(response).to(have_http_status(:unauthorized))
         end
       end
 
@@ -288,7 +288,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
           user = create(:user, super: false)
           signed_cookie(user)
           put :update, params: valid_params.merge({ id: TourSet.first.to_param })
-          expect(response).to(have_http_status(401))
+          expect(response).to(have_http_status(:unauthorized))
         end
 
         it 'allows update TourSet when not super but is a tenant admin' do
@@ -296,7 +296,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
           user.tour_sets << TourSet.second
           signed_cookie(user)
           put :update, params: valid_params.merge({ id: TourSet.second.to_param })
-          expect(response).to(have_http_status(200))
+          expect(response).to(have_http_status(:ok))
         end
 
         it 'does not update TourSet when not super not a tenant admin but is a tour author' do
@@ -307,7 +307,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
           user.tours << tour
           signed_cookie(user)
           put :update, params: valid_params.merge({ id: TourSet.second.to_param })
-          expect(response).to(have_http_status(401))
+          expect(response).to(have_http_status(:unauthorized))
         end
       end
 
@@ -319,7 +319,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
             user = create(:user, super: true)
             signed_cookie(user)
             put :update, params: valid_params.merge({ id: TourSet.last.to_param })
-            expect(response).to(have_http_status(200))
+            expect(response).to(have_http_status(:ok))
             expect(attributes[:name]).to(eq(new_name))
           end
         end
@@ -338,7 +338,7 @@ RSpec.describe(V3::TourSetsController, type: :controller) do
             user = create(:user, super: true)
             signed_cookie(user)
             put :update, params: { data: serialized_tour_set[:data], id: tour_set.id, tenant: 'public' }
-            expect(response).to(have_http_status(200))
+            expect(response).to(have_http_status(:ok))
             expect(TourSet.find(tour_set.id).logo.attached?).to(be(false))
           end
         end

@@ -18,7 +18,7 @@ class AccessRequest < ApplicationRecord
   end
 
   def requested_tours
-    return [] if tour_ids.nil? || tour_ids.empty?
+    return [] if tour_ids.blank?
 
     Apartment::Tenant.switch!(tour_set.subdir)
     Tour.find(tour_ids)

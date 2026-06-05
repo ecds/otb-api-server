@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   include Searchable
   after_update :update_index
   has_many :tour_set_admins

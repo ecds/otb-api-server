@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe(V3::StopMediaController, type: :controller) do
   describe 'GET #index' do
-    before(:each) { Tour.all.each { |tour| tour.update(published: false) } }
+    before { Tour.all.find_each { |tour| tour.update(published: false) } }
 
     context 'unauthenticated' do
       it 'returns a success response but zero StopMedium objects' do
@@ -75,10 +75,10 @@ RSpec.describe(V3::StopMediaController, type: :controller) do
         stop_medium = create(:stop_medium, stop: create(:stop))
         get :show, params: { id: stop_medium.id, tenant: Apartment::Tenant.current }
         expect(response.status).to(eq(200))
-        expect(relationships[:medium][:data]).to(be(nil))
-        expect(relationships[:stop][:data]).to(be(nil))
-        expect(stop_medium.stop).not_to(be(nil))
-        expect(stop_medium.medium).not_to(be(nil))
+        expect(relationships[:medium][:data]).to(be_nil)
+        expect(relationships[:stop][:data]).to(be_nil)
+        expect(stop_medium.stop).not_to(be_nil)
+        expect(stop_medium.medium).not_to(be_nil)
         expect(StopMedium.count).to(be > 0)
       end
 
@@ -101,10 +101,10 @@ RSpec.describe(V3::StopMediaController, type: :controller) do
         Apartment::Tenant.switch!(original_tenant)
         get :show, params: { id: stop_medium.id, tenant: original_tenant }
         expect(response.status).to(eq(200))
-        expect(relationships[:medium][:data]).to(be(nil))
-        expect(relationships[:stop][:data]).to(be(nil))
-        expect(stop_medium.stop).not_to(be(nil))
-        expect(stop_medium.medium).not_to(be(nil))
+        expect(relationships[:medium][:data]).to(be_nil)
+        expect(relationships[:stop][:data]).to(be_nil)
+        expect(stop_medium.stop).not_to(be_nil)
+        expect(stop_medium.medium).not_to(be_nil)
         expect(StopMedium.count).to(be > 0)
       end
 
@@ -119,8 +119,8 @@ RSpec.describe(V3::StopMediaController, type: :controller) do
         Apartment::Tenant.switch!(original_tenant)
         get :show, params: { id: stop_medium.id, tenant: original_tenant }
         expect(response.status).to(eq(200))
-        expect(relationships[:medium][:data]).to(be(nil))
-        expect(relationships[:stop][:data]).to(be(nil))
+        expect(relationships[:medium][:data]).to(be_nil)
+        expect(relationships[:stop][:data]).to(be_nil)
         expect(StopMedium.count).to(be > 0)
       end
     end
@@ -141,7 +141,7 @@ RSpec.describe(V3::StopMediaController, type: :controller) do
     it 'returns does not create a new StopMedium' do
       expect do
         post(:create, params: { tenant: Apartment::Tenant.current })
-      end.to(change(StopMedium, :count).by(0))
+      end.not_to(change(StopMedium, :count))
     end
 
     it 'returns 401' do
@@ -180,7 +180,7 @@ RSpec.describe(V3::StopMediaController, type: :controller) do
       signed_cookie(user)
       expect do
         delete(:destroy, params: { id: stop_medium.to_param, tenant: Apartment::Tenant.current })
-      end.to(change(StopMedium, :count).by(0))
+      end.not_to(change(StopMedium, :count))
     end
 
     it 'responds with 405' do

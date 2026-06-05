@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe(V3::ThemesController, type: :controller) do
-  before(:each) { create_list(:theme, rand(3..6)) }
+  before { create_list(:theme, rand(3..6)) }
 
   describe 'GET #index' do
     it 'returns a success response' do

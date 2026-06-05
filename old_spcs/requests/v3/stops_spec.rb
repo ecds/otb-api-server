@@ -21,7 +21,7 @@ RSpec.describe('V3::Stops API') do
       end
 
       it 'returns status code 200' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
 
       it 'returns all tour stops' do
@@ -63,7 +63,7 @@ RSpec.describe('V3::Stops API') do
 
     context 'when tour stop exists' do
       it 'returns status code 200' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
 
       # For now, access to stop is through /tour-stop?slug=XX&tour=Y
@@ -80,7 +80,7 @@ RSpec.describe('V3::Stops API') do
       before { get "/#{Apartment::Tenant.current}/stops/0" }
 
       it 'returns status code 404' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
 
       it 'returns dummy stop' do
@@ -94,17 +94,17 @@ RSpec.describe('V3::Stops API') do
     let!(:stop) { Stop.second }
     let!(:tour) { stop.tours.first }
     let!(:original_slug) { stop.slug }
-    let!(:new_title) { "#{Faker::Movies::HitchhikersGuideToTheGalaxy.starship}" }
+    let!(:new_title) { Faker::Movies::HitchhikersGuideToTheGalaxy.starship.to_s }
 
     context 'get stop after title change' do
       before do
         tour.update(published: true)
         stop.update(title: new_title)
+        get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour.id}"
       end
-      before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour.id}" }
 
       it 'gets same stop with new slug' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
         expect(attributes['slug']).to(eq(new_title.parameterize))
         expect(json['id']).to(eq(stop.id.to_s))
       end
@@ -135,7 +135,7 @@ RSpec.describe('V3::Stops API') do
       end
 
       it 'returns status code 201' do
-        expect(response).to(have_http_status(201))
+        expect(response).to(have_http_status(:created))
       end
     end
 
@@ -165,7 +165,7 @@ RSpec.describe('V3::Stops API') do
 
     context 'when stop exists' do
       it 'returns status code 204' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
 
       it 'updates the stop' do
@@ -181,7 +181,7 @@ RSpec.describe('V3::Stops API') do
       end
 
       it 'returns status code 404' do
-        expect(response).to(have_http_status(404))
+        expect(response).to(have_http_status(:not_found))
       end
 
       it 'returns a not found message' do
@@ -198,7 +198,7 @@ RSpec.describe('V3::Stops API') do
     end
 
     it 'returns status code 204' do
-      expect(response).to(have_http_status(204))
+      expect(response).to(have_http_status(:no_content))
     end
   end
 end

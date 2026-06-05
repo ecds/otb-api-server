@@ -8,9 +8,9 @@ module V3
       @records = if current_user.current_tenant_admin?
         Stop.all
       elsif current_user.tours.present?
-        current_user.tours.map { |tour| tour.stops }.flatten.uniq
+        current_user.tours.map(&:stops).flatten.uniq
       else
-        Tour.published.map { |tour| tour.stops }.flatten.uniq
+        Tour.published.map(&:stops).flatten.uniq
       end
       render(json: @records)
     end
@@ -21,7 +21,7 @@ module V3
         @record = Stop.new(stop_params)
         render(json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}") if @record.save
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
@@ -32,17 +32,17 @@ module V3
           render(json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}")
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
     def destroy
       if !crud_allowed?
-        head(401)
+        head(:unauthorized)
       elsif crud_allowed? && @record.orphaned
         @record.destroy
       elsif crud_allowed? && !@record.orphaned
-        head(405)
+        head(:method_not_allowed)
       end
     end
 

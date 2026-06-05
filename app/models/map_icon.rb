@@ -6,9 +6,7 @@ class MapIcon < MediumBaseRecord
 
   has_one :stop
 
-  def published
-    stop.published
-  end
+  delegate :published, to: :stop
 
   def search_data
     { id: }
@@ -19,7 +17,7 @@ class MapIcon < MediumBaseRecord
 
     file_to_check = MiniMagick::Image.read(Base64.decode64(base_sixty_four))
 
-    return unless file_to_check[:height] > 80 || file_to_check[:width] > 80
+    return if file_to_check[:height] <= 80 && file_to_check[:width] <= 80
 
     errors.add(:base, 'Icons should be no bigger that 80 by 80 pixels')
   end

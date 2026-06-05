@@ -16,7 +16,7 @@ RSpec.describe(V3::TourFlatPagesController, type: :controller) do
 
   describe 'GET #index' do
     it 'returns a 200 response and empty tour when none are part of a published tour' do
-      Tour.all.each { |tour| tour.update(published: false) }
+      Tour.all.find_each { |tour| tour.update(published: false) }
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(json).to(be_empty)
       expect(response.status).to(eq(200))

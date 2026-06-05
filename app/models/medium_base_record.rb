@@ -8,7 +8,7 @@ class MediumBaseRecord < ApplicationRecord
   before_create :attach_file
   before_destroy :purge
 
-  validates_presence_of :filename
+  validates :filename, presence: true
 
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
   has_one_attached 'file'
@@ -74,7 +74,7 @@ class MediumBaseRecord < ApplicationRecord
 
     parse_base64
 
-    return unless content_type.include?('jp2')
+    return if content_type.exclude?('jp2')
 
     errors.add(:base, 'JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.')
   end

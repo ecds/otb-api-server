@@ -9,9 +9,7 @@ class MapOverlay < MediumBaseRecord
   belongs_to :tour, optional: true
   belongs_to :stop, optional: true
 
-  def published
-    tour.published
-  end
+  delegate :published, to: :tour
 
   def set_initial_bounds
     return if tour.nil? || tour&.bounds.nil? || (tour&.stop_count&.< 2)

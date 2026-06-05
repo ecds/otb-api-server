@@ -3,6 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe(TourAuthor, type: :model) do
-  it { should belong_to(:tour) }
-  it { should belong_to(:user) }
+  it { is_expected.to(belong_to(:tour)) }
+  it { is_expected.to(belong_to(:user)) }
 end

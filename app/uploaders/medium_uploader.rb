@@ -16,7 +16,7 @@ class MediumUploader < CarrierWave::Uploader::Base
   # end
 
   def store_dir
-    "#{Rails.root}/public/uploads/#{Apartment::Tenant.current}/"
+    Rails.root.join("public/uploads/#{Apartment::Tenant.current}/").to_s
   end
 
   # Provide a default URL as a default if there hasn't been a file uploaded:
@@ -64,7 +64,7 @@ class MediumUploader < CarrierWave::Uploader::Base
     if model.video.present?
       "#{model.video}.jpg"
     elsif defined?(original_filname) && original_filename.starts_with?('original_image')
-      "#{DateTime.now.strftime("%Q")[0..8]}.#{file.extension}"
+      "#{Time.zone.now.strftime("%Q")[0..8]}.#{file.extension}"
     else
       @filename
     end

@@ -5,9 +5,9 @@ require 'rails_helper'
 RSpec.describe(V3::ToursController, type: :controller) do
   describe 'GET #index' do
     it 'returns a 200 response and empty tour when none found' do
-      StopSlug.all.each { |t| t.delete }
-      Stop.all.each { |t| t.delete }
-      Tour.all.each { |t| t.delete }
+      StopSlug.all.find_each(&:delete)
+      Stop.all.find_each(&:delete)
+      Tour.all.find_each(&:delete)
       get :index, params: { tenant: 'public' }
       expect(json).to(be_empty)
       expect(response.status).to(eq(200))
@@ -290,7 +290,7 @@ RSpec.describe(V3::ToursController, type: :controller) do
       it 'returns 200 and adds stop to a tour' do
         tour = create(:tour)
         create_list(:stop, 5)
-        Stop.all.each { |stop| tour.stops << stop }
+        Stop.all.find_each { |stop| tour.stops << stop }
         serialized_tour = JSON.parse(ActiveModelSerializers::Adapter::JsonApi.new(V3::TourSerializer.new(tour)).to_json).with_indifferent_access
         original_stop_count = serialized_tour[:data][:relationships][:stops][:data].count
         original_tour_stop_count = serialized_tour[:data][:relationships][:tour_stops][:data].count
@@ -320,7 +320,7 @@ RSpec.describe(V3::ToursController, type: :controller) do
       it 'returns 200 and removes a stop from a tour' do
         tour = create(:tour)
         create_list(:stop, 5)
-        Stop.all.each { |stop| tour.stops << stop }
+        Stop.all.find_each { |stop| tour.stops << stop }
         serialized_tour = JSON.parse(ActiveModelSerializers::Adapter::JsonApi.new(V3::TourSerializer.new(tour)).to_json).with_indifferent_access
         original_stop_count = serialized_tour[:data][:relationships][:stops][:data].count
         original_tour_stop_count = serialized_tour[:data][:relationships][:tour_stops][:data].count

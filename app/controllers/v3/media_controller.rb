@@ -9,7 +9,7 @@ module V3
     def index
       # TODO: This ins not ideal, we use these `not_in_*` scopes to make the list of media available to add
       # to a stop or tour. But the parameter does not make sense when just looking at it. Needs clearer language.
-      @media = if current_user && current_user.current_tenant_admin?
+      @media = if current_user&.current_tenant_admin?
         Medium.all
       else
         Medium.all.map { |medium| medium if medium.published }.compact

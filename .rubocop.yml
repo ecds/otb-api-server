@@ -12,3 +12,15 @@ Metrics/PerceivedComplexity:
 
 Style/StringLiterals:
   EnforcedStyle: single_quotes
+
+RSpec/ExampleLength:
+  Max: 20
+
+RSpec/MultipleExpectations:
+  Max: 10
+
+plugins:
+  - rubocop-factory_bot
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rspec_rails

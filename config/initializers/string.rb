@@ -13,7 +13,7 @@ class String
       transliterated_string.gsub(/[^a-z0-9\-_]+/i, separator)
     end
 
-    unless separator.nil? || separator.empty?
+    if separator.present?
       if separator == '_'
         re_duplicate_separator        = /-{2,}/
         re_leading_trailing_separator = /^-|-$/

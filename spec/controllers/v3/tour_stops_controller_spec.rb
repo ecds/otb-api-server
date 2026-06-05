@@ -16,7 +16,7 @@ RSpec.describe(V3::TourStopsController, type: :controller) do
 
   describe 'GET #index' do
     it 'returns a 200 response and empty tour when none are part of a published tour' do
-      Tour.all.each { |tour| tour.update(published: false) }
+      Tour.all.find_each { |tour| tour.update(published: false) }
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(json).to(be_empty)
       expect(response.status).to(eq(200))
@@ -72,7 +72,7 @@ RSpec.describe(V3::TourStopsController, type: :controller) do
     it 'returns empty json when unauthenticated but tour is not published' do
       tour = create(:tour_with_stops, published: false)
       get :index, params: { tenant: Apartment::Tenant.current, slug: tour.tour_stops.first.stop.slug, tour: tour.id }
-      expect(json).to(be(nil))
+      expect(json).to(be_nil)
     end
 
     it 'returns all TourStops when requested by tenant admin' do

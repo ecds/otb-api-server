@@ -13,7 +13,7 @@ class LogoUploader < CarrierWave::Uploader::Base
   process resize_to_limit: [1000, 80]
 
   def store_dir
-    "#{Rails.root}/public/uploads/#{Apartment::Tenant.current}/"
+    Rails.root.join("public/uploads/#{Apartment::Tenant.current}/").to_s
   end
 
   # Add a white list of extensions which are allowed to be uploaded.

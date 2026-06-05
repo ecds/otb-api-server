@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe(MapIcon, type: :model) do
   context 'size error' do
     it 'fails validation when image it too big' do
-      icon = MapIcon.create(
+      icon = described_class.create(
         base_sixty_four: File.read(Rails.root.join('spec/factories/images/png_base64.txt')),
         filename: Faker::File.file_name(dir: '', ext: 'png', directory_separator: ''),
       )

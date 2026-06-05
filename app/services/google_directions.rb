@@ -31,7 +31,7 @@ class GoogleDirections
     else
       matrix[:rows].first[:elements].map do |e|
         e[:duration][:value] if e[:duration].present?
-      end.reject { |d| d.nil? }
+      end.reject(&:nil?)
     end
   end
 

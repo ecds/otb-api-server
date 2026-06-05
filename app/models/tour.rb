@@ -78,9 +78,7 @@ class Tour < ApplicationRecord
     Apartment::Tenant.current.titleize
   end
 
-  def theme_title
-    theme.title
-  end
+  delegate :title, to: :theme, prefix: true
 
   def splash
     splash_medium = if medium.present?
@@ -217,7 +215,7 @@ class Tour < ApplicationRecord
   end
 
   def add_modes
-    Mode.all.each do |m|
+    Mode.all.find_each do |m|
       modes << m
     end
   end
@@ -258,6 +256,6 @@ class Tour < ApplicationRecord
   def first_stop_medium
     return if stops.empty?
 
-    stops.map { |s| s.media }.flatten.first
+    stops.map(&:media).flatten.first
   end
 end

@@ -7,6 +7,6 @@ class ReindexJob < ApplicationJob
     Apartment::Tenant.switch!(tenant)
     model = class_name.constantize
     record = model.find(id)
-    record.reindex if record.present?
+    record.presence&.reindex
   end
 end

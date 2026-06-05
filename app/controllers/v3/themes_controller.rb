@@ -15,17 +15,17 @@ module V3
 
     # POST /themes
     def create
-      head(405)
+      head(:method_not_allowed)
     end
 
     # PATCH/PUT /themes/1
     def update
-      head(405)
+      head(:method_not_allowed)
     end
 
     # DELETE /themes/1
     def destroy
-      head(405)
+      head(:method_not_allowed)
     end
 
     private

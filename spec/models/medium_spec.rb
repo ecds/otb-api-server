@@ -3,8 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe(Medium, type: :model) do
-  it { should have_many(:stop_media) }
-  it { should have_many(:stops) }
+  it { is_expected.to(have_many(:stop_media)) }
+  it { is_expected.to(have_many(:stops)) }
 
   context 'video' do
     it 'gets image from youtube and sets embed' do
@@ -23,8 +23,8 @@ RSpec.describe(Medium, type: :model) do
 
     it 'gets nothing when YouTube video is not found' do
       medium = create(:medium, video: 'CvmxYF9ULbm', base_sixty_four: nil, video_provider: 'youtube')
-      expect(medium.embed).to(be(nil))
-      expect(medium.provider).to(be(nil))
+      expect(medium.embed).to(be_nil)
+      expect(medium.provider).to(be_nil)
       expect(medium.file.attached?).to(be(false))
     end
 
@@ -87,11 +87,11 @@ RSpec.describe(Medium, type: :model) do
   context 'creating images' do
     it 'creates a medium record with attachment' do
       poo = nil
-      File.open(Rails.root.join('spec', 'factories', 'images', 'atl_base64.txt'), 'r') do |b64|
+      File.open(Rails.root.join('spec/factories/images/atl_base64.txt'), 'r') do |b64|
         poo = b64.read
       end
-      Medium.create(base_sixty_four: poo, filename: 'atl.png')
-      medium = Medium.find_by(filename: 'atl.png')
+      described_class.create(base_sixty_four: poo, filename: 'atl.png')
+      medium = described_class.find_by(filename: 'atl.png')
       expect(medium.filename).to(eq('atl.png'))
     end
 
@@ -101,9 +101,9 @@ RSpec.describe(Medium, type: :model) do
         filename: Faker::File.file_name(dir: '', ext: 'jpg', directory_separator: ''),
         video: nil,
       )
-      medium = Medium.find(medium.id)
+      medium = described_class.find(medium.id)
       medium.save
-      expect(medium).not_to(be(nil))
+      expect(medium).not_to(be_nil)
       # expect(medium.lqip_width).not_to be nil
     end
 

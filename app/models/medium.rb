@@ -27,13 +27,13 @@ class Medium < MediumBaseRecord
   attr_accessor :insecure
 
   def props
-    return if video.nil? || video.empty?
+    return if video.blank?
 
     VideoProps.props(self)
   end
 
   def published
-    tours.any? { |tour| tour.published } || stops.any? { |stop| stop.published }
+    tours.any?(&:published) || stops.any?(&:published)
   end
 
   def files
@@ -87,7 +87,7 @@ class Medium < MediumBaseRecord
   private
 
   def replace_video
-    return unless video.present?
+    return if video.blank?
 
     attach_file
   end

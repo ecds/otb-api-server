@@ -10,7 +10,7 @@ module V3
 
     # GET /users
     def index
-      return unless current_user.present?
+      return if current_user.blank?
 
       if params['me']
         render(json: current_user)
@@ -26,7 +26,7 @@ module V3
       if current_user == @record || current_user.super
         render(json: @record, include_tours: true)
       else
-        render(json: { message: 'You are not authorized to to view this resource.' }.to_json, status: 401)
+        render(json: { message: 'You are not authorized to to view this resource.' }.to_json, status: :unauthorized)
       end
     end
 
@@ -42,7 +42,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
@@ -55,7 +55,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
@@ -64,7 +64,7 @@ module V3
       if current_user&.super
         @record.destroy
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 

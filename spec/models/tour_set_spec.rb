@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe(TourSet, type: :model) do
-  it { should validate_presence_of(:name) }
+  it { is_expected.to(validate_presence_of(:name)) }
 
   it 'creates four travel modes' do
     tour_set = create(:tour_set)

@@ -41,9 +41,42 @@ def delete_test_indices
   end
 end
 
+def reset_test_db!
+  # Drop every Apartment tenant schema so factory-created schemas from a
+  # previous run (or a force-killed run) don't accumulate or conflict.
+  Apartment::Tenant.reset
+  TourSet.pluck(:subdir).each do |subdir|
+    Apartment::Tenant.drop(subdir)
+  rescue StandardError
+    nil
+  end
+
+  # Wipe all public-schema tables. Order matters for FK constraints.
+  tables = [
+    'active_storage_attachments',
+    'active_storage_blobs',
+    'active_storage_variant_records',
+    'tour_set_admins',
+    'access_requests',
+    'tour_authors',
+    'logins',
+    'tokens',
+    'tour_sets',
+    'users',
+    'modes',
+    'roles',
+    'themes',
+  ]
+  tables.each do |t|
+    ActiveRecord::Base.connection.execute("TRUNCATE #{t} RESTART IDENTITY CASCADE")
+  rescue
+    nil
+  end
+end
+
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = ["#{Rails.root}/spec/fixtures"]
+  config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -59,31 +92,20 @@ RSpec.configure do |config|
   config.include(FactoryBot::Syntax::Methods)
   # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
   config.before(:suite) do
+    # Start from a clean slate every run so re-seeding is safe and
+    # schemas from a previous (possibly force-killed) run don't linger.
+    reset_test_db!
     delete_test_indices
     Rails.application.routes.default_url_options = { host: 'www.example.com', protocol: 'https' }
     ActiveStorage::Current.url_options = { protocol: 'https', host: 'example.com', port: 443 }
-    # ActiveStorage::Current.host = "https://example.com"
-    # DatabaseCleaner.clean_with(:truncation, except: [ :modes, :roles ])
-    # DatabaseCleaner.strategy = :transaction
-    # Truncating doesn't drop schemas, ensure we're clean here, app *may not* exist
-    # begin
-    #   Apartment::Tenant.drop('atlanta')
-    # rescue
-    #   nil
-    # end
-    # # Create the default tenant for our tests
-    # TourSet.create(name: 'Atlanta')
     load Rails.root + 'db/seeds.rb'
   end
 
   # config.use_transactional_fixtures = true
 
   # start the transaction strategy as examples are run
-  config.around(:each) do |example|
-    example.run
-  end
 
-  config.before(:each) do
+  config.before do
     # MiniMagick.configure do |config|
     #   config.validate_on_create = false
     # end
@@ -235,7 +257,7 @@ RSpec.configure do |config|
       .to_return(status: 200, body: ip_info_body, headers: {})
   end
 
-  config.after(:each) do
+  config.after do
     # Reset tentant back to `public`
   end
 
@@ -263,28 +285,22 @@ RSpec.configure do |config|
   config.after(:all) do
     # Get rid of the linked images
     if Rails.env.test?
-      FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/test/[^.]*"])
-      FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/tmp/test/[^.]*"])
+      FileUtils.rm_rf(Dir[Rails.root.join('public/uploads/test/[^.]*').to_s])
+      FileUtils.rm_rf(Dir[Rails.root.join('public/uploads/tmp/test/[^.]*').to_s])
       # Apartment::Tenant.reset
       # DatabaseCleaner.clean
     end
   end
 
   config.after(:suite) do
-    # TourSet.all.each { |ts| ts.destroy }
-    # indices = Searchkick.client.indices.get(index: 'otb_*_test').keys
-    # Searchkick.client.indices.delete(index: indices.join(',')) if indices.any?
+    delete_test_indices
   end
 
   # Class to mock IPinfo
   class MockIpinfo
-    def longitude
-      Faker::Address.longitude
-    end
+    delegate :longitude, to: :'Faker::Address'
 
-    def latitude
-      Faker::Address.latitude
-    end
+    delegate :latitude, to: :'Faker::Address'
   end
 
   def ip_info_body

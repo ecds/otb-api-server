@@ -3,12 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe(Slug, type: :model) do
-  it { should belong_to(:tour) }
+  it { is_expected.to(belong_to(:tour)) }
 
-  it 'should get reassigned' do
+  it 'gets reassigned' do
     title = Faker::Movies::HitchhikersGuideToTheGalaxy.location
     tour1 = create(:tour, title:)
-    slug = Slug.find_by(slug: title.parameterize_intl)
+    slug = described_class.find_by(slug: title.parameterize_intl)
     expect(slug.tour).to(eq(tour1))
     tour1.update(title: 'changed')
     expect(tour1.slugs).to(include(slug))

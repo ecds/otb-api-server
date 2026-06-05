@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe('Using custom parameterize_intl method') do
+RSpec.describe(String) do
   it 'uses custom parameterize_intl method' do
     expect('My Awesome Tour'.parameterize_intl).to(eq('my-awesome-tour'))
     expect('Csodálatos túrám'.parameterize_intl).to(eq('csodalatos-turam'))

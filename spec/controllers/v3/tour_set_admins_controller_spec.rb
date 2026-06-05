@@ -3,9 +3,9 @@
 require 'rails_helper'
 
 RSpec.describe(V3::TourSetAdminsController, type: :controller) do
-  before(:each) do
+  before do
     create_list(:tour_set, rand(2..5))
-    TourSet.all.each { |tour_set| tour_set.update(admins: create_list(:user, rand(2..5))) }
+    TourSet.all.find_each { |tour_set| tour_set.update(admins: create_list(:user, rand(2..5))) }
   end
 
   describe 'GET #index' do

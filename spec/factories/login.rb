@@ -5,7 +5,7 @@ require 'faker'
 require 'jwt'
 
 FactoryBot.define do
-  factory :login, class: EcdsRailsAuthEngine::Login do
+  factory :login, class: 'EcdsRailsAuthEngine::Login' do
     provider { Faker::Internet.domain_name }
     user_id { nil }
 

@@ -83,7 +83,7 @@ RSpec.describe(V4::Admin::AccessRequestsController, type: :controller) do
       Apartment::Tenant.switch!(tour_set.subdir)
       expect do
         post(:create, params: { tenant: tour_set.subdir, user: user.id })
-      end.to(change { AccessRequest.count }.by(1))
+      end.to(change(AccessRequest, :count).by(1))
     end
 
     it 'creates new access request for tours' do

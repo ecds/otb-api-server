@@ -51,11 +51,11 @@ Role.create!(
   # Login.last.user.update_attribute(:display_name, Faker::Movies::Lebowski)
 end
 
-TourSet.all.each do |ts|
+TourSet.all.find_each do |ts|
   Apartment::Tenant.switch!(ts.subdir)
   Random.new.rand(2..3).times do
     FactoryBot.create(:tour)
-    Tour.all.each do |tour|
+    Tour.all.find_each do |tour|
       FactoryBot.create_list(:stop, Random.new.rand(3..4))
       tour.stops << Stop.all
     end
@@ -72,7 +72,7 @@ User.where(super: false).limit(6).each do |u|
   u.save
 end
 
-User.all.each do |u|
+User.all.find_each do |u|
   FactoryBot.create(:login, who: u.email, user_id: u.id, provider: 'earth')
   next if u.super
   next if u.tours.present?

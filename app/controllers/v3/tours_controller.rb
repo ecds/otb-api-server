@@ -8,9 +8,9 @@ module V3
       @records = if params[:slug]
         @record = Slug.find_by(slug: params[:slug]).tour
         @record if @record.published || crud_allowed?
-      elsif current_user && current_user.current_tenant_admin?
+      elsif current_user&.current_tenant_admin?
         Tour.all
-      elsif current_user && current_user.id
+      elsif current_user&.id
         (current_user.tours + Tour.published).uniq
       else
         Tour.published
@@ -47,7 +47,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
@@ -60,7 +60,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 

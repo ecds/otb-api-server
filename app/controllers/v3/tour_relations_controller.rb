@@ -4,7 +4,7 @@
 module V3
   class TourRelationsController < V3Controller
     def destroy
-      head(405)
+      head(:method_not_allowed)
     end
 
     def allowed?

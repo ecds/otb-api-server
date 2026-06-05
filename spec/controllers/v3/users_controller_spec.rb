@@ -34,13 +34,13 @@ RSpec.describe(V3::UsersController, type: :controller) do
 
       it 'returns list of users when requested by super' do
         create_list(:user, rand(4..7))
-        User.all.each { |user| user.tours << create_list(:tour, rand(0..3)) }
+        User.all.find_each { |user| user.tours << create_list(:tour, rand(0..3)) }
         user = User.last
         user.update(super: true)
         signed_cookie(user)
         get :index, params: { tenant: Apartment::Tenant.current }
         expect(json.count).to(eq(User.count))
-        expect(User.all.map(&:all_tours).all? { |tours| tours.empty? }).not_to(be(true))
+        expect(User.all.map(&:all_tours).all?(&:empty?)).not_to(be(true))
         expect(json.map { |user| user[:attributes][:all_tours].empty? }).to(all(be(true)))
       end
     end
@@ -100,7 +100,7 @@ RSpec.describe(V3::UsersController, type: :controller) do
       it 'does not create a new User when unauthenticated' do
         expect do
           post(:create, params: valid_params)
-        end.to(change(User, :count).by(0))
+        end.not_to(change(User, :count))
       end
 
       it 'does not create a new User for tenant admin' do
@@ -108,7 +108,7 @@ RSpec.describe(V3::UsersController, type: :controller) do
         signed_cookie(user)
         expect do
           post(:create, params: valid_params)
-        end.to(change(User, :count).by(0))
+        end.not_to(change(User, :count))
       end
 
       it 'does not create a new User for tour author' do
@@ -116,7 +116,7 @@ RSpec.describe(V3::UsersController, type: :controller) do
         signed_cookie(user)
         expect do
           post(:create, params: valid_params)
-        end.to(change(User, :count).by(0))
+        end.not_to(change(User, :count))
       end
     end
 
@@ -135,7 +135,7 @@ RSpec.describe(V3::UsersController, type: :controller) do
         signed_cookie(user)
         expect do
           post(:create, params: valid_params)
-        end.to(change(User, :count).by(0))
+        end.not_to(change(User, :count))
       end
 
       it 'responds with errors when creating a new User for super with invalid_params' do
@@ -275,7 +275,7 @@ RSpec.describe(V3::UsersController, type: :controller) do
         user = create(:user)
         expect do
           delete(:destroy, params: { id: user.to_param, tenant: 'public' })
-        end.to(change(User, :count).by(0))
+        end.not_to(change(User, :count))
       end
 
       it 'does not destroy the requested user when authenticated' do
@@ -283,7 +283,7 @@ RSpec.describe(V3::UsersController, type: :controller) do
         signed_cookie(user)
         expect do
           delete(:destroy, params: { id: user.to_param, tenant: 'public' })
-        end.to(change(User, :count).by(0))
+        end.not_to(change(User, :count))
       end
     end
 

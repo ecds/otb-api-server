@@ -15,7 +15,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 

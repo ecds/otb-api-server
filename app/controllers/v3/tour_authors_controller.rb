@@ -9,7 +9,7 @@ module V3
       if current_user&.current_tenant_admin?
         render(json: TourAuthor.all)
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
@@ -18,23 +18,23 @@ module V3
       if current_user&.current_tenant_admin?
         render(json: @tour_author)
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
     # POST /tour_authors
     def create
-      head(405)
+      head(:method_not_allowed)
     end
 
     # PATCH/PUT /tour_set_admins/1
     def update
-      head(405)
+      head(:method_not_allowed)
     end
 
     # DELETE /tour_set_admins/1
     def destroy
-      head(405)
+      head(:method_not_allowed)
     end
 
     private

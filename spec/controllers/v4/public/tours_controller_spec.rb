@@ -14,7 +14,7 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
     Tour.reindex
   end
 
-  before(:each) do
+  before do
     Apartment::Tenant.switch!(tour_set.subdir)
     clean_reindex
   end

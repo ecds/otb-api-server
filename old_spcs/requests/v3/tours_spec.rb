@@ -19,7 +19,7 @@ RSpec.describe('V3::Tours', type: :request) do
     end
 
     it 'returns status code 200' do
-      expect(response).to(have_http_status(200))
+      expect(response).to(have_http_status(:ok))
     end
   end
 
@@ -39,12 +39,12 @@ RSpec.describe('V3::Tours', type: :request) do
       end
 
       it 'returns status code 200' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
 
       it 'returns description without html tags and space between sentences' do
         expect(attributes['sanitized_description']).not_to(include('<p>'))
-        expect(attributes['sanitized_description']).not_to(match(/.*[A-z]\.[A-z].*/))
+        expect(attributes['sanitized_description']).not_to(match(/.*[A-Za-z]\.[A-Za-z].*/))
       end
     end
 
@@ -52,7 +52,7 @@ RSpec.describe('V3::Tours', type: :request) do
       before { get "/#{Apartment::Tenant.current}/tours/0" }
 
       it 'returns status code 404' do
-        expect(response).to(have_http_status(404))
+        expect(response).to(have_http_status(:not_found))
       end
 
       it 'returns a not found message' do
@@ -72,12 +72,11 @@ RSpec.describe('V3::Tours', type: :request) do
         tour.title = new_title
         tour.published = true
         tour.save
+        get "/#{Apartment::Tenant.current}/tours?slug=#{new_title.parameterize}"
       end
 
-      before { get "/#{Apartment::Tenant.current}/tours?slug=#{new_title.parameterize}" }
-
       it 'gets same tour with new slug' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
         expect(attributes['slug']).to(eq(new_title.parameterize))
         expect(json['id']).to(eq(tour.id.to_s))
       end
@@ -90,11 +89,11 @@ RSpec.describe('V3::Tours', type: :request) do
         tour.save
         tour.title = new_title
         tour.save
+        get "/#{Apartment::Tenant.current}/tours?slug=#{original_slug}"
       end
-      before { get "/#{Apartment::Tenant.current}/tours?slug=#{original_slug}" }
 
       it 'returns the tour by the original slug' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
         expect(attributes['slug']).to(eq(new_title.parameterize))
         expect(json['id']).to(eq(tour.id.to_s))
       end
@@ -108,7 +107,7 @@ RSpec.describe('V3::Tours', type: :request) do
       end
 
       it 'returns nothing' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
     end
   end
@@ -119,6 +118,7 @@ RSpec.describe('V3::Tours', type: :request) do
     let(:valid_attributes) do
       factory_to_json_api(FactoryBot.build(:tour, title: 'Learn Elm', published: true))
     end
+
     before { Apartment::Tenant.switch!(TourSet.find(TourSet.pluck(:id).sample).subdir) }
 
     context 'when the post is valid and authenticated as non-tour set admin' do
@@ -130,7 +130,7 @@ RSpec.describe('V3::Tours', type: :request) do
       end
 
       it 'returns status code 401' do
-        expect(response).to(have_http_status(401))
+        expect(response).to(have_http_status(:unauthorized))
       end
     end
 
@@ -140,12 +140,13 @@ RSpec.describe('V3::Tours', type: :request) do
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/tours", params: valid_attributes
       end
+
       it 'creates a tour' do
         expect(attributes['title']).to(eq('Learn Elm'))
       end
 
       it 'returns status code 201' do
-        expect(response).to(have_http_status(201))
+        expect(response).to(have_http_status(:created))
       end
     end
 
@@ -153,6 +154,7 @@ RSpec.describe('V3::Tours', type: :request) do
       let(:invalid_attributes) do
         hash_to_json_api('tours', invalid: 'Foobar')
       end
+
       before do
         # Tour.create!(published: true)
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
@@ -161,7 +163,7 @@ RSpec.describe('V3::Tours', type: :request) do
       end
 
       it 'returns status code 201' do
-        expect(response).to(have_http_status(201))
+        expect(response).to(have_http_status(:created))
       end
 
       it 'returns new tour titled `untitled`' do
@@ -192,7 +194,7 @@ RSpec.describe('V3::Tours', type: :request) do
       end
 
       it 'returns status code 200' do
-        expect(response).to(have_http_status(200))
+        expect(response).to(have_http_status(:ok))
       end
     end
   end
@@ -207,7 +209,7 @@ RSpec.describe('V3::Tours', type: :request) do
     end
 
     it 'returns status code 204' do
-      expect(response).to(have_http_status(204))
+      expect(response).to(have_http_status(:no_content))
     end
   end
 
@@ -234,7 +236,7 @@ RSpec.describe('V3::Tours', type: :request) do
         # user.tours = []
         user.save
         user.tours << Tour.first
-        Tour.all.each do |t|
+        Tour.all.find_each do |t|
           t.published = false
           t.save
         end

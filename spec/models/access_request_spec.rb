@@ -46,7 +46,7 @@ RSpec.describe(AccessRequest, type: :model) do
       access_request.update(approved: true)
       user.reload
       expect(user.tour_sets).to(include(tour_set))
-      expect(AccessRequest.find_by(id: access_request.id)).to(be_nil)
+      expect(described_class.find_by(id: access_request.id)).to(be_nil)
     end
 
     it 'adds specific tours to the user and destroys the request when approved for tours' do
@@ -58,7 +58,7 @@ RSpec.describe(AccessRequest, type: :model) do
       expect(user.tours).to(include(tours.first))
       expect(user.tours).to(include(tours.last))
       expect(user.tour_sets).not_to(include(tour_set))
-      expect(AccessRequest.find_by(id: request_with_tours.id)).to(be_nil)
+      expect(described_class.find_by(id: request_with_tours.id)).to(be_nil)
     end
 
     it 'destroys the request without granting access when denied' do
@@ -66,7 +66,7 @@ RSpec.describe(AccessRequest, type: :model) do
       access_request.update(approved: false)
       user.reload
       expect(user.tour_sets).not_to(include(tour_set))
-      expect(AccessRequest.find_by(id: access_request.id)).to(be_nil)
+      expect(described_class.find_by(id: access_request.id)).to(be_nil)
     end
   end
 end

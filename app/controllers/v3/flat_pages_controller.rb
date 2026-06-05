@@ -10,9 +10,9 @@ module V3
       @records = if current_user.current_tenant_admin?
         FlatPage.all
       elsif current_user.tours.present?
-        current_user.tours.map { |tour| tour.flat_pages }.flatten.uniq
+        current_user.tours.map(&:flat_pages).flatten.uniq
       else
-        Tour.published.map { |tour| tour.flat_pages }.flatten.uniq
+        Tour.published.map(&:flat_pages).flatten.uniq
       end
       render(json: @records)
     end
@@ -28,7 +28,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
@@ -41,7 +41,7 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 

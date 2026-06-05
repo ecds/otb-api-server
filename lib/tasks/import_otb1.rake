@@ -114,7 +114,7 @@ namespace :ImportOTB1 do
     # Set Stop Position
     p 'Setting stop positions'
     d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
-      next unless s['fields']['position'] != 0
+      next if s['fields']['position'] == 0
 
       stop = Stop.where(title: s['fields']['name']).first
       tour = stop.tours.first

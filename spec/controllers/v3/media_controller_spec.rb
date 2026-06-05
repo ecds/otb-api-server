@@ -23,7 +23,7 @@ RSpec.describe(V3::MediaController, type: :controller) do
       it 'returns a success response' do
         create_list(:medium, 5)
         tour = create(:tour, published: true)
-        Medium.all.each { |m| tour.media << m }
+        Medium.all.find_each { |m| tour.media << m }
         get :index, params: { tenant: Apartment::Tenant.current }
         expect(response.status).to(eq(200))
         expect(json.count).to(eq(tour.media.count))

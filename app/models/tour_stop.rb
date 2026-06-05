@@ -10,28 +10,26 @@ class TourStop < ApplicationRecord
   # before_save :_ensure_stop_slug
   before_validation :_set_position
 
-  def slug
-    stop.slug
-  end
+  delegate :slug, to: :stop
 
   def next
     ts = self.class.where(tour_id: tour_id).where(position: position + 1).first
-    ts.present? ? ts : nil
+    ts.presence
   end
 
   # Used for UIkit's Sticky component on the desktop vew. The media is sticky when scrolling until
   # the next stop comes along.
   def next_slug
-    self.next.nil? ? nil : self.next.stop.slug
+    self.next&.stop&.slug
   end
 
   def previous
     ts = self.class.where(tour_id: tour_id).where(position: position - 1).first
-    ts.present? ? ts : nil
+    ts.presence
   end
 
   def previous_slug
-    previous.nil? ? nil : previous.stop.slug
+    previous&.stop&.slug
   end
 
   def search_data

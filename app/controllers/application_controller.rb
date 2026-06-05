@@ -5,7 +5,7 @@ class ApplicationController < ActionController::API
   include Response
   include ExceptionHandler
   include EcdsRailsAuthEngine::CurrentUser
-  include ActiveStorage::SetCurrent if Rails.env == 'test'
+  include ActiveStorage::SetCurrent if Rails.env.test?
 
   before_action :set_no_cache_control, only: [:index, :show]
 

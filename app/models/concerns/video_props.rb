@@ -45,7 +45,7 @@ module VideoProps
         track_response = HTTParty.get("https://soundcloud.com/oembed?url=#{track_url}&format=json", format: 'plan')
         track_data = JSON.parse(track_response.body).deep_symbolize_keys!
         downloaded_image = if track_data[:thumbnail_url].nil?
-          File.open(File.join(Rails.root, 'public', 'soundcloud.jpg')).read
+          File.open(Rails.root.join('public/soundcloud.jpg').to_s).read
         else
           URI.open(track_data[:thumbnail_url])
         end

@@ -28,7 +28,7 @@ module V3
     # POST /stops
     def create
       # Not created via the API
-      head(405)
+      head(:method_not_allowed)
     end
 
     # PATCH/PUT /stops/1
@@ -40,14 +40,14 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
     # DELETE /stops/1
     def destroy
       # Not deleted via the API
-      head(405)
+      head(:method_not_allowed)
     end
 
     private

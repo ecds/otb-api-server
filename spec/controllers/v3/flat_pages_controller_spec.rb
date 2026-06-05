@@ -12,7 +12,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       expect(response.status).to(eq(200))
       expect(Tour.count).to(be > Tour.published.count)
       json.each do |flat_page|
-        expect(FlatPage.find(flat_page[:id]).tours.any? { |tour| tour.published })
+        expect(FlatPage.find(flat_page[:id]).tours.any?(&:published))
       end
       expect(json.count).to(be < FlatPage.count)
     end
@@ -29,9 +29,9 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       expect(response.status).to(eq(200))
       expect(Tour.count).to(be > Tour.published.count)
       json.each do |flat_page|
-        expect(FlatPage.find(flat_page[:id]).tours.any? { |tour| tour.published })
+        expect(FlatPage.find(flat_page[:id]).tours.any?(&:published))
       end
-      expect(json.count).to(be == FlatPage.all.reject { |fp| !fp.published }.count)
+      expect(json.count).to(eq(FlatPage.all.reject { |fp| !fp.published }.count))
     end
 
     it 'returns a 200 response with flat_pages when request is authenticated by tenant admin and tour is unpublished' do
@@ -67,7 +67,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       tour = create(:tour)
       tour.update(published: false)
       create_list(:flat_page, 3)
-      FlatPage.all.each { |flat_page| tour.flat_pages << flat_page }
+      FlatPage.all.find_each { |flat_page| tour.flat_pages << flat_page }
       # Make sure the flat page is only associated with the newly created tour
       tour.flat_pages.last.update(tours: [tour])
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.flat_pages.last.id }
@@ -80,7 +80,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       tour = create(:tour)
       tour.update(published: true)
       create_list(:flat_page, 3)
-      FlatPage.all.each { |flat_page| tour.flat_pages << flat_page }
+      FlatPage.all.find_each { |flat_page| tour.flat_pages << flat_page }
       tour.flat_pages.last.update(tours: [tour])
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.flat_pages.last.id }
       expect(response.status).to(eq(200))
@@ -91,7 +91,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       tour = create(:tour)
       tour.update(published: false)
       create_list(:flat_page, 3)
-      FlatPage.all.each { |flat_page| tour.flat_pages << flat_page }
+      FlatPage.all.find_each { |flat_page| tour.flat_pages << flat_page }
       tour.flat_pages.last.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -108,7 +108,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       tour = create(:tour)
       tour.update(published: false)
       create_list(:flat_page, 3)
-      FlatPage.all.each { |flat_page| tour.flat_pages << flat_page }
+      FlatPage.all.find_each { |flat_page| tour.flat_pages << flat_page }
       tour.flat_pages.first.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -124,7 +124,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       tour = create(:tour)
       tour.update(published: false)
       create_list(:flat_page, 3)
-      FlatPage.all.each { |flat_page| tour.flat_pages << flat_page }
+      FlatPage.all.find_each { |flat_page| tour.flat_pages << flat_page }
       tour.flat_pages.first.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -140,7 +140,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       tour = create(:tour)
       tour.update(published: false)
       create_list(:flat_page, 3)
-      FlatPage.all.each { |flat_page| tour.flat_pages << flat_page }
+      FlatPage.all.find_each { |flat_page| tour.flat_pages << flat_page }
       tour.flat_pages.first.update(tours: [tour])
       user = create(:user)
       user.update(super: true)

@@ -27,7 +27,7 @@ require 'rails_helper'
 
 RSpec.describe(V3::TourMediaController, type: :controller) do
   describe 'GET #index' do
-    before(:each) { Tour.all.each { |tour| tour.update(published: false) } }
+    before { Tour.all.find_each { |tour| tour.update(published: false) } }
 
     context 'unauthenticated' do
       it 'returns a success response but zero TourMedium objects' do
@@ -105,10 +105,10 @@ RSpec.describe(V3::TourMediaController, type: :controller) do
         tour_medium = create(:tour_medium, tour: create(:tour, published: false))
         get :show, params: { id: tour_medium.id, tenant: Apartment::Tenant.current }
         expect(response.status).to(eq(200))
-        expect(relationships[:medium][:data]).to(be(nil))
-        expect(relationships[:tour][:data]).to(be(nil))
-        expect(tour_medium.tour).not_to(be(nil))
-        expect(tour_medium.medium).not_to(be(nil))
+        expect(relationships[:medium][:data]).to(be_nil)
+        expect(relationships[:tour][:data]).to(be_nil)
+        expect(tour_medium.tour).not_to(be_nil)
+        expect(tour_medium.medium).not_to(be_nil)
         expect(TourMedium.count).to(be > 0)
       end
 
@@ -131,10 +131,10 @@ RSpec.describe(V3::TourMediaController, type: :controller) do
         Apartment::Tenant.switch!(original_tenant)
         get :show, params: { id: tour_medium.id, tenant: original_tenant }
         expect(response.status).to(eq(200))
-        expect(relationships[:medium][:data]).to(be(nil))
-        expect(relationships[:tour][:data]).to(be(nil))
-        expect(tour_medium.tour).not_to(be(nil))
-        expect(tour_medium.medium).not_to(be(nil))
+        expect(relationships[:medium][:data]).to(be_nil)
+        expect(relationships[:tour][:data]).to(be_nil)
+        expect(tour_medium.tour).not_to(be_nil)
+        expect(tour_medium.medium).not_to(be_nil)
         expect(TourMedium.count).to(be > 0)
       end
 
@@ -149,8 +149,8 @@ RSpec.describe(V3::TourMediaController, type: :controller) do
         Apartment::Tenant.switch!(original_tenant)
         get :show, params: { id: tour_medium.id, tenant: original_tenant }
         expect(response.status).to(eq(200))
-        expect(relationships[:medium][:data]).to(be(nil))
-        expect(relationships[:tour][:data]).to(be(nil))
+        expect(relationships[:medium][:data]).to(be_nil)
+        expect(relationships[:tour][:data]).to(be_nil)
         expect(TourMedium.count).to(be > 0)
       end
     end
@@ -171,7 +171,7 @@ RSpec.describe(V3::TourMediaController, type: :controller) do
     it 'returns does not create a new TourMedium' do
       expect do
         post(:create, params: { tenant: Apartment::Tenant.current })
-      end.to(change(TourMedium, :count).by(0))
+      end.not_to(change(TourMedium, :count))
     end
 
     it 'returns 401' do
@@ -231,7 +231,7 @@ RSpec.describe(V3::TourMediaController, type: :controller) do
       signed_cookie(user)
       expect do
         delete(:destroy, params: { id: tour_medium.to_param, tenant: Apartment::Tenant.current })
-      end.to(change(TourMedium, :count).by(0))
+      end.not_to(change(TourMedium, :count))
     end
 
     it 'responds with 405' do

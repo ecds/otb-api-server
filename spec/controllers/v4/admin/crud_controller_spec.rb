@@ -13,12 +13,12 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       user = create(:user, super: true)
       signed_cookie(user)
       file = Rack::Test::UploadedFile.new(
-        Rails.root.join('spec', 'factories', 'images', '0.jpg'),
+        Rails.root.join('spec/factories/images/0.jpg'),
         'image/jpeg',
       )
       post :create, params: { tenant: TourSet.first.subdir, model: 'medium', medium: { file: file, filename: '0.jpg' } }
       medium = Medium.find(v4_json[:id])
-      expect(medium.file.attached?).to(be_truthy)
+      expect(medium.file).to(be_attached)
       expect(response).to(have_http_status(:created))
     end
 
@@ -36,7 +36,7 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       user = create(:user, super: true)
       signed_cookie(user)
       file = Rack::Test::UploadedFile.new(
-        Rails.root.join('spec', 'factories', 'images', 'map_icon.jpg'), 'image/jpeg'
+        Rails.root.join('spec/factories/images/map_icon.jpg'), 'image/jpeg'
       )
       post :create,
         params: { tenant: TourSet.second.subdir, model: 'map_icon', map_icon: { file:, filename: 'map_icon.jpg' } }
@@ -47,7 +47,7 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       user = create(:user, super: true)
       signed_cookie(user)
       file = Rack::Test::UploadedFile.new(
-        Rails.root.join('spec', 'factories', 'images', 'map_icon_too_big.jpg'), 'image/jpeg'
+        Rails.root.join('spec/factories/images/map_icon_too_big.jpg'), 'image/jpeg'
       )
       post :create,
         params: { tenant: TourSet.second.subdir, model: 'map_icon', map_icon: { file:, filename: 'map_icon.jpg' } }
@@ -60,8 +60,8 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       signed_cookie(user)
       request.remote_ip = Faker::Internet.ip_v4_address
       post :create, params: { tenant: TourSet.last.subdir, model: 'stop', stop: { title: Faker::Movies::HitchhikersGuideToTheGalaxy.planet } }
-      expect(v4_json[:lat]).not_to(be(nil))
-      expect(v4_json[:lng]).not_to(be(nil))
+      expect(v4_json[:lat]).not_to(be_nil)
+      expect(v4_json[:lng]).not_to(be_nil)
     end
 
     it 'allows super to create record in public tenant' do
@@ -145,13 +145,13 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       medium = create(
         :medium,
         base_sixty_four: nil,
-        file: fixture_file_upload(Rails.root.join('spec', 'factories', 'images', 'atl.png'), 'image/png'),
+        file: fixture_file_upload(Rails.root.join('spec/factories/images/atl.png'), 'image/png'),
       )
       expect(medium.file.attached?)
       original_files = medium.search_data[:files]
       original_checksum = medium.file.blob.checksum
       file = Rack::Test::UploadedFile.new(
-        Rails.root.join('spec', 'factories', 'images', '0.jpg'),
+        Rails.root.join('spec/factories/images/0.jpg'),
         'image/jpeg',
       )
       request_body = {
@@ -163,7 +163,7 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       put :update, params: request_body
       expect(v4_json[:files]).not_to(eq(original_files))
       medium.reload
-      expect(medium.file.attached?).to(be_truthy)
+      expect(medium.file).to(be_attached)
       expect(medium.file.blob.checksum).not_to(eq(original_checksum))
     end
 
@@ -171,11 +171,11 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       user = create(:user, super: true)
       tour_set = TourSet.second
       user.tour_sets << tour_set
-      expect(tour_set.logo_url).to(be(nil))
+      expect(tour_set.logo_url).to(be_nil)
       Apartment::Tenant.switch!('public')
       signed_cookie(user)
       file = Rack::Test::UploadedFile.new(
-        Rails.root.join('spec', 'factories', 'images', '0.jpg'),
+        Rails.root.join('spec/factories/images/0.jpg'),
         'image/jpeg',
       )
       request_body = {
@@ -186,8 +186,8 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       }
       put :update, params: request_body
       tour_set.reload
-      expect(v4_json[:logo_url]).not_to(be(nil))
-      expect(tour_set.logo.attached?).to(be_truthy)
+      expect(v4_json[:logo_url]).not_to(be_nil)
+      expect(tour_set.logo).to(be_attached)
     end
 
     it 'cannot rename a tour with a name that already exists' do

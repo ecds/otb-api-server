@@ -18,7 +18,7 @@ module V3
       elsif current_user.current_tenant_admin?
         TourStop.all
       else
-        Tour.published.map { |tour| tour.tour_stops }.flatten.uniq
+        Tour.published.map(&:tour_stops).flatten.uniq
       end
       if @records.nil?
         render(json: { data: { type: 'tour_stops', id: 0 } })
@@ -41,7 +41,7 @@ module V3
     # POST /stops
     def create
       # Not created via the API
-      head(405)
+      head(:method_not_allowed)
     end
 
     # PATCH/PUT /stops/1
@@ -53,13 +53,13 @@ module V3
           render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
     # DELETE /stops/1
     def destroy
-      head(405)
+      head(:method_not_allowed)
     end
 
     private

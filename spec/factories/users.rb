@@ -8,7 +8,7 @@ FactoryBot.define do
     terms_accepted { false }
 
     after(:create) do |user|
-      create(:login, user_id: user.id) unless user.login.present?
+      create(:login, user_id: user.id) if user.login.blank?
     end
   end
 end

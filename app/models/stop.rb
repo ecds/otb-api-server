@@ -60,7 +60,7 @@ class Stop < ApplicationRecord
   end
 
   def published
-    tours.any? { |tour| tour.published }
+    tours.any?(&:published)
   end
 
   def should_index?

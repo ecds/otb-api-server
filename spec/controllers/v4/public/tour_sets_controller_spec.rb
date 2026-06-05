@@ -3,14 +3,14 @@
 require 'rails_helper'
 
 RSpec.describe(V4::Public::TourSetsController, type: :controller) do
-  before(:each) do
+  before do
     create_list(:tour_set, Random.new.rand(2..4))
-    TourSet.all.each do |ts|
+    TourSet.all.find_each do |ts|
       Apartment::Tenant.switch!(ts.subdir)
       create_list(:tour, Random.new.rand(2..4))
     end
     Apartment::Tenant.switch!(TourSet.first.subdir)
-    Tour.all.each { |t| t.update(published: false) }
+    Tour.all.find_each { |t| t.update(published: false) }
     Apartment::Tenant.switch!(TourSet.last.subdir)
     Tour.first.update(published: true)
     Apartment::Tenant.reset
@@ -29,7 +29,7 @@ RSpec.describe(V4::Public::TourSetsController, type: :controller) do
 
     it 'returns a 200 and only TourSets with published and authenticated user is admin' do
       Apartment::Tenant.switch!(TourSet.second.subdir)
-      Tour.all.each { |t| t.update(published: false) }
+      Tour.all.find_each { |t| t.update(published: false) }
       Apartment::Tenant.reset
       published_tour_sets = TourSet.all.select(&:should_index?)
       user = create(:user, super: false)
@@ -44,7 +44,7 @@ RSpec.describe(V4::Public::TourSetsController, type: :controller) do
 
     it 'returns a 200 and all TourSets when authenticated as super' do
       Apartment::Tenant.switch!(TourSet.second.subdir)
-      Tour.all.each { |t| t.update(published: false) }
+      Tour.all.find_each { |t| t.update(published: false) }
       Apartment::Tenant.reset
       published_tour_sets = TourSet.all.select(&:should_index?)
       user = create(:user, super: true)

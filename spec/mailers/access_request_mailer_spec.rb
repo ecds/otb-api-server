@@ -9,7 +9,7 @@ RSpec.describe(AccessRequestMailer, type: :mailer) do
     let(:access_request) { create(:access_request, user:, tour_set:) }
     let(:super_admin) { create(:user, super: true) }
     let(:admin) { create(:user, super: false, tour_sets: [tour_set]) }
-    let(:mail) { AccessRequestMailer.with(access_request:).access_request_email }
+    let(:mail) { described_class.with(access_request:).access_request_email }
 
     it 'renders the headers' do
       expect(super_admin.email).not_to(be_nil)

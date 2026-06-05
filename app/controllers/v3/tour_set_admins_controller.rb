@@ -7,13 +7,13 @@ module V3
       if current_user&.super || current_user&.current_tenant_admin?
         render(json: TourSetAdmin.all)
       else
-        head(401)
+        head(:unauthorized)
       end
     end
 
     # GET /tour_set_admins/1
     def show
-      head(405)
+      head(:method_not_allowed)
       # if current_user&.super || current_user&.current_tenant_admin?
       #   render json: @record
       # else
@@ -23,7 +23,7 @@ module V3
 
     # POST /tour_set_admins
     def create
-      head(405)
+      head(:method_not_allowed)
       # @record = TourSetAdmin.new(tour_set_admin_params)
 
       # if @record.save
@@ -35,12 +35,12 @@ module V3
 
     # PATCH/PUT /tour_set_admins/1
     def update
-      head(405)
+      head(:method_not_allowed)
     end
 
     # DELETE /tour_set_admins/1
     def destroy
-      head(405)
+      head(:method_not_allowed)
     end
 
     private

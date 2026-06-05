@@ -3,21 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe(User, type: :model) do
-  # it { should have_one(:login) }
-  # it { expect(User.reflect_on_association(:login).macro).to eq(:has_one) }
-
-  context 'tour author across tenants' do
+  context 'when tour author across tenants' do
     it 'lists all tours across tenants' do
-      # pw = Faker::Internet.password(min_length: 8)
-      # u = User.create!(displayname: Faker::Movies::HitchhikersGuideToTheGalaxy.character)
-      # Login.create!(identification: 'foo@bar.com', password: pw, password_confirmation: pw, user: u)
-      # # RailsApiAuth uses `has_secure_password` The `authenticate` method returns
-      # # the `Login` object. This just checks that the password authenticates
-      # expect(u.login.authenticate(pw).user).to eq(u)
-      TourSet.all.each { |tour_set| tour_set.delete }
+      TourSet.all.find_each(&:delete)
       user = create(:user)
       create_list(:tour_set, 4)
-      TourSet.all.each do |tour_set|
+      TourSet.all.find_each do |tour_set|
         Apartment::Tenant.switch!(tour_set.subdir)
         user.tours << create_list(:tour, 2)
       end
@@ -25,14 +16,14 @@ RSpec.describe(User, type: :model) do
     end
   end
 
-  context 'has login' do
+  context 'when has login' do
     it 'has no provider' do
       user = create(:user)
-      expect(user.provider).not_to(be(nil))
+      expect(user.provider).not_to(be_nil)
     end
   end
 
-  context 'has default' do
+  context 'when has default' do
     it 'terms accepted defaults to false' do
       user = create(:user)
       expect(user.terms_accepted).to(be(false))

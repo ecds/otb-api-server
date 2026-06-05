@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 git_source(:github) do |repo_name|
-  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+  repo_name = "#{repo_name}/#{repo_name}" if repo_name.exclude?('/')
   "https://github.com/#{repo_name}.git"
 end
 
@@ -66,13 +66,6 @@ gem 'yt'
 gem 'rack-cors'
 
 # TODO: should probably only require this for :test
-gem 'faker'
-
-group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  # gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
-  # gem "test-prof"
-end
 
 group :development do
   gem 'listen'
@@ -89,6 +82,12 @@ group :test do
   gem 'shoulda-matchers', '~> 4.5.1' # git: 'https://github.com/thoughtbot/shoulda-matchers.git', branch: 'rails-5'
   gem 'term-ansicolor'
   gem 'webmock'
+  gem 'rubocop-factory_bot' # (https://rubygems.org/gems/rubocop-factory_bot)
+  gem 'rubocop-rspec' # (https://rubygems.org/gems/rubocop-rspec)
+  gem 'rubocop-rspec_rails' # (https://rubygems.org/gems/rubocop-rspec_rails)
+  gem 'faker'
+  gem 'ruby-lsp'
+  gem 'rubocop-shopify'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

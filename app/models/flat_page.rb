@@ -6,7 +6,7 @@ class FlatPage < ApplicationRecord
   validates :title, presence: true
 
   def slug
-    title ? title.parameterize_intl : ""
+    title ? title.parameterize_intl : ''
   end
 
   def orphaned
@@ -24,7 +24,7 @@ class FlatPage < ApplicationRecord
       slug:,
       body:,
       orphaned:,
-      tour_count: tours.count
+      tour_count: tours.count,
     }
   end
 end

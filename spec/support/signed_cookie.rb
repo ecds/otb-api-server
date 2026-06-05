@@ -13,7 +13,7 @@ module SignedCookieHelper
       value: login.tokens.first.token,
       httponly: true,
       same_site: :none,
-      secure: 'Secure'
+      secure: 'Secure',
     }
   end
 
@@ -23,7 +23,7 @@ module SignedCookieHelper
       value: JWT.encode(Faker::Beer.style, Faker::Address.zip, 'HS256'),
       httponly: true,
       same_site: :none,
-      secure: 'Secure'
+      secure: 'Secure',
     }
   end
 end

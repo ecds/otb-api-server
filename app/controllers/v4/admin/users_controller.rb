@@ -1,18 +1,32 @@
+# frozen_string_literal: true
+
 module V4
   module Admin
     class UsersController < V4Controller
       def index
-        begin
-          head :unauthorized and return if current_user.nil? || current_user.id.nil?
+        head(:unauthorized) and return unless current_user && current_user.super
+        return unless current_user.current_tenant_admin?
 
-          render json: current_user.search_data, status: :ok and return if params[:me]
+        render(
+          json: User.all.map(&:preview_data).sort_by do |u|
+            u[:email]
+          end,
+          status: :ok,
+        ) and return
+      end
 
-          render json: User.all.map(&:search_data), status: :ok and return if current_user.current_tenant_admin?
+      def show
+        render(json: User.new.search_data, status: :unauthorized) and return if current_user.id.nil?
 
-          head :unauthorized
-        rescue NoMethodError
-          head :unauthorized and return
-        end
+        render(json: @record, status: :ok) and return
+      end
+
+      private
+
+      def set_record
+        return unless current_user.id
+
+        @record = current_user.search_data
       end
     end
   end

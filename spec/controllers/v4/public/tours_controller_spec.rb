@@ -2,109 +2,128 @@
 
 require 'rails_helper'
 
-RSpec.describe V4::Public::ToursController, type: :controller do
-  before(:each) { Tour.reindex }
+RSpec.describe(V4::Public::ToursController, type: :controller) do
+  let(:tour_set) { create(:tour_set) }
+
+  def clean_reindex
+    begin
+      Tour.search_index.delete
+    rescue StandardError
+      nil
+    end
+    Tour.reindex
+  end
+
+  before(:each) do
+    Apartment::Tenant.switch!(tour_set.subdir)
+    clean_reindex
+  end
 
   describe 'GET #index' do
-    it 'returns a 200 response and empty tour when none found' do
-      StopSlug.all.each { |t| t.delete }
-      Stop.all.each { |t| t.delete }
-      Tour.all.each { |t| t.delete }
-      Tour.reindex
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json).to be_empty
-      expect(response.status).to eq(200)
+    it 'returns 404 when no tours exist' do
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(response.status).to(eq(404))
     end
 
-    it 'returns a 200 response' do
-      tour = create(:tour)
-      Tour.reindex
-      get :index, params: { tenant: tour.tenant }
-      expect(response.status).to eq(200)
-      expect(v4_json.count).to eq(Tour.published.count)
+    it 'returns 200 and only published tours when unauthenticated' do
+      create(:tour_with_stops, published: true)
+      create(:tour, published: false)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:tours].count).to(eq(Tour.published.count))
     end
 
-    it 'returns all Tour objects when requested by tenant admin' do
-      create_list(:tour, rand(4..5))
+    it 'returns all tours when requested by tenant admin' do
+      create_list(:tour, 3, published: false)
       user = create(:user, super: false)
-      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      user.tour_sets << tour_set
       signed_cookie(user)
-      Tour.reindex
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json.count).to eq(Tour.count)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(v4_json[:tours].count).to(eq(Tour.count))
     end
 
-    it 'returns only tours where requester is an author' do
-      Tour.all.each { |tour| tour.update(published: false) }
-      Tour.first.update(published: true)
-      new_tours = create_list(:tour, rand(4..6), published: false)
-      user = create(:user, super: false)
-      user.tour_sets = []
-      user.tours << [ Tour.published.first, new_tours.first, new_tours.last ]
-      Tour.reindex
+    it 'returns only published tours plus authored tours for a non-admin user' do
+      published_tour = create(:tour, published: true)
+      authored_unpublished = create_list(:tour, 3, published: false)
+      other_unpublished = create(:tour, published: false)
+      user = create(:user, super: false, tour_sets: [])
+      user.tours << [published_tour, authored_unpublished.first, authored_unpublished.last]
       signed_cookie(user)
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json.count).to be < Tour.count
-      expect(v4_json.count).to eq([ *user.tours, *Tour.published ].uniq.count)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(v4_json[:tours].count).to(be < Tour.count)
+      expect(v4_json[:tours].count).to(eq([*user.tours, *Tour.published].uniq.count))
+      expect(v4_json[:tours].map { |t| t[:id] }).not_to(include(other_unpublished.id))
     end
   end
 
-  describe 'GET "#show' do
-    it 'returns a 404 response when tour is not published' do
-      tour = create(:tour)
-      tour.update(published: false)
-      Tour.reindex
-      get :show, params: { tenant: tour.tenant, slug: tour.slug }
-      expect(response.status).to eq(404)
-      expect(v4_json[:errors].first).to eq("Not found")
+  describe 'GET #show' do
+    it 'returns 404 when tour is not published' do
+      tour = create(:tour, published: false)
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slug }
+      expect(response.status).to(eq(404))
+      expect(v4_json[:errors].first).to(eq('Not found'))
     end
 
-    it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
+    it 'returns 200 when requested by tenant admin and tour is unpublished' do
       tour = create(:tour, published: false)
-      tour.update(published: false)
       user = create(:user)
-      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
+      user.tour_sets << tour_set
       signed_cookie(user)
-      Tour.reindex
-      get :show, params: { tenant: tour.tenant, slug: tour.slug }
-      expect(response.status).to eq(200)
-      expect(v4_json[:title]).to eq(tour.title)
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slug }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:tour][:title]).to(eq(tour.title))
     end
 
-    it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
+    it 'returns 200 when requested by tour author and tour is unpublished' do
       tour = create(:tour, published: false)
-      tour.update(published: false)
-      user = create(:user)
-      user.tour_sets = []
+      user = create(:user, tour_sets: [])
       user.tours << tour
       signed_cookie(user)
-      Tour.reindex
-      get :show, params: { tenant: tour.tenant, slug: tour.slug }
-      expect(response.status).to eq(200)
-      expect(v4_json[:title]).to eq(tour.title)
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slug }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:tour][:title]).to(eq(tour.title))
     end
 
-    it 'returns a 200 response when requested by slug' do
-      tour = create(:tour)
-      tour.update(published: true)
-      Tour.reindex
-      get :show, params: { tenant: tour.tenant, slug: tour.slug }
-      expect(response.status).to eq(200)
-      expect(v4_json[:title]).to eq(tour.title)
-    end
-
-    it "returns tour with multiple slugs" do
+    it 'returns 200 when requested by slug' do
       tour = create(:tour, published: true)
-      original_title = tour.title
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slug }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:tour][:title]).to(eq(tour.title))
+    end
+
+    it 'returns tour when requested by an old slug after title change' do
+      tour = create(:tour, published: true)
+      original_slug = tour.slugs.first.slug
       tour.update(title: Faker::Movies::HitchhikersGuideToTheGalaxy.location)
-      new_title = tour.title
-      Tour.reindex
-      expect(original_title).not_to eq(new_title)
-      expect(tour.slugs.count).to eq(2)
-      get :show, params: { tenant: Apartment::Tenant.current, slug: tour.slugs.first.slug }
-      expect(response.status).to eq(200)
-      expect(v4_json[:title]).to eq(tour.title)
-      expect(v4_json[:slug]).not_to eq(tour.slugs.first.slug)
+      clean_reindex
+      expect(tour.slugs.count).to(eq(2))
+      get :show, params: { tenant: tour_set.subdir, slug: original_slug }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:tour][:title]).to(eq(tour.title))
+      expect(v4_json[:tour][:slug]).not_to(eq(original_slug))
+    end
+
+    it 'returns stops from an Open Geographies endpoint' do
+      tour = create(:tour, published: true, open_geographies: true, open_geographies_endpoint: 'http://og.ecds.io')
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
+      expect(v4_json[:tour][:stops]).to(eq(['Open Geographies']))
+      expect(v4_json[:tour][:stop_count]).to(eq(1))
+      expect(v4_json[:tour][:bounds]).to(eq({
+        east: -83.8150232,
+        west: -83.2818954,
+        south: 32.6648851,
+        north: 33.8113142,
+      }))
+      expect(v4_json[:tour][:title]).to(eq(tour.title))
     end
   end
 end

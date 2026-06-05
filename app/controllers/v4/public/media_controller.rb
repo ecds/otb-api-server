@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module V4
   module Public
     class MediaController < V4Controller
@@ -5,9 +7,9 @@ module V4
         return 404 if @record.nil?
 
         if params[:variant]
-          redirect_to @record.files[params[:variant].to_sym], allow_other_host: true
+          redirect_to(@record.files[params[:variant].to_sym], allow_other_host: true)
         else
-          redirect_to @record.file.blob.url, allow_other_host: true
+          redirect_to(@record.file.blob.url, allow_other_host: true)
         end
       end
 

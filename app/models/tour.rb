@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "uri"
+require 'uri'
 
 # Model class for a tour.
 class Tour < ApplicationRecord
@@ -25,13 +25,32 @@ class Tour < ApplicationRecord
 
   belongs_to :theme, default: -> { Theme.first }
 
-  enum :default_lng, { "en-US": 0, "fr-FR": 1, "de-DE": 2, "pl-PL": 3, "nl-NL": 4, "fi-FI": 5, "sv-SE": 6, "it-IT": 7, "es-ES": 8, "pt-PT": 9, "ru-RU": 10, "pt-BR": 11, "es-MX": 12, "zh-CN": 13, "zh-TW": 14, "ja-JP": 15, "ko-KR": 16 }
+  enum :default_lng,
+    {
+      'en-US': 0,
+      'fr-FR': 1,
+      'de-DE': 2,
+      'pl-PL': 3,
+      'nl-NL': 4,
+      'fi-FI': 5,
+      'sv-SE': 6,
+      'it-IT': 7,
+      'es-ES': 8,
+      'pt-PT': 9,
+      'ru-RU': 10,
+      'pt-BR': 11,
+      'es-MX': 12,
+      'zh-CN': 13,
+      'zh-TW': 14,
+      'ja-JP': 15,
+      'ko-KR': 16,
+    }
 
   validates :title, presence: true, uniqueness: { case_sensitive: false }
 
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }
-  before_validation -> { self.title ||= "untitled" }
+  before_validation -> { self.title ||= 'untitled' }
   before_validation :update_saved_stop_order
   before_save :calculate_duration
   before_save :check_url
@@ -68,25 +87,30 @@ class Tour < ApplicationRecord
       medium
     elsif tour_media.present?
       tour_media.order(:position).first.medium
-    else
-      nil
+    elsif stops.present?
+      first_stop_medium
     end
 
     if splash_medium && splash_medium.files.present?
-      return { title: splash_medium.title, caption: splash_medium.caption, url: splash_medium.search_data[:files][:desktop] }
+      return {
+        title: splash_medium.title,
+        caption: splash_medium.caption,
+        url: splash_medium.search_data[:files][:desktop],
+      }
     end
-    { title: "OpenTourBuilder", caption: "OpenTourBuilderLogo", url: "https://opentour.site/assets/images/otb-bg.png" }
+
+    { title: 'OpenTourBuilder', caption: 'OpenTourBuilderLogo', url: 'https://opentour.site/assets/images/otb-bg.png' }
   end
 
   def stop_count
-    self.stops.count
+    stops.count
   end
 
   def bounds
-    if self.map_overlay.present?
+    if map_overlay.present?
       box = RGeo::Cartesian::BoundingBox.create_from_points(
-        RGeo::Geographic.spherical_factory.point(self.map_overlay.east.to_f, self.map_overlay.south.to_f),
-        RGeo::Geographic.spherical_factory.point(self.map_overlay.west.to_f, self.map_overlay.north.to_f)
+        RGeo::Geographic.spherical_factory.point(map_overlay.east.to_f, map_overlay.south.to_f),
+        RGeo::Geographic.spherical_factory.point(map_overlay.west.to_f, map_overlay.north.to_f),
       )
 
       return {
@@ -95,10 +119,10 @@ class Tour < ApplicationRecord
         east: box.max_x + (box.x_span / 8),
         west: box.min_x - (box.x_span / 8),
         centerLat: box.center_y,
-        centerLng: box.center_x
+        centerLng: box.center_x,
       }
     elsif stops.empty?
-      return nil
+      return
     end
 
     points = stops.map { |stop| RGeo::Geographic.spherical_factory.point(stop.lng, stop.lat) }
@@ -111,7 +135,7 @@ class Tour < ApplicationRecord
       east: box.max_x + (box.x_span / 8),
       west: box.min_x - (box.x_span / 8),
       centerLat: box.center_y,
-      centerLng: box.center_x
+      centerLng: box.center_x,
     }
   end
 
@@ -124,10 +148,12 @@ class Tour < ApplicationRecord
 
     return if mode.title.nil?
 
-    return unless self.will_save_change_to_published? || self.will_save_change_to_saved_stop_order? || self.will_save_change_to_mode_id?
+    unless will_save_change_to_published? || will_save_change_to_saved_stop_order? || will_save_change_to_mode_id?
+      return
+    end
 
     durations = []
-    destinations = tour_stops.order(:position).map { |tour_stop| [ tour_stop.stop.lat, tour_stop.stop.lng ] }
+    destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
 
     # The direction matrix API limits the number of destinations to 25.
     # Calculate the duration in chunks to stay below the limit.
@@ -153,11 +179,12 @@ class Tour < ApplicationRecord
       link_address:,
       link_text:,
       map_overlay: map_overlay&.search_data,
-      map_type: map_type || "hybrid",
+      map_type: map_type || 'hybrid',
       media: tour_media.sort_by(&:position).map(&:search_data),
       meta_description: search_meta_description,
       mode: mode.search_data,
       modes: tour_modes.map(&:search_data),
+      open_geographies_endpoint:,
       published:,
       restrict_bounds:,
       restrict_bounds_to_overlay:,
@@ -171,60 +198,66 @@ class Tour < ApplicationRecord
       tenant_title:,
       title:,
       theme: { id: theme.id, title: theme.title },
-      type: "tour",
-      use_directions:
+      type: 'tour',
+      use_directions:,
     }
   end
 
-    private
+  private
 
-    def ensure_slug
-      tour_slug = title.parameterize_intl
-      existing = Slug.find_by(slug: tour_slug)
+  def ensure_slug
+    tour_slug = title.parameterize_intl
+    existing = Slug.find_by(slug: tour_slug)
 
-      if existing
-        existing.update(tour: self) unless existing.tour == self
-      else
-        slugs.create(slug: tour_slug)
-      end
+    if existing
+      existing.update(tour: self) unless existing.tour == self
+    else
+      slugs.create(slug: tour_slug)
+    end
+  end
+
+  def add_modes
+    Mode.all.each do |m|
+      modes << m
+    end
+  end
+
+  def check_url
+    return if link_address.blank?
+
+    uri = URI(link_address)
+
+    self.link_address = "http://#{link_address}" if uri.scheme.nil?
+  end
+
+  def update_saved_stop_order
+    self.saved_stop_order = tour_stops.order(:position).map(&:stop_id)
+  end
+
+  def check_for_overlay
+    # Can't restrict to overlay without an overlay present
+    if restrict_bounds_to_overlay? && map_overlay.nil?
+      self.restrict_bounds_to_overlay = false
+      return
     end
 
-    def add_modes
-      Mode.all.each do |m|
-        self.modes << m
-      end
+    # These two flags are mutually exclusive — the most recently changed one wins
+    if restrict_bounds_to_overlay_changed? && restrict_bounds_to_overlay?
+      self.restrict_bounds = false
+    elsif restrict_bounds_changed? && restrict_bounds?
+      self.restrict_bounds_to_overlay = false
     end
+  end
 
-    def check_url
-      return if link_address.blank?
+  def search_meta_description
+    return meta_description unless meta_description.nil?
 
-      uri = URI(link_address)
+    sanitized_description
+  end
 
-      self.link_address = "http://#{link_address}" if uri.scheme.nil?
-    end
+  def first_stop_medium
+    return if stops.empty?
 
-    def update_saved_stop_order
-      self.saved_stop_order = self.tour_stops.order(:position).map(&:stop_id)
-    end
-
-    def check_for_overlay
-      if self.restrict_bounds_to_overlay && self.map_overlay.nil?
-        self.restrict_bounds_to_overlay = false
-        # self.restrict_bounds = false
-      end
-
-      if !self.restrict_bounds_to_overlay_was && self.restrict_bounds_to_overlay && self.map_overlay.present?
-        self.restrict_bounds = false
-      end
-
-      if self.restrict_bounds && !self.restrict_bounds_was
-        self.restrict_bounds_to_overlay = false
-      end
-    end
-
-    def search_meta_description
-      return meta_description unless meta_description.nil?
-
-      sanitized_description
-    end
+    stops.map { |s| s.media }.flatten.first
+  end
 end

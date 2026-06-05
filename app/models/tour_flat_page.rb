@@ -6,15 +6,15 @@ class TourFlatPage < ApplicationRecord
   belongs_to :flat_page
 
   after_create do
-    self.position = self.tour.tour_flat_pages.length + 1
-    self.save
+    self.position = tour.tour_flat_pages.length + 1
+    save
   end
 
   def search_data
     {
       position: position,
       relation_id: id,
-      **flat_page.search_data
+      **flat_page.search_data,
     }
   end
 end

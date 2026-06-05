@@ -3,14 +3,14 @@
 require 'rails_helper'
 require 'ecds_rails_auth_engine'
 
-RSpec.describe 'V3::FlatPages', type: :request do
+RSpec.describe('V3::FlatPages', type: :request) do
   let!(:theme) { create(:theme) }
   let!(:tours) { create_list(:tour_with_flat_pages, 1, theme: theme) }
   let!(:flat_page) { tours.first.flat_pages.first }
   let(:tour_id) { tours.first.id }
 
   context 'create tour with flat pages' do
-    before {
+    before do
       user = create(:user)
       user.update(super: false)
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
@@ -18,11 +18,11 @@ RSpec.describe 'V3::FlatPages', type: :request do
       signed_cookie(user)
       cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
       get "/#{Apartment::Tenant.current}/flat-pages"
-    }
+    end
 
     it 'associates flat_page with tour' do
-      expect(response).to have_http_status(200)
-      expect(json.size).to eq(FlatPage.count)
+      expect(response).to(have_http_status(200))
+      expect(json.size).to(eq(FlatPage.count))
     end
   end
 
@@ -40,14 +40,14 @@ RSpec.describe 'V3::FlatPages', type: :request do
   # end
 
   context 'get specific flat page by id' do
-    before {
+    before do
       Tour.first.update(published: true)
       Tour.first.flat_pages << FlatPage.first
       get "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}"
-    }
+    end
 
     it 'returns requested flat page' do
-      expect(response).to have_http_status(200)
+      expect(response).to(have_http_status(200))
     end
   end
 
@@ -57,33 +57,32 @@ RSpec.describe 'V3::FlatPages', type: :request do
   end
 
   describe 'POST /tenant/flat-pages' do
-
     context 'create page not authenticated' do
       before { post "/#{Apartment::Tenant.current}/flat-pages", params: valid_attributes }
       it 'returns status code 401' do
-        expect(response).to have_http_status(401)
+        expect(response).to(have_http_status(401))
       end
     end
 
     context 'when created by tour set admin' do
-      before {
+      before do
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/flat-pages", params: valid_attributes
-      }
+      end
       it 'creates a tour' do
-        expect(response).to have_http_status(201)
+        expect(response).to(have_http_status(201))
       end
     end
 
     context 'create without valid params' do
-      before {
+      before do
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/flat-pages", params: { foo: 'bar' }
-      }
+      end
       it 'returns unprocessable entity' do
-        expect(response).to have_http_status(422)
+        expect(response).to(have_http_status(422))
       end
     end
   end
@@ -92,53 +91,52 @@ RSpec.describe 'V3::FlatPages', type: :request do
     context 'update page not authenticated' do
       before { put "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}", params: valid_attributes }
       it 'returns status code 401' do
-        expect(response).to have_http_status(401)
+        expect(response).to(have_http_status(401))
       end
     end
 
     context 'when updated by tour set admin' do
-      before {
+      before do
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         put "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}", params: valid_attributes
-      }
+      end
       it 'creates a tour' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
     end
 
     context 'update without valid params' do
-      before {
+      before do
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         invalid_attributes = { data: { type: 'flat_pages', attributes: { title: nil } } }
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         put "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.last.id}", params: invalid_attributes
-      }
+      end
       it 'returns unprocessable entity' do
-        expect(response).to have_http_status(422)
+        expect(response).to(have_http_status(422))
       end
     end
-
   end
 
   describe 'DELETE /tenant/flat-pages/<id>' do
     context 'delete page not authenticated' do
-      before {
+      before do
         delete "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}", params: valid_attributes
-      }
+      end
       it 'returns status code 401' do
-        expect(response).to have_http_status(401)
+        expect(response).to(have_http_status(401))
       end
     end
 
     context 'when deletes by tour set admin' do
-      before {
+      before do
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         delete "/#{Apartment::Tenant.current}/flat-pages/#{FlatPage.first.id}", params: valid_attributes
-      }
+      end
       it 'creates a tour' do
-        expect(response).to have_http_status(204)
+        expect(response).to(have_http_status(204))
       end
     end
   end

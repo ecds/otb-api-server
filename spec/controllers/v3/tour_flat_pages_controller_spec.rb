@@ -2,15 +2,15 @@
 
 require 'rails_helper'
 
-RSpec.describe V3::TourFlatPagesController, type: :controller do
+RSpec.describe(V3::TourFlatPagesController, type: :controller) do
   def data(tour, flat_page, position = 1)
     {
       type: 'tour_flat_pages',
       attributes: { position: position },
       relationships: {
         tour: { data: { type: 'tours', id: tour.id } },
-        flat_page: { data: { type: 'flat_pages', id: flat_page.id } }
-      }
+        flat_page: { data: { type: 'flat_pages', id: flat_page.id } },
+      },
     }
   end
 
@@ -18,8 +18,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
     it 'returns a 200 response and empty tour when none are part of a published tour' do
       Tour.all.each { |tour| tour.update(published: false) }
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(json).to be_empty
-      expect(response.status).to eq(200)
+      expect(json).to(be_empty)
+      expect(response.status).to(eq(200))
     end
 
     it 'returns a 200 response and only tour flat_pages that are part of a published tour' do
@@ -27,16 +27,16 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       Tour.first.update(published: true) if Tour.published.empty?
       Tour.last.update(published: false) if Tour.published.count == Tour.count
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(json.count).to eq(Tour.published.map { |tour| tour.tour_flat_pages.count }.sum)
-     end
+      expect(response.status).to(eq(200))
+      expect(json.count).to(eq(Tour.published.map { |tour| tour.tour_flat_pages.count }.sum))
+    end
 
     it 'returns a 200 response when requeted by slug' do
       tour = create(:tour_with_flat_pages)
       tour.update(published: true)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(json.count).to eq(FlatPage.count)
+      expect(response.status).to(eq(200))
+      expect(json.count).to(eq(FlatPage.count))
     end
 
     it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
@@ -46,8 +46,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(json.count).to eq(FlatPage.count)
+      expect(response.status).to(eq(200))
+      expect(json.count).to(eq(FlatPage.count))
     end
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
@@ -58,8 +58,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tours << tour
       signed_cookie(user)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(json.count).to eq(FlatPage.count)
+      expect(response.status).to(eq(200))
+      expect(json.count).to(eq(FlatPage.count))
     end
   end
 
@@ -68,8 +68,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       tour = create(:tour_with_flat_pages)
       tour.update(published: true)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
-      expect(response.status).to eq(200)
-      expect(relationships[:tour][:data][:id]).to eq(tour.id.to_s)
+      expect(response.status).to(eq(200))
+      expect(relationships[:tour][:data][:id]).to(eq(tour.id.to_s))
     end
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
@@ -80,8 +80,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tours << tour
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
-      expect(response.status).to eq(200)
-      expect(relationships[:tour][:data][:id]).to eq(tour.id.to_s)
+      expect(response.status).to(eq(200))
+      expect(relationships[:tour][:data][:id]).to(eq(tour.id.to_s))
     end
 
     it 'returns a 200 response when request is authenticated by tenant admin and tour is unpublished' do
@@ -91,16 +91,16 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
-      expect(response.status).to eq(200)
-      expect(relationships[:tour][:data][:id]).to eq(tour.id.to_s)
+      expect(response.status).to(eq(200))
+      expect(relationships[:tour][:data][:id]).to(eq(tour.id.to_s))
     end
 
     it 'returns a 200 response and empty json when tour is unpublished and request is not authenticated' do
       tour = create(:tour_with_flat_pages)
       tour.update(published: false)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
-      expect(response.status).to eq(200)
-      expect(json).to be_empty
+      expect(response.status).to(eq(200))
+      expect(json).to(be_empty)
     end
 
     it 'returns a 200 response and empty json when tour is unpublished and request is authenticated by someone who is nither a tenant admin or tour author' do
@@ -111,8 +111,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tour_sets = []
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.tour_flat_pages.first.id }
-      expect(response.status).to eq(200)
-      expect(json).to be_empty
+      expect(response.status).to(eq(200))
+      expect(json).to(be_empty)
     end
   end
 
@@ -123,7 +123,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         tour = create(:tour)
         flat_page = create(:flat_page)
         post :create, params: { data: data(tour, flat_page), tenant: TourSet.first.subdir }
-        expect(response.status).to eq(405)
+        expect(response.status).to(eq(405))
       end
 
       it 'return 405 when authenticated but not an admin for current tenant' do
@@ -135,9 +135,9 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         user.tour_sets = []
         user.tours = []
         signed_cookie(user)
-        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(405)
-        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
+        post :create, params: { data: data(tour, flat_page), tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(405))
+        expect(original_tour_flat_page_count).to(eq(TourFlatPage.count))
       end
 
       it 'return 405 when authenticated but an admin for current tenant' do
@@ -149,9 +149,9 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         user.tours = []
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         signed_cookie(user)
-        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(405)
-        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
+        post :create, params: { data: data(tour, flat_page), tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(405))
+        expect(original_tour_flat_page_count).to(eq(TourFlatPage.count))
       end
 
       it 'return 405 when authenticated by super' do
@@ -163,9 +163,9 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         user.tour_sets = []
         user.update(super: true)
         signed_cookie(user)
-        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(405)
-        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
+        post :create, params: { data: data(tour, flat_page), tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(405))
+        expect(original_tour_flat_page_count).to(eq(TourFlatPage.count))
       end
 
       it 'return 405 when authenticated by tour author' do
@@ -177,9 +177,9 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         user.tour_sets = []
         user.update(super: false)
         signed_cookie(user)
-        post :create, params: { data:  data(tour, flat_page), tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(405)
-        expect(original_tour_flat_page_count).to eq(TourFlatPage.count)
+        post :create, params: { data: data(tour, flat_page), tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(405))
+        expect(original_tour_flat_page_count).to(eq(TourFlatPage.count))
       end
     end
   end
@@ -193,7 +193,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         request_data = data(tour, flat_page, 4)
         request_data[:id] = TourFlatPage.find_by(tour: tour, flat_page: flat_page).id
         post :update, params: { id: request_data[:id], data: request_data, tenant: TourSet.first.subdir }
-        expect(response.status).to eq(401)
+        expect(response.status).to(eq(401))
       end
 
       it 'return 401 when authenticated but not an admin for current tenant' do
@@ -208,7 +208,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         request_data = data(tour, flat_page, 5)
         request_data[:id] = TourFlatPage.find_by(tour: tour, flat_page: flat_page).id
         post :update, params: { id: request_data[:id], data: request_data, tenant: TourSet.first.subdir }
-        expect(response.status).to eq(401)
+        expect(response.status).to(eq(401))
       end
 
       it 'return 200 and updated tour when authenticated but an admin for current tenant' do
@@ -225,13 +225,13 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         signed_cookie(user)
         tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
         tour_flat_page.update(position: 2)
-        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(2)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to(eq(2))
         request_data = data(tour, flat_page, 5)
         request_data[:id] = tour_flat_page.id
         post :update, params: { id: tour_flat_page.id, data: request_data, tenant: TourSet.first.subdir }
-        expect(response.status).to eq(200)
-        expect(attributes[:position]).not_to eq('5')
-        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(5)
+        expect(response.status).to(eq(200))
+        expect(attributes[:position]).not_to(eq('5'))
+        expect(TourFlatPage.find(tour_flat_page.id).position).to(eq(5))
       end
 
       it 'return 200 and updated tour when authenticated by super' do
@@ -248,13 +248,13 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         signed_cookie(user)
         tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
         tour_flat_page.update(position: 3)
-        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(3)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to(eq(3))
         request_data = data(tour, flat_page, 4)
         request_data[:id] = tour_flat_page.id
         post :update, params: { id: tour_flat_page.id, data: request_data, tenant: TourSet.first.subdir }
-        expect(response.status).to eq(200)
-        expect(attributes[:position]).not_to eq('4')
-        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(4)
+        expect(response.status).to(eq(200))
+        expect(attributes[:position]).not_to(eq('4'))
+        expect(TourFlatPage.find(tour_flat_page.id).position).to(eq(4))
       end
 
       it 'return 200 and updated tour when authenticated by tour author' do
@@ -271,23 +271,27 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
         signed_cookie(user)
         tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
         tour_flat_page.update(position: 6)
-        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(6)
+        expect(TourFlatPage.find(tour_flat_page.id).position).to(eq(6))
         request_data = data(tour, flat_page, 1)
         request_data[:id] = tour_flat_page.id
         post :update, params: { id: tour_flat_page.id, data: request_data, tenant: TourSet.first.subdir }
-        expect(response.status).to eq(200)
-        expect(attributes[:position]).not_to eq('1')
-        expect(TourFlatPage.find(tour_flat_page.id).position).to eq(1)
+        expect(response.status).to(eq(200))
+        expect(attributes[:position]).not_to(eq('1'))
+        expect(TourFlatPage.find(tour_flat_page.id).position).to(eq(1))
       end
 
       it 'returns 422 when params are invalid' do
         tour_flat_page = create(:tour_flat_page)
         user = create(:user, super: true)
-        invalid_params = { type: 'tour_flat_pages',  attributes: {}, relationships: { tour: { data: nil }, flat_page: { data: nil } } }
+        invalid_params = {
+          type: 'tour_flat_pages',
+          attributes: {},
+          relationships: { tour: { data: nil }, flat_page: { data: nil } },
+        }
         signed_cookie(user)
         post :update, params: { id: tour_flat_page.id, data: invalid_params, tenant: TourSet.first.subdir }
-        expect(response.status).to eq(422)
-        expect(errors).to include('Tour must exist')
+        expect(response.status).to(eq(422))
+        expect(errors).to(include('Tour must exist'))
       end
     end
   end
@@ -299,7 +303,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       tour.flat_pages << flat_page
       tour_flat_page = TourFlatPage.find_by(tour: tour, flat_page: flat_page)
       post :destroy, params: { id: tour_flat_page.id, tenant: TourSet.first.subdir }
-      expect(response.status).to eq(405)
+      expect(response.status).to(eq(405))
     end
 
     it 'return 405 when authenticated but not an admin for current tenant' do
@@ -312,7 +316,7 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       user.tour_sets = []
       signed_cookie(user)
       post :destroy, params: { id: tour_flat_page.id, tenant: TourSet.first.subdir }
-      expect(response.status).to eq(405)
+      expect(response.status).to(eq(405))
     end
 
     it 'return 405 and one less tour when authenticated but an admin for current tenant' do
@@ -326,8 +330,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       signed_cookie(user)
       tour_count = Tour.count
       post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(405)
-      expect(Tour.count).to eq(tour_count)
+      expect(response.status).to(eq(405))
+      expect(Tour.count).to(eq(tour_count))
     end
 
     it 'return 405 and one less tour when authenticated by super' do
@@ -341,8 +345,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       signed_cookie(user)
       tour_count = Tour.count
       post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(405)
-      expect(Tour.count).to eq(tour_count)
+      expect(response.status).to(eq(405))
+      expect(Tour.count).to(eq(tour_count))
     end
 
     it 'return 405 and one less tour when authenticated by tour author' do
@@ -357,8 +361,8 @@ RSpec.describe V3::TourFlatPagesController, type: :controller do
       signed_cookie(user)
       tour_count = Tour.count
       post :destroy, params: { id: tour_flat_page.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(405)
-      expect(Tour.count).to eq(tour_count)
+      expect(response.status).to(eq(405))
+      expect(Tour.count).to(eq(tour_count))
     end
   end
 end

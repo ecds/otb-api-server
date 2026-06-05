@@ -8,7 +8,7 @@ class TourMode < ApplicationRecord
   def search_data
     {
       relation_id: id,
-      **mode.search_data
+      **mode.search_data,
     }
   end
 end

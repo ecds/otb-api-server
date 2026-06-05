@@ -7,8 +7,8 @@ class TourMedium < ApplicationRecord
   # validates :position, presence: true
 
   after_create do
-    self.position = self.tour.media.length + 1
-    self.save
+    self.position = tour.media.length + 1
+    save
   end
 
   # before_destroy do
@@ -27,7 +27,7 @@ class TourMedium < ApplicationRecord
     {
       relation_id: id,
       position:,
-      **medium&.search_data
+      **medium&.search_data,
     }
   end
 end

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Stop, type: :model do
+RSpec.describe(Stop, type: :model) do
   it { should have_many(:tours) }
   it { should have_many(:tour_stops) }
   # it { should validate_presence_of(:title) }
@@ -11,20 +11,20 @@ RSpec.describe Stop, type: :model do
 
   it 'has specified splash' do
     stop = create(:stop, medium: create(:medium))
-    expect(stop.splash).not_to be nil
+    expect(stop.splash).not_to(be(nil))
   end
 
   it 'has uses the first medium for splash' do
     stop = create(:stop)
     create_list(:medium, 3)
     Medium.all.each { |medium| stop.media << medium }
-    expect(stop.splash).not_to be nil
-    expect(stop.splash[:title]).to eq(StopMedium.find_by(position: 1).medium.title)
+    expect(stop.splash).not_to(be(nil))
+    expect(stop.splash[:title]).to(eq(StopMedium.find_by(position: 1).medium.title))
   end
 
-  it "will not allow a title with a duplicate name" do
+  it 'will not allow a title with a duplicate name' do
     title = Faker::Movies::HitchhikersGuideToTheGalaxy.location
     create(:stop, title:)
-    expect(build(:stop, title:)).to_not be_valid
+    expect(build(:stop, title:)).to_not(be_valid)
   end
 end

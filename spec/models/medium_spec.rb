@@ -2,15 +2,15 @@
 
 require 'rails_helper'
 
-RSpec.describe Medium, type: :model do
+RSpec.describe(Medium, type: :model) do
   it { should have_many(:stop_media) }
   it { should have_many(:stops) }
 
   context 'video' do
     it 'gets image from youtube and sets embed' do
       medium = create(:medium, video: 'F9ULbmCvmxY', base_sixty_four: nil, video_provider: 'youtube')
-      expect(medium.embed).to eq("//www.youtube.com/embed/#{medium.video}")
-      expect(medium.file.attached?).to be true
+      expect(medium.embed).to(eq("//www.youtube.com/embed/#{medium.video}"))
+      expect(medium.file.attached?).to(be(true))
     end
 
     it 'gets image from youtube when downloaded image is a StringIO object and sets embed' do
@@ -18,57 +18,61 @@ RSpec.describe Medium, type: :model do
       string_io = StringIO.new(file.read)
       base64 = VideoProps.encode_image(string_io)
       medium = create(:medium, base_sixty_four: base64)
-      expect(medium.file.attached?).to be true
+      expect(medium.file.attached?).to(be(true))
     end
 
     it 'gets nothing when YouTube video is not found' do
       medium = create(:medium, video: 'CvmxYF9ULbm', base_sixty_four: nil, video_provider: 'youtube')
-      expect(medium.embed).to be nil
-      expect(medium.provider).to be nil
-      expect(medium.file.attached?).to be false
+      expect(medium.embed).to(be(nil))
+      expect(medium.provider).to(be(nil))
+      expect(medium.file.attached?).to(be(false))
     end
 
     it 'gets image from vimeo and sets embed' do
       medium = create(:medium, video: '310645255', base_sixty_four: nil, video_provider: 'vimeo')
-      expect(medium.embed).to eq("//player.vimeo.com/video/#{medium.video}")
-      expect(medium.file.attached?).to be true
+      expect(medium.embed).to(eq("//player.vimeo.com/video/#{medium.video}"))
+      expect(medium.file.attached?).to(be(true))
     end
 
     it 'gets image from soundcloud and sets embed' do
+      stub_request(:get, 'https://soundcloud.com/oembed?url=https://soundcloud.com/fiendbassy/boca-raton-feat-a-ap-ferg&format=json')
+        .to_return(status: 200, body: '{"thumbnail_url":"https://i1.sndcdn.com/artworks-KsTDkyGJ8S6x-0-t500x500.jpg"}', headers: { 'Content-Type' => 'application/json' })
       iframe = '<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/457871163&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe><div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/fiendbassy" title="FiendBassy" target="_blank" style="color: #cccccc; text-decoration: none;">FiendBassy</a> · <a href="https://soundcloud.com/fiendbassy/boca-raton-feat-a-ap-ferg" title="Boca Raton (with A$AP Ferg)" target="_blank" style="color: #cccccc; text-decoration: none;">Boca Raton (with A$AP Ferg)</a></div>'
       medium = create(:medium, video: iframe, base_sixty_four: nil, video_provider: 'soundcloud')
-      expect(medium.embed).to eq("//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false")
-      expect(medium.file.attached?).to be true
-      expect(medium.title).to eq('FiendBassy: Boca Raton (with A$AP Ferg)')
+      expect(medium.embed).to(eq("//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false"))
+      expect(medium.file.attached?).to(be(true))
+      expect(medium.title).to(eq('FiendBassy: Boca Raton (with A$AP Ferg)'))
     end
 
     it 'gets default image from when no image found for soundcloud and sets embed' do
+      stub_request(:get, 'https://soundcloud.com/oembed?url=https://soundcloud.com/user-270843798/6-subsatellite-launch&format=json')
+        .to_return(status: 200, body: '{"thumbnail_url":null}', headers: { 'Content-Type' => 'application/json' })
       iframe = '<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/431162745&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe><div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/user-270843798" title="Emory Center for Digital Scholarship" target="_blank" style="color: #cccccc; text-decoration: none;">Emory Center for Digital Scholarship</a> · <a href="https://soundcloud.com/user-270843798/6-subsatellite-launch" target="_blank" style="color: #cccccc; text-decoration: none;">Subsatellite Launch</a></div>'
       medium = create(:medium, video: iframe, base_sixty_four: nil, video_provider: 'soundcloud')
-      expect(medium.embed).to eq("//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false")
-      expect(medium.file.attached?).to be true
-      expect(medium.title).to eq('Emory Center for Digital Scholarship')
+      expect(medium.embed).to(eq("//w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/#{medium.video}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false"))
+      expect(medium.file.attached?).to(be(true))
+      expect(medium.title).to(eq('Emory Center for Digital Scholarship'))
     end
 
     it 'replaces file for video' do
       medium = create(:medium, video: 'F9ULbmCvmxY', base_sixty_four: nil, video_provider: 'youtube')
       original_checksum = medium.file.blob.checksum
-      expect(original_checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/0.jpg')).base64digest)
+      expect(original_checksum).to(eq(Digest::MD5.file(Rails.root.join('spec/factories/images/0.jpg')).base64digest))
       medium.update(base_sixty_four: File.read(Rails.root.join('spec/factories/images/png_base64.txt')))
-      expect(medium.file.blob.checksum).not_to eq(original_checksum)
-      expect(medium.file.blob.checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest)
+      expect(medium.file.blob.checksum).not_to(eq(original_checksum))
+      expect(medium.file.blob.checksum).to(eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest))
     end
 
     it 'updates title and caption of video' do
       medium = create(:medium, video: 'F9ULbmCvmxY', base_sixty_four: nil, video_provider: 'youtube')
-      expect(medium.title).to include('Goodie')
-      expect(medium.caption).to include('Goodie')
+      expect(medium.title).to(include('Goodie'))
+      expect(medium.caption).to(include('Goodie'))
       medium.update(title: 'Outkast')
       medium.update(caption: 'GOATs')
-      expect(medium.title).not_to include('Goodie')
-      expect(medium.caption).not_to include('Goodie')
-      expect(medium.title).to include('Outkast')
-      expect(medium.caption).to include('GOATs')
+      expect(medium.title).not_to(include('Goodie'))
+      expect(medium.caption).not_to(include('Goodie'))
+      expect(medium.title).to(include('Outkast'))
+      expect(medium.caption).to(include('GOATs'))
       # medium.update(base_sixty_four: File.read(Rails.root.join('spec/factories/images/png_base64.txt')))
       # expect(medium.file.blob.checksum).not_to eq(original_checksum)
       # expect(medium.file.blob.checksum).to eq(Digest::MD5.file(Rails.root.join('spec/factories/images/atl.png')).base64digest)
@@ -76,31 +80,30 @@ RSpec.describe Medium, type: :model do
 
     it 'skips video_props when provider in nil' do
       medium = create(:medium, video: 'ACod3', base_sixty_four: nil)
-      expect(medium.file.attached?).to be false
+      expect(medium.file.attached?).to(be(false))
     end
   end
 
-
   context 'creating images' do
-    it "creates a medium record with attachment" do
+    it 'creates a medium record with attachment' do
       poo = nil
-      File.open(Rails.root.join('spec', 'factories', 'images', 'atl_base64.txt'), "r") do |b64|
+      File.open(Rails.root.join('spec', 'factories', 'images', 'atl_base64.txt'), 'r') do |b64|
         poo = b64.read
       end
-      Medium.create(base_sixty_four: poo, filename: "atl.png")
-      medium = Medium.find_by(filename: "atl.png")
-      expect(medium.filename).to eq("atl.png")
+      Medium.create(base_sixty_four: poo, filename: 'atl.png')
+      medium = Medium.find_by(filename: 'atl.png')
+      expect(medium.filename).to(eq('atl.png'))
     end
 
     it 'sets widths for variants' do
       medium = create(
         :medium,
         filename: Faker::File.file_name(dir: '', ext: 'jpg', directory_separator: ''),
-        video: nil
+        video: nil,
       )
       medium = Medium.find(medium.id)
       medium.save
-      expect(medium).not_to be nil
+      expect(medium).not_to(be(nil))
       # expect(medium.lqip_width).not_to be nil
     end
 
@@ -109,10 +112,10 @@ RSpec.describe Medium, type: :model do
         :medium,
         filename: Faker::File.file_name(dir: '', ext: 'gif', directory_separator: ''),
         base_sixty_four: File.read(Rails.root.join('spec/factories/images/gif_base64.txt')),
-        video: nil
+        video: nil,
       )
 
-      expect(medium.file.blob.checksum).to eq('4fqkSXu+qjQuQWCms8xBBQ==')
+      expect(medium.file.blob.checksum).to(eq('4fqkSXu+qjQuQWCms8xBBQ=='))
     end
   end
 end

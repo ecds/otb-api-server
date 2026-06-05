@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "cgi"
+require 'cgi'
 
 # Model for media associated with stops.
 class Medium < MediumBaseRecord
@@ -27,7 +27,7 @@ class Medium < MediumBaseRecord
   attr_accessor :insecure
 
   def props
-    return if self.video.nil? || self.video.empty?
+    return if video.nil? || video.empty?
 
     VideoProps.props(self)
   end
@@ -37,21 +37,21 @@ class Medium < MediumBaseRecord
   end
 
   def files
-    return nil if !self.file.attached?
+    return unless file.attached?
 
-    if file.content_type.include?("gif")
+    if file.content_type.include?('gif')
       return {
         lqip: file.url,
         mobile: file.url,
         tablet: file.url,
-        desktop: file.url
+        desktop: file.url,
       }
     end
     {
-      lqip: file.variant(resize_to_limit: [ 5, 5 ]).processed.url,
-      mobile: file.variant(resize_to_limit: [ 300, 300 ]).processed.url,
-      tablet: file.variant(resize_to_limit: [ 400, 400 ]).processed.url,
-      desktop: file.variant(resize_to_limit: [ 750, 750 ]).processed.url
+      lqip: file.variant(resize_to_limit: [5, 5]).processed.url,
+      mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
+      tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
+      desktop: file.variant(resize_to_limit: [750, 750]).processed.url,
     }
   end
 
@@ -71,7 +71,7 @@ class Medium < MediumBaseRecord
         mobile: "#{http_path}?variant=mobile",
         tablet: "#{http_path}?variant=tablet",
         desktop: "#{http_path}?variant=desktop",
-        lqip: "#{http_path}?variant=lqip"
+        lqip: "#{http_path}?variant=lqip",
       },
       id: id,
       lqip_width:,
@@ -80,16 +80,16 @@ class Medium < MediumBaseRecord
       provider:,
       tablet_width:,
       title:,
-      video:
+      video:,
     }
   end
 
   private
 
   def replace_video
-    if video.present?
-      attach_file
-    end
+    return unless video.present?
+
+    attach_file
   end
 
   def add_widths

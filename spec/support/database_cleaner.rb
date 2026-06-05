@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.configure do |config|
   config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)
@@ -16,10 +18,8 @@ RSpec.configure do |config|
   end
 
   config.after(:each) do
-    begin
-      DatabaseCleaner.clean
-    rescue NoMethodError
-      # IDK
-    end
+    DatabaseCleaner.clean
+  rescue NoMethodError
+    # IDK
   end
 end

@@ -3,7 +3,7 @@
 module V3
   class FlatPagesController < V3Controller
     before_action :set_record, only: [:show, :update, :destroy]
-    #authorize_resource
+    # authorize_resource
 
     # GET /v3/records
     def index
@@ -14,7 +14,7 @@ module V3
       else
         Tour.published.map { |tour| tour.flat_pages }.flatten.uniq
       end
-      render json: @records
+      render(json: @records)
     end
 
     # POST /v3/records
@@ -23,12 +23,12 @@ module V3
         @record = FlatPage.new(record_params)
 
         if @record.save
-          render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@record.id}"
+          render(json: @record, status: :created, location: "/#{Apartment::Tenant.current}/flat-pages/#{@record.id}")
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head 401
+        head(401)
       end
     end
 
@@ -36,37 +36,37 @@ module V3
     def update
       if @allowed
         if @record.update(record_params)
-          render json: @record
+          render(json: @record)
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head 401
+        head(401)
       end
     end
 
     # DELETE /v3/records/1
 
-
     private
-      # Use callbacks to share common setup or constraints between actions.
-      def set_record
-        _record = FlatPage.find(params[:id])
-        @record = _record.published || @allowed ? _record : FlatPage.new(id: params[:id])
-      end
 
-      # Only allow a trusted parameter "white list" through.
-      def record_params
-        ActiveModelSerializers::Deserialization
-            .jsonapi_parse(
-              params, only: [
-                    :title, :body, :tours
-                ]
-            )
-      end
+    # Use callbacks to share common setup or constraints between actions.
+    def set_record
+      _record = FlatPage.find(params[:id])
+      @record = _record.published || @allowed ? _record : FlatPage.new(id: params[:id])
+    end
 
-      def allowed?
-        @allowed = current_user&.current_tenant_admin? || current_user.tours&.any? { |tour| Tour.all.include?(tour) }
-      end
+    # Only allow a trusted parameter "white list" through.
+    def record_params
+      ActiveModelSerializers::Deserialization
+        .jsonapi_parse(
+          params, only: [
+            :title, :body, :tours,
+          ]
+        )
+    end
+
+    def allowed?
+      @allowed = current_user&.current_tenant_admin? || current_user.tours&.any? { |tour| Tour.all.include?(tour) }
+    end
   end
 end

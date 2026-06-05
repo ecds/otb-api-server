@@ -1,113 +1,134 @@
-require "rails_helper"
+# frozen_string_literal: true
 
-RSpec.describe V4::Admin::ToursController, type: :controller do
-  before(:each) do
-    TourSet.all.each do |ts|
-      Apartment::Tenant.switch! ts.subdir
-      Tour.reindex
+require 'rails_helper'
+
+RSpec.describe(V4::Admin::ToursController, type: :controller) do
+  let(:tour_set) { create(:tour_set) }
+
+  def clean_reindex
+    begin
+      Tour.search_index.delete
+    rescue StandardError
+      nil
+    end
+    Tour.reindex
+  end
+
+  describe 'GET #index' do
+    it 'returns 401 when unauthenticated' do
+      get :index, params: { tenant: tour_set.subdir }
+      expect(response.status).to(eq(401))
+    end
+
+    it 'returns all tours when super user' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      create_list(:tour, 4)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(v4_json.count).to(eq(Tour.count))
+    end
+
+    it 'returns all tours when tour set admin' do
+      user = create(:user, super: false)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      create_list(:tour, 4)
+      user.tour_sets << tour_set
+      signed_cookie(user)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(v4_json.count).to(eq(Tour.count))
+    end
+
+    it 'returns only tours assigned to user' do
+      user = create(:user, super: false)
+      signed_cookie(user)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tours = create_list(:tour, 4)
+      user.tours << [tours.first, tours.last]
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(v4_json.count).to(eq(2))
+      expect(v4_json.count).not_to(eq(Tour.count))
+    end
+
+    it 'returns empty list when no tours' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      expect(Tour.count).to(be_zero)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir }
+      expect(v4_json.count).to(be_zero)
+    end
+
+    it 'returns list of all tours if all param is present' do
+      user = create(:user, super: false)
+      signed_cookie(user)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      create_list(:tour, 3)
+      clean_reindex
+      get :index, params: { tenant: tour_set.subdir, all: true }
+      expect(v4_json.count).to(eq(Tour.count))
+      expect(v4_json.count).to(be > 0)
     end
   end
 
-  describe "GET #index" do
-    it "return 401 when unauthenticated" do
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(401)
-    end
-
-    it "returns all all when super user" do
-      user = create(:user, super: true)
-      signed_cookie(user)
-      create_list(:tour, 4)
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json.count).to eq(Tour.count)
-    end
-
-    it "returns all tours when tour set admin" do
-      Apartment::Tenant.switch! TourSet.last.subdir
-      user = create(:user, super: false)
-      signed_cookie(user)
-      create_list(:tour, 4)
-      user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json.count).to eq(Tour.count)
-    end
-
-    it "returns only tours assigned to user" do
-      Apartment::Tenant.switch! TourSet.last.subdir
-      user = create(:user, super: false)
-      signed_cookie(user)
-      create_list(:tour, 4)
-      user.tours << [ Tour.first, Tour.last ]
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json.count).to eq(2)
-      expect(v4_json.count).not_to eq(Tour.count)
-    end
-
-    it "returns empty list when no tours" do
-      user = create(:user, super: true)
-      signed_cookie(user)
-      Apartment::Tenant.switch! TourSet.second.subdir
-      Stop.all.each(&:destroy)
-      Tour.all.each(&:destroy)
-      expect(Tour.count).to be_zero
-      get :index, params: { tenant: Apartment::Tenant.current }
-      expect(v4_json.count).to be_zero
-    end
-  end
-
-  describe "GET #show" do
-    it "returns 401 when unauthenticated" do
+  describe 'GET #show' do
+    it 'returns 401 when unauthenticated' do
+      Apartment::Tenant.switch!(tour_set.subdir)
       tour = create(:tour)
-      get :show, params: { tenant: Apartment::Tenant.current, id: tour.id }
-      expect(response.status).to eq(401)
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, id: tour.id }
+      expect(response.status).to(eq(401))
     end
 
-    it "returns 200 and list of stops when authenticated as super" do
+    it 'returns 200 and tour when authenticated as super' do
       user = create(:user, super: true)
       signed_cookie(user)
-      create_list(:tour, 4)
-      Tour.reindex
-      get :show, params: { tenant: Apartment::Tenant.current, id: Tour.first.id }
-      expect(response.status).to eq(200)
-      expect(v4_json[:title]).to eq(Tour.first.title)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, id: tour.id }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:title]).to(eq(tour.title))
     end
 
-    it "returns 200 a tour when authenticated as site owner" do
+    it 'returns 200 a tour when authenticated as site owner' do
       user = create(:user, super: false)
-      tour_set = create(:tour_set)
-      Apartment::Tenant.switch! tour_set.subdir
+      Apartment::Tenant.switch!(tour_set.subdir)
       tour = create(:tour)
       user.tour_sets << tour_set
       signed_cookie(user)
-      Tour.reindex
+      clean_reindex
       get :show, params: { tenant: tour_set.subdir, id: tour.id }
-      expect(response.status).to eq(200)
-      expect(v4_json[:title]).to eq(tour.title)
+      expect(response.status).to(eq(200))
+      expect(v4_json[:title]).to(eq(tour.title))
     end
 
-    it "returns 200 a tour when authenticated as tour author" do
+    it 'returns 200 a tour when authenticated as tour author' do
       user = create(:user, super: false)
-      tour_set = create(:tour_set)
-      Apartment::Tenant.switch! tour_set.subdir
+      Apartment::Tenant.switch!(tour_set.subdir)
       tour = create(:tour)
       user.tours << tour
       signed_cookie(user)
-      Tour.reindex
+      clean_reindex
       get :show, params: { tenant: tour_set.subdir, id: tour.id }
-      expect(response.status).to eq(200)
-      expect(v4_json[:id]).to eq(tour.id)
+      expect(response.status).to(eq(200))
+      expect(v4_json[:id]).to(eq(tour.id))
     end
 
-    it "returns 401 when authenticated as site owner but requesting tour for different site" do
+    it 'returns 401 when authenticated as site owner but requesting tour for different site' do
+      other_tour_set = create(:tour_set)
       user = create(:user, super: false)
-      tour_sets = create_list(:tour_set, 4)
-      Apartment::Tenant.switch! tour_sets.first.subdir
+      Apartment::Tenant.switch!(other_tour_set.subdir)
       tour = create(:tour, published: false)
-      user.tour_sets << tour_sets.last
+      user.tour_sets << tour_set
       signed_cookie(user)
-      Tour.reindex
-      get :show, params: { tenant: tour_sets.first.subdir, id: tour.id }
-      expect(response.status).to eq(401)
+      clean_reindex
+      get :show, params: { tenant: other_tour_set.subdir, id: tour.id }
+      expect(response.status).to(eq(401))
     end
   end
 end

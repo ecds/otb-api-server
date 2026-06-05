@@ -3,15 +3,14 @@
 # app/requests/stops_spec.rb
 require 'rails_helper'
 
-RSpec.describe 'V3::Stops API' do
+RSpec.describe('V3::Stops API') do
   # Initialize the test data
   let!(:user) { User.find_by(super: true) }
 
   # Test suite for GET /stops
   describe 'GET /stops' do
     context 'when stops exist' do
-
-      before {
+      before do
         user = create(:user)
         user.update(super: false)
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
@@ -19,14 +18,14 @@ RSpec.describe 'V3::Stops API' do
         signed_cookie(user)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
         get "/#{Apartment::Tenant.current}/stops"
-      }
+      end
 
       it 'returns status code 200' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
 
       it 'returns all tour stops' do
-        expect(json.size).to eq(Stop.count)
+        expect(json.size).to(eq(Stop.count))
       end
     end
 
@@ -41,30 +40,30 @@ RSpec.describe 'V3::Stops API' do
     # end
 
     context 'get stop by slug and tour' do
-      before {
+      before do
         Tour.first.update(published: true)
         Tour.first.stops << Stop.first
         get "/#{Apartment::Tenant.current}/tour-stops?slug=#{Stop.first.slug}&tour=#{Tour.first.id}"
-      }
+      end
 
       it 'returns stop in tour with slug' do
-        expect(json['id']).to eq(Stop.first.id.to_s)
-        expect(relationships['tour']['data']['id']).to eq(Stop.first.tours.first.id.to_s)
+        expect(json['id']).to(eq(Stop.first.id.to_s))
+        expect(relationships['tour']['data']['id']).to(eq(Stop.first.tours.first.id.to_s))
       end
     end
   end
 
   # Test suite for GET /stops/:id
   describe 'GET /stops/:id' do
-    before {
+    before do
       Tour.first.update(published: true)
       Tour.first.stops << Stop.first
       get "/#{Apartment::Tenant.current}/stops/#{Stop.first.id}"
-    }
+    end
 
     context 'when tour stop exists' do
       it 'returns status code 200' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
 
       # For now, access to stop is through /tour-stop?slug=XX&tour=Y
@@ -81,12 +80,12 @@ RSpec.describe 'V3::Stops API' do
       before { get "/#{Apartment::Tenant.current}/stops/0" }
 
       it 'returns status code 404' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
 
       it 'returns dummy stop' do
-        expect(json[:id]).to match('0')
-        expect(attributes[:title]).to be_nil
+        expect(json[:id]).to(match('0'))
+        expect(attributes[:title]).to(be_nil)
       end
     end
   end
@@ -98,17 +97,16 @@ RSpec.describe 'V3::Stops API' do
     let!(:new_title) { "#{Faker::Movies::HitchhikersGuideToTheGalaxy.starship}" }
 
     context 'get stop after title change' do
-
-      before {
+      before do
         tour.update(published: true)
         stop.update(title: new_title)
-      }
+      end
       before { get "/#{Apartment::Tenant.current}/tour-stops?slug=#{new_title.parameterize}&tour=#{tour.id}" }
 
       it 'gets same stop with new slug' do
-        expect(response).to have_http_status(200)
-        expect(attributes['slug']).to eq(new_title.parameterize)
-        expect(json['id']).to eq(stop.id.to_s)
+        expect(response).to(have_http_status(200))
+        expect(attributes['slug']).to(eq(new_title.parameterize))
+        expect(json['id']).to(eq(stop.id.to_s))
       end
     end
 
@@ -130,14 +128,14 @@ RSpec.describe 'V3::Stops API' do
     end
 
     context 'when request attributes are valid' do
-      before {
+      before do
         User.first.update_attribute(:super, true)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/stops", params: valid_attributes
-      }
+      end
 
       it 'returns status code 201' do
-        expect(response).to have_http_status(201)
+        expect(response).to(have_http_status(201))
       end
     end
 
@@ -160,47 +158,47 @@ RSpec.describe 'V3::Stops API' do
       factory_to_json_api(FactoryBot.build(:stop, title: '3 Stacks'))
     end
 
-    before {
+    before do
       cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
       put "/#{Apartment::Tenant.current}/stops/#{Stop.second.id}", params: valid_attributes
-    }
+    end
 
     context 'when stop exists' do
       it 'returns status code 204' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
 
       it 'updates the stop' do
         updated_stop = Stop.second
-        expect(updated_stop.title).to match(/3 Stacks/)
+        expect(updated_stop.title).to(match(/3 Stacks/))
       end
     end
 
     context 'when the stop does not exist' do
-      before {
+      before do
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
         put "/#{Apartment::Tenant.current}/stops/0", params: valid_attributes
-      }
+      end
 
       it 'returns status code 404' do
-        expect(response).to have_http_status(404)
+        expect(response).to(have_http_status(404))
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Record not found/)
+        expect(response.body).to(match(/Record not found/))
       end
     end
   end
 
   # Test suite for DELETE /stops/:id
   describe 'DELETE /stops/:id' do
-    before {
+    before do
       cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
       delete "/#{Apartment::Tenant.current}/stops/#{Stop.last.id}"
-    }
+    end
 
     it 'returns status code 204' do
-      expect(response).to have_http_status(204)
+      expect(response).to(have_http_status(204))
     end
   end
 end

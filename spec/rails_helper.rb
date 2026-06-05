@@ -30,14 +30,20 @@ ActiveRecord::Migration.maintain_test_schema!
 
 Shoulda::Matchers.configure do |config|
   config.integrate do |with|
-    with.test_framework :rspec
-    with.library :rails
+    with.test_framework(:rspec)
+    with.library(:rails)
+  end
+end
+
+def delete_test_indices
+  Searchkick.client.indices.get(index: 'otb_*_test').keys.each_slice(10) do |batch|
+    Searchkick.client.indices.delete(index: batch.join(','))
   end
 end
 
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = [ "#{::Rails.root}/spec/fixtures" ]
+  config.fixture_paths = ["#{Rails.root}/spec/fixtures"]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -46,15 +52,16 @@ RSpec.configure do |config|
     # config.use_transactional_fixtures = true
   end
 
-  config.include RequestSpecHelper, type: :request
+  config.include(RequestSpecHelper, type: :request)
   config.include(RequestSpecHelper, type: :controller)
   config.include(SignedCookieHelper, type: :request)
   config.include(SignedCookieHelper, type: :controller)
-  config.include FactoryBot::Syntax::Methods
+  config.include(FactoryBot::Syntax::Methods)
   # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
   config.before(:suite) do
+    delete_test_indices
     Rails.application.routes.default_url_options = { host: 'www.example.com', protocol: 'https' }
-    ActiveStorage::Current.url_options = { protocol: "https", host: "example.com", port: 443 }
+    ActiveStorage::Current.url_options = { protocol: 'https', host: 'example.com', port: 443 }
     # ActiveStorage::Current.host = "https://example.com"
     # DatabaseCleaner.clean_with(:truncation, except: [ :modes, :roles ])
     # DatabaseCleaner.strategy = :transaction
@@ -83,7 +90,7 @@ RSpec.configure do |config|
     # Start transaction for this test
     # DatabaseCleaner.start
     # Switch into the default tenant
-    Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
+    Apartment::Tenant.switch!(TourSet.find(TourSet.pluck(:id).sample).subdir)
     # Set the host for ActiveStorage urls
     ActiveStorage::Current.url_options = { host: 'http://test.host' }
 
@@ -93,13 +100,13 @@ RSpec.configure do |config|
     stub_request(:get, 'https://placehold.it/300x300.png_1000x1000')
       .to_return(
         body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
-        status: 200
-    )
+        status: 200,
+      )
 
     stub_request(:get, 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/310645255')
       .to_return(
         body: "{ title: 'CycloramaBattleSites.org Stop 2', thumbnail_url: 'https://placehold.it/300x300.png' }",
-        status: 200
+        status: 200,
       )
 
     stub_request(:get, 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/video/310645255')
@@ -107,46 +114,46 @@ RSpec.configure do |config|
         headers: {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent': 'Ruby'
-        }
+          'User-Agent': 'Ruby',
+        },
       )
       .to_return(
         status: 200,
         body: '{ "title": "CycloramaBattleSites.org Stop 2", "thumbnail_url": "https://placehold.it/300x300.png", "thumbnail_width": 100, "thumbnail_height": 100 }',
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
       )
 
     stub_request(:get, 'https://vimeo.com/310645255')
       .to_return(
-        status: 200
+        status: 200,
       )
 
     stub_request(:get, 'https://youtu.be/F9ULbmCvmxY')
       .to_return(
-        status: 200
+        status: 200,
       )
 
     stub_request(:get, 'https://img.youtube.com/vi/F9ULbmCvmxY/0.jpg')
       .to_return(
         body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
-        status: 200
+        status: 200,
       )
 
-    stub_request(:get, /http:\/\/test\.host\/rails\/active_storage\/.*/)
-    .to_return(
-      body: File.open(Rails.root + 'spec/factories/images/atl.png'),
-      status: 200
-    )
+    stub_request(:get, %r{http://test\.host/rails/active_storage/.*})
+      .to_return(
+        body: File.open(Rails.root + 'spec/factories/images/atl.png'),
+        status: 200,
+      )
 
     stub_request(
       :get,
-      'https://www.googleapis.com/youtube/v3/videos?id=F9ULbmCvmxY&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet'
+      'https://www.googleapis.com/youtube/v3/videos?id=F9ULbmCvmxY&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet',
     )
-    .to_return(
-      status: 200,
-      body: '{"items": [{ "id": "F9ULbmCvmxY",  "snippet": { "title": "Goodie Mob - Black Ice (Sky High) ft. OutKast", "description": "Music video by Goodie Mob feat. OutKast performing Black Ice (Sky High). (C) 1998 LaFace Records LLC" }}] }',
-      headers: { 'content-type': 'application/json' }
-    )
+      .to_return(
+        status: 200,
+        body: '{"items": [{ "id": "F9ULbmCvmxY",  "snippet": { "title": "Goodie Mob - Black Ice (Sky High) ft. OutKast", "description": "Music video by Goodie Mob feat. OutKast performing Black Ice (Sky High). (C) 1998 LaFace Records LLC" }}] }',
+        headers: { 'content-type': 'application/json' },
+      )
 
     stub_request(:get, 'https://www.youtube.com/watch?v=F9ULbmCvmxY')
       .to_return(status: 200, body: '', headers: {})
@@ -161,62 +168,71 @@ RSpec.configure do |config|
       .to_return(
         status: 200,
         body: '{"kind": "youtube#videoListResponse", "etag": "YIUPVpqNjppyCWOZfL-19bLb7uk", "items": [ ], "pageInfo": { "totalResults": 0, "resultsPerPage": 0 } }',
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json' },
       )
 
     stub_request(:get, 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/431162745&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false')
       .to_return(
         status: 200,
         body: '<html><span style="background-image:url(//i1.sndcdn.com/artworks-KsTDkyGJ8S6x-0-t500x500.jpg);width:100%;height:100%;" class="sc-artwork sc-artwork-placeholder-3 image__full g-transition-opacity" aria-label="Boca Raton (with A$AP Ferg)" aria-role="img"></span></html>',
-        headers: {}
+        headers: {},
       )
 
     stub_request(:get, 'https://w.soundcloud.com/player/?auto_play=false&color=%23ff5500&hide_related=true&sharing=false&show_comments=false&show_reposts=false&show_teaser=false&show_user=false&url=https://api.soundcloud.com/tracks/457871163&visual=true')
       .to_return(
         status: 200,
         body: '<html><div class="image sc-artwork sc-artwork-placeholder-9"><span style="width:100%;height:100%;" class="sc-artwork sc-artwork-placeholder-9 image__full g-transition-opacity" aria-label="Subsatellite Launch" aria-role="img"></span></div></html>',
-        headers: {}
+        headers: {},
       )
 
-    stub_request(:get, /https:\/\/i1\.sndcdn.com\/artworks-.*\.jpg/)
+    stub_request(:get, %r{https://i1\.sndcdn.com/artworks-.*\.jpg})
       .to_return(
         body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
         status: 200,
-        headers: {}
+        headers: {},
       )
 
-    stub_request(:get, /http:\/\/127\.0\.0\.1:.*\/json\/version/).to_return(body: '{}', status: 200)
+    stub_request(:get, %r{http://127\.0\.0\.1:.*/json/version}).to_return(body: '{}', status: 200)
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*BICYCLING.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*BICYCLING.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*TRANSIT.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*TRANSIT.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix2.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*WALKING.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*WALKING.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*DRIVING.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*DRIVING.*})
       .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/ipinfo\.io\/.*\/geo.*/)
+    stub_request(:get, 'http://og.ecds.io')
+      .to_return(
+        status: 200,
+        body: '{"stops": ["Open Geographies"], "bounds": {"east": -83.8150232, "west": -83.2818954, "south": 32.6648851, "north": 33.8113142}}',
+        headers: { 'Content-Type' => 'application/json' },
+      )
+
+    stub_request(:get, %r{http.*://ipinfo\.io/.*/geo.*})
       .with(
-           headers: {
-          'Accept'=>'*/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent'=>'Ruby'
-           })
+        headers: {
+          'Accept' => '*/*',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent' => 'Ruby',
+        },
+      )
       .to_return(status: 200, headers: {}, body: ip_info_body)
 
-    stub_request(:get, /http.*:\/\/ipinfo\.io\/.*\?token.*/)
+    stub_request(:get, %r{http.*://ipinfo\.io/.*\?token.*})
       .with(
-       headers: {
-       'Accept'=>'application/json',
-       'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-       'Authorization'=>'Bearer d3bb06e9a6567d',
-       'User-Agent'=>'IPinfoClient/Ruby/2.4.0'
-       }).
-     to_return(status: 200, body: ip_info_body, headers: {})
+        headers: {
+          'Accept' => 'application/json',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Authorization' => 'Bearer d3bb06e9a6567d',
+          'User-Agent' => 'IPinfoClient/Ruby/2.4.0',
+        },
+      )
+      .to_return(status: 200, body: ip_info_body, headers: {})
   end
 
   config.after(:each) do
@@ -256,6 +272,8 @@ RSpec.configure do |config|
 
   config.after(:suite) do
     # TourSet.all.each { |ts| ts.destroy }
+    # indices = Searchkick.client.indices.get(index: 'otb_*_test').keys
+    # Searchkick.client.indices.delete(index: indices.join(',')) if indices.any?
   end
 
   # Class to mock IPinfo
@@ -279,7 +297,7 @@ RSpec.configure do |config|
       loc: "#{Faker::Address.latitude},#{Faker::Address.longitude}",
       org: Faker::Company.name,
       postal: Faker::Address.zip,
-      timezone: Faker::Address.time_zone
+      timezone: Faker::Address.time_zone,
     }.to_json
   end
 end

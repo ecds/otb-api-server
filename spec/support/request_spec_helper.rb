@@ -20,9 +20,8 @@ module RequestSpecHelper
   end
 
   def attributes
-    if json.is_a?(Array)
-      return json.map { |record| record[:attributes] }
-    end
+    return json.map { |record| record[:attributes] } if json.is_a?(Array)
+
     json['attributes']
   end
 
@@ -36,21 +35,21 @@ module RequestSpecHelper
 
   def hash_to_json_api(model, attributes)
     {
-        data: {
-            type: model,
-            attributes: attributes
-        }
+      data: {
+        type: model,
+        attributes: attributes,
+      },
     }
   end
 
   def factory_to_json_api(model)
     {
-        data: {
-            type: ActiveModel::Naming.plural(model),
-            attributes: model.attributes
-        }.tap do |hash|
-          hash[:id] = model.id if model.persisted?
-        end
+      data: {
+        type: ActiveModel::Naming.plural(model),
+        attributes: model.attributes,
+      }.tap do |hash|
+        hash[:id] = model.id if model.persisted?
+      end,
     }
   end
 end

@@ -20,7 +20,7 @@ Rails.application.configure do
   # Configure public file server for tests with Cache-Control for performance.
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
-      "Cache-Control" => "public, max-age=#{1.hour.seconds.to_i}"
+    'Cache-Control' => "public, max-age=#{1.hour.seconds.to_i}",
   }
 
   # Show full error reports and disable caching.
@@ -50,7 +50,7 @@ Rails.application.configure do
   config.force_ssl = false
   config.active_job.queue_adapter = :test
   config.active_storage.service = :test
-  config.middleware.use(IPinfoMiddleware, { token: ENV["IPINFO_TOKEN"] || Rails.application.credentials.dig(:ipinfo) })
+  config.middleware.use(IPinfoMiddleware, { token: ENV['IPINFO_TOKEN'] || Rails.application.credentials.dig(:ipinfo) })
   # config.active_record.logger = nil
   config.log_level = :info
   # config.ipinfo.filter = ->(request) { false } # Never filter out, always lookup

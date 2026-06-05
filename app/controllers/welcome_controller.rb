@@ -1,5 +1,7 @@
-class WelcomeController <  ActionController::Base
+# frozen_string_literal: true
+
+class WelcomeController < ActionController::Base
   def index
-   render json: {}
+    render(json: {})
   end
 end

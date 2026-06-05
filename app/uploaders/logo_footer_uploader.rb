@@ -10,8 +10,8 @@ class LogoFooterUploader < LogoUploader
   private
 
   def get_dimensions
-    if file && model
-      model.footer_width, model.footer_height = ::MiniMagick::Image.open(file.file)[:dimensions]
-    end
+    return unless file && model
+
+    model.footer_width, model.footer_height = ::MiniMagick::Image.open(file.file)[:dimensions]
   end
 end

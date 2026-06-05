@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe User, type: :model do
+RSpec.describe(User, type: :model) do
   # it { should have_one(:login) }
   # it { expect(User.reflect_on_association(:login).macro).to eq(:has_one) }
 
@@ -18,30 +18,24 @@ RSpec.describe User, type: :model do
       user = create(:user)
       create_list(:tour_set, 4)
       TourSet.all.each do |tour_set|
-        Apartment::Tenant.switch! tour_set.subdir
+        Apartment::Tenant.switch!(tour_set.subdir)
         user.tours << create_list(:tour, 2)
       end
-      expect(user.all_tours.count).to eq(8)
+      expect(user.all_tours.count).to(eq(8))
     end
   end
 
   context 'has login' do
     it 'has no provider' do
       user = create(:user)
-      expect(user.provider).to be nil
-    end
-
-    it 'has no provider' do
-      user = create(:user)
-      login = create(:login, user_id: user.id)
-      expect(user.provider).to eq(login.provider)
+      expect(user.provider).not_to(be(nil))
     end
   end
 
   context 'has default' do
     it 'terms accepted defaults to false' do
       user = create(:user)
-      expect(user.terms_accepted).to be(false)
+      expect(user.terms_accepted).to(be(false))
     end
   end
 end

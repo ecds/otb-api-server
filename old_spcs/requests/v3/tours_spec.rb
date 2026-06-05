@@ -2,24 +2,24 @@
 
 require 'rails_helper'
 
-RSpec.describe 'V3::Tours', type: :request do
-  before {
+RSpec.describe('V3::Tours', type: :request) do
+  before do
     set = TourSet.find(TourSet.pluck(:id).sample).subdir
-    Apartment::Tenant.switch! set
+    Apartment::Tenant.switch!(set)
     Tour.first.update_attribute(:published, true)
-  }
+  end
 
   describe 'GET /atlanta/tours unauthenticated' do
-    before {
+    before do
       get "/#{Apartment::Tenant.current}/tours"
-    }
+    end
 
     it 'returns only published tours' do
-      expect(json.size).to eq(Tour.published.count)
+      expect(json.size).to(eq(Tour.published.count))
     end
 
     it 'returns status code 200' do
-      expect(response).to have_http_status(200)
+      expect(response).to(have_http_status(200))
     end
   end
 
@@ -29,22 +29,22 @@ RSpec.describe 'V3::Tours', type: :request do
 
     context 'when the record exists' do
       it 'returns the tour' do
-        expect(json).not_to be_empty
-        expect(json['id']).to eq(Tour.published.last.id.to_s)
+        expect(json).not_to(be_empty)
+        expect(json['id']).to(eq(Tour.published.last.id.to_s))
       end
 
       it 'has five stops' do
-        expect(relationships['tour_stops']['data'].size).to eq(Tour.published.last.tour_stops.length)
-        expect(relationships['stops']['data'].size).to eq(Tour.published.last.stops.length)
+        expect(relationships['tour_stops']['data'].size).to(eq(Tour.published.last.tour_stops.length))
+        expect(relationships['stops']['data'].size).to(eq(Tour.published.last.stops.length))
       end
 
       it 'returns status code 200' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
 
       it 'returns description without html tags and space between sentences' do
-        expect(attributes['sanitized_description']).not_to include('<p>')
-        expect(attributes['sanitized_description']).not_to match(/.*[A-z]\.[A-z].*/)
+        expect(attributes['sanitized_description']).not_to(include('<p>'))
+        expect(attributes['sanitized_description']).not_to(match(/.*[A-z]\.[A-z].*/))
       end
     end
 
@@ -52,11 +52,11 @@ RSpec.describe 'V3::Tours', type: :request do
       before { get "/#{Apartment::Tenant.current}/tours/0" }
 
       it 'returns status code 404' do
-        expect(response).to have_http_status(404)
+        expect(response).to(have_http_status(404))
       end
 
       it 'returns a not found message' do
-        expect(response.body).to match(/Couldn't find Tour/)
+        expect(response.body).to(match(/Couldn't find Tour/))
       end
     end
   end
@@ -68,47 +68,47 @@ RSpec.describe 'V3::Tours', type: :request do
     let!(:new_title) { Faker::TvShows::RickAndMorty.character }
 
     context 'get tour after title change' do
-      before {
+      before do
         tour.title = new_title
         tour.published = true
         tour.save
-      }
+      end
 
       before { get "/#{Apartment::Tenant.current}/tours?slug=#{new_title.parameterize}" }
 
       it 'gets same tour with new slug' do
-        expect(response).to have_http_status(200)
-        expect(attributes['slug']).to eq(new_title.parameterize)
-        expect(json['id']).to eq(tour.id.to_s)
+        expect(response).to(have_http_status(200))
+        expect(attributes['slug']).to(eq(new_title.parameterize))
+        expect(json['id']).to(eq(tour.id.to_s))
       end
     end
 
     context 'get tour by old slug' do
-      before {
+      before do
         tour.title = original_title
         tour.published = true
         tour.save
         tour.title = new_title
         tour.save
-      }
+      end
       before { get "/#{Apartment::Tenant.current}/tours?slug=#{original_slug}" }
 
       it 'returns the tour by the original slug' do
-        expect(response).to have_http_status(200)
-        expect(attributes['slug']).to eq(new_title.parameterize)
-        expect(json['id']).to eq(tour.id.to_s)
+        expect(response).to(have_http_status(200))
+        expect(attributes['slug']).to(eq(new_title.parameterize))
+        expect(json['id']).to(eq(tour.id.to_s))
       end
     end
 
     context 'get nothing if tour is unpublished and no user' do
-      before {
+      before do
         tour.published = false
         tour.save
         get "/#{Apartment::Tenant.current}/tours?slug=#{tour.slug}"
-      }
+      end
 
       it 'returns nothing' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
     end
   end
@@ -119,33 +119,33 @@ RSpec.describe 'V3::Tours', type: :request do
     let(:valid_attributes) do
       factory_to_json_api(FactoryBot.build(:tour, title: 'Learn Elm', published: true))
     end
-    before { Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir }
+    before { Apartment::Tenant.switch!(TourSet.find(TourSet.pluck(:id).sample).subdir) }
 
     context 'when the post is valid and authenticated as non-tour set admin' do
-      before {
+      before do
         User.last.update_attribute(:super, false)
         User.last.update_attribute(:tour_sets, [])
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
         post "/#{Apartment::Tenant.current}/tours", params: valid_attributes
-      }
+      end
 
       it 'returns status code 401' do
-        expect(response).to have_http_status(401)
+        expect(response).to(have_http_status(401))
       end
     end
 
     context 'when created by tour set admin' do
-      before {
+      before do
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/tours", params: valid_attributes
-      }
+      end
       it 'creates a tour' do
-        expect(attributes['title']).to eq('Learn Elm')
+        expect(attributes['title']).to(eq('Learn Elm'))
       end
 
       it 'returns status code 201' do
-        expect(response).to have_http_status(201)
+        expect(response).to(have_http_status(201))
       end
     end
 
@@ -153,19 +153,19 @@ RSpec.describe 'V3::Tours', type: :request do
       let(:invalid_attributes) do
         hash_to_json_api('tours', invalid: 'Foobar')
       end
-      before {
+      before do
         # Tour.create!(published: true)
         User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
         post "/#{Apartment::Tenant.current}/tours", params: invalid_attributes
-      }
+      end
 
       it 'returns status code 201' do
-        expect(response).to have_http_status(201)
+        expect(response).to(have_http_status(201))
       end
 
       it 'returns new tour titled `untitled`' do
-        expect(attributes['title']).to eq('untitled')
+        expect(attributes['title']).to(eq('untitled'))
       end
     end
   end
@@ -177,55 +177,55 @@ RSpec.describe 'V3::Tours', type: :request do
     end
 
     context 'when the record exists' do
-      before {
+      before do
         user = create(:user)
         user.update(super: false)
         user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         signed_cookie(user)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: user.id).token
         put "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}", params: valid_attributes
-      }
+      end
 
       it 'updates the record' do
-        expect(json).not_to be_empty
-        expect(attributes['title']).to eq('Shopping')
+        expect(json).not_to(be_empty)
+        expect(attributes['title']).to(eq('Shopping'))
       end
 
       it 'returns status code 200' do
-        expect(response).to have_http_status(200)
+        expect(response).to(have_http_status(200))
       end
     end
   end
 
   # Test suite for DELETE /atlanta/tours/:id
   describe 'DELETE /atlanta/tours/:id' do
-    before {
+    before do
       Tour.create!
       User.first.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.first.id).token
       delete "/#{Apartment::Tenant.current}/tours/#{Tour.last.id}"
-    }
+    end
 
     it 'returns status code 204' do
-      expect(response).to have_http_status(204)
+      expect(response).to(have_http_status(204))
     end
   end
 
   describe 'Get /<tenant>/tours authenticated' do
     context 'tour set adim gets all the tours for that set' do
-      before {
+      before do
         User.last.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
         cookies['auth'] = EcdsRailsAuthEngine::Login.find_by(user_id: User.last.id).token
         get "/#{Apartment::Tenant.current}/tours"
-      }
+      end
 
       it 'returns all the tours in the set' do
-        expect(json.size).to eq(Tour.count)
+        expect(json.size).to(eq(Tour.count))
       end
     end
 
     context 'get tours as tour author' do
-      before {
+      before do
         user = User.first
         login = EcdsRailsAuthEngine::Login.find_by(user_id: user.id)
         user.update(super: false, tour_sets: [], tours: [])
@@ -240,11 +240,11 @@ RSpec.describe 'V3::Tours', type: :request do
         end
         cookies['auth'] = login.token
         get "/#{Apartment::Tenant.current}/tours"
-      }
+      end
 
       it 'only returns tours user can edit' do
-        expect(json.size).to eq(1)
-        expect(json.size).not_to eq(Tour.count)
+        expect(json.size).to(eq(1))
+        expect(json.size).not_to(eq(Tour.count))
       end
     end
   end

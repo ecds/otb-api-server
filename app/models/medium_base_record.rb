@@ -11,7 +11,7 @@ class MediumBaseRecord < ApplicationRecord
   validates_presence_of :filename
 
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
-  has_one_attached "file"
+  has_one_attached 'file'
 
   attr_accessor :content_type
 
@@ -22,7 +22,8 @@ class MediumBaseRecord < ApplicationRecord
   # end
 
   def tmp_file_path
-    return Rails.root.join("public", "storage", "tmp", filename) if self.filename
+    return Rails.root.join('public', 'storage', 'tmp', filename) if filename
+
     nil
   end
 
@@ -41,18 +42,19 @@ class MediumBaseRecord < ApplicationRecord
   #
   def attach_file
     return if base_sixty_four.nil?
+
     # file.blob.delete if file.attached?
 
-    self.parse_base64
-    File.open(tmp_file_path, "wb") do |f|
+    parse_base64
+    File.open(tmp_file_path, 'wb') do |f|
       f.write(Base64.decode64(base_sixty_four))
       f.rewind
     end
 
-    self.file.attach(
+    file.attach(
       io: File.open(tmp_file_path),
       filename: filename,
-      content_type: self.content_type
+      content_type: content_type,
     )
 
     self.base_sixty_four = nil
@@ -70,22 +72,22 @@ class MediumBaseRecord < ApplicationRecord
   def check_content_type
     return if base_sixty_four.nil?
 
-    self.parse_base64
+    parse_base64
 
-    if self.content_type.include?("jp2")
-      errors.add(:base, "JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.")
-    end
+    return unless content_type.include?('jp2')
+
+    errors.add(:base, 'JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.')
   end
 
   private
 
-    def parse_base64
-      if base_sixty_four.include?("data:")
-        headers, self.base_sixty_four = base_sixty_four.split(",")
-        headers =~ /^data:(.*?)$/
-        self.content_type = Regexp.last_match(1).split(";base64").first
-      else
-        self.content_type = "image/jpeg"
-      end
+  def parse_base64
+    if base_sixty_four.include?('data:')
+      headers, self.base_sixty_four = base_sixty_four.split(',')
+      headers =~ /^data:(.*?)$/
+      self.content_type = Regexp.last_match(1).split(';base64').first
+    else
+      self.content_type = 'image/jpeg'
     end
+  end
 end

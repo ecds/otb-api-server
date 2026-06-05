@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 # app/models/concerns/html_saintizer.rb
@@ -10,6 +9,6 @@ module HtmlSanitizer
   end
 
   def self.accessible_truncated(text)
-    self.accessible(text).truncate(140)
+    accessible(text).truncate(140)
   end
 end

@@ -10,21 +10,21 @@ require 'faker'
 Mode.create!(
   [
     {
-        title: 'Walk'
+      title: 'Walk',
     },
     {
-        title: 'Bike'
+      title: 'Bike',
     },
     {
-        title: 'Transit'
+      title: 'Transit',
     },
     {
-        title: 'Drive'
+      title: 'Drive',
     },
     {
-        title: 'None'
-    }
-  ]
+      title: 'None',
+    },
+  ],
 )
 
 # Role.destroy_all
@@ -32,15 +32,15 @@ Mode.create!(
 Role.create!(
   [
     {
-      title: 'Super'
+      title: 'Super',
     },
     {
-      title: 'Tour Admin'
+      title: 'Tour Admin',
     },
     {
-      title: 'Author'
-    }
-  ]
+      title: 'Author',
+    },
+  ],
 )
 
 3.times { FactoryBot.create(:tour_set) }
@@ -76,9 +76,10 @@ User.all.each do |u|
   FactoryBot.create(:login, who: u.email, user_id: u.id, provider: 'earth')
   next if u.super
   next if u.tours.present?
+
   # u.tours = Tour.all.order(Arel.sql('random()')).limit(Random.new.rand(2..3))
   Random.new.rand(2..3).times do
-    Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
+    Apartment::Tenant.switch!(TourSet.find(TourSet.pluck(:id).sample).subdir)
     u.tours << Tour.find(Tour.pluck(:id).sample)
   end
   u.save

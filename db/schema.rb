@@ -10,19 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_21_125403) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
   enable_extension "shared_extensions.uuid-ossp"
 
   create_table "access_requests", force: :cascade do |t|
-    t.string "tour_set", null: false
     t.integer "tour"
     t.bigint "user_id"
     t.boolean "approved", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "tour_set_id", null: false
+    t.integer "tour_ids", default: [], array: true
+    t.index ["tour_set_id"], name: "index_access_requests_on_tour_set_id"
     t.index ["user_id"], name: "index_access_requests_on_user_id"
   end
 
@@ -31,7 +33,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "record_type", null: false
     t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
@@ -43,7 +45,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.text "metadata"
     t.bigint "byte_size", null: false
     t.string "checksum", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: nil, null: false
     t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
@@ -59,8 +61,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "provider"
     t.bigint "user_id"
     t.bigint "{}_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["user_id"], name: "index_ecds_rails_auth_engine_logins_on_user_id"
     t.index ["{}_id"], name: "index_ecds_rails_auth_engine_logins_on_{}_id"
   end
@@ -68,15 +70,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   create_table "ecds_rails_auth_engine_tokens", force: :cascade do |t|
     t.string "token"
     t.bigint "login_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "flat_pages", force: :cascade do |t|
     t.string "title"
     t.text "body"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "position"
   end
 
@@ -87,8 +89,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "uid"
     t.string "single_use_oauth2_token"
     t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "provider"
     t.string "confirm_token"
     t.index ["user_id"], name: "index_logins_on_user_id"
@@ -121,8 +123,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "title"
     t.text "caption"
     t.string "original_image"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "video"
     t.string "provider"
     t.string "embed"
@@ -143,8 +145,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
 
   create_table "modes", force: :cascade do |t|
     t.string "title"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "icon"
   end
 
@@ -155,16 +157,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   create_table "slugs", force: :cascade do |t|
     t.string "slug"
     t.bigint "tour_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["tour_id"], name: "index_slugs_on_tour_id"
   end
 
   create_table "stop_media", force: :cascade do |t|
     t.bigint "stop_id"
     t.bigint "medium_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "position"
     t.index ["medium_id"], name: "index_stop_media_on_medium_id"
     t.index ["stop_id"], name: "index_stop_media_on_stop_id"
@@ -173,8 +175,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   create_table "stop_slugs", force: :cascade do |t|
     t.string "slug"
     t.bigint "stop_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["stop_id"], name: "index_stop_slugs_on_stop_id"
   end
 
@@ -191,8 +193,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "parking_lng"
     t.text "direction_intro"
     t.text "direction_notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "address"
     t.bigint "medium_id"
     t.string "parking_address"
@@ -209,7 +211,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "tagger_type"
     t.integer "tagger_id"
     t.string "context", limit: 128
-    t.datetime "created_at"
+    t.datetime "created_at", precision: nil
     t.index ["context"], name: "index_taggings_on_context"
     t.index ["tag_id", "taggable_id", "taggable_type", "context", "tagger_id", "tagger_type"], name: "taggings_idx", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
@@ -223,8 +225,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
 
   create_table "themes", force: :cascade do |t|
     t.string "title"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "tour_authors", force: :cascade do |t|
@@ -236,16 +238,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
 
   create_table "tour_collections", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "tour_flat_pages", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "flat_page_id"
     t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["flat_page_id"], name: "index_tour_flat_pages_on_flat_page_id"
     t.index ["tour_id"], name: "index_tour_flat_pages_on_tour_id"
   end
@@ -253,8 +255,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   create_table "tour_media", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "medium_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.integer "position"
     t.index ["medium_id"], name: "index_tour_media_on_medium_id"
     t.index ["tour_id"], name: "index_tour_media_on_tour_id"
@@ -263,8 +265,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   create_table "tour_modes", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "mode_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["mode_id"], name: "index_tour_modes_on_mode_id"
     t.index ["tour_id"], name: "index_tour_modes_on_tour_id"
   end
@@ -281,8 +283,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
 
   create_table "tour_sets", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.string "subdir"
     t.bigint "tour_id"
     t.string "external_url"
@@ -290,6 +292,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.string "footer_logo"
     t.text "base_sixty_four"
     t.string "logo_title"
+    t.text "description"
     t.index ["tour_id"], name: "index_tour_sets_on_tours_id"
   end
 
@@ -297,8 +300,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.bigint "tour_id"
     t.bigint "stop_id"
     t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["stop_id"], name: "index_tour_stops_on_stop_id"
     t.index ["tour_id"], name: "index_tour_stops_on_tour_id"
   end
@@ -311,8 +314,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.boolean "is_geo", default: true
     t.boolean "published"
     t.bigint "theme_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.bigint "mode_id"
     t.integer "position"
     t.bigint "splash_image_medium_id"
@@ -328,6 +331,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
     t.boolean "restrict_bounds_to_overlay", default: false
     t.boolean "blank_map", default: false
     t.boolean "restrict_bounds", default: true
+    t.boolean "open_geographies"
+    t.string "open_geographies_endpoint"
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"
@@ -336,14 +341,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_16_232850) do
   create_table "users", force: :cascade do |t|
     t.string "display_name"
     t.bigint "login_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.boolean "super", default: false
     t.string "email"
     t.boolean "terms_accepted", default: false
     t.index ["login_id"], name: "index_users_on_login_id", unique: true
   end
 
+  add_foreign_key "access_requests", "tour_sets"
   add_foreign_key "access_requests", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"

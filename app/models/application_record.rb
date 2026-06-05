@@ -7,4 +7,8 @@ class ApplicationRecord < ActiveRecord::Base
   def mappings
     {}
   end
+
+  def search_data
+    {}
+  end
 end

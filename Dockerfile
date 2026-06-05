@@ -19,12 +19,6 @@ RUN apt-get update -qq && \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    apt-get install -y --fix-broken ./google-chrome-stable_current_amd64.deb && \
-    rm google-chrome-stable_current_amd64.deb && \
-    rm -rf /var/lib/apt/lists/*
-
 WORKDIR /rails
 
 COPY Gemfile Gemfile.lock ./

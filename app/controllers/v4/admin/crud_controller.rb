@@ -1,39 +1,42 @@
+# frozen_string_literal: true
+
 module V4
   module Admin
     class CrudController < V4Controller
       after_action :update_index
 
       def create
-        head :unauthorized and return unless crud_allowed?
+        head(:unauthorized) and return unless crud_allowed?
 
         model = params[:model].camelize.constantize
         @record = model.new(allowed_params)
 
         if @record.save
-          render json: @record.search_data, status: :created and return
+          render(json: @record.search_data, status: :created) and return
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       end
 
       def update
-        head :unauthorized and return unless crud_allowed?
+        head(:unauthorized) and return unless crud_allowed?
+
         set_record
         if @record.update(update_params)
           @record.reload
-          render json: @record.search_data, status: :ok
+          render(json: @record.search_data, status: :ok)
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       end
 
       def destroy
-        head :unauthorized and return unless crud_allowed?
+        head(:unauthorized) and return unless crud_allowed?
 
         if @record.destroy
-          head :no_content and return
+          head(:no_content) and return
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       end
 
@@ -52,14 +55,14 @@ module V4
       end
 
       def update_index
-        if params[:reindex] && params[:model] == "tour"
+        if params[:reindex] && params[:model] == 'tour'
           Tour.find(params[:reindex][:id]).reindex
         else
           @record.reindex if @record.respond_to?(:reindex)
           @record.tours.each(&:reindex) if @record.respond_to?(:tours)
           @record.tour&.reindex if @record.respond_to?(:tour)
         end
-        sleep 1
+        sleep(1)
       end
 
       def update_params
@@ -72,31 +75,60 @@ module V4
 
       def allowed_params
         case params[:model]
-        when "medium"
+        when 'medium'
           params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video)
-        when "tour_medium"
+        when 'tour_medium'
           params.require(:tour_medium).permit(:medium_id, :tour_id, :position)
-        when "stop_medium"
+        when 'stop_medium'
           params.require(:stop_medium).permit(:medium_id, :stop_id, :position)
-        when "map_overlay"
+        when 'map_overlay'
           params.require(:map_overlay).permit(:file, :filename, :south, :east, :north, :west)
-        when "map_icon"
+        when 'map_icon'
           params.require(:map_icon).permit(:file, :filename)
-        when "flat_page"
+        when 'flat_page'
           params.require(:flat_page).permit(:title, :body)
-        when "tour_flat_page"
+        when 'tour_flat_page'
           params.require(:tour_flat_page).permit(:tour_id, :flat_page_id, :position)
-        when "stop"
+        when 'stop'
           default_location
-          params.require(:stop).permit(:title, :lat, :lng, :address, :article_link, :description, :direction_intro, :direction_notes, :icon_color, :meta_description, :parking_lat, :parking_lng)
-        when "tour_stop"
+          params.require(:stop).permit(
+            :title,
+            :lat,
+            :lng,
+            :address,
+            :article_link,
+            :description,
+            :direction_intro,
+            :direction_notes,
+            :icon_color,
+            :meta_description,
+            :parking_lat,
+            :parking_lng,
+          )
+        when 'tour_stop'
           params.require(:tour_stop).permit(:tour_id, :stop_id, :position)
-        when "tour_mode"
+        when 'tour_mode'
           params.require(:tour_mode).permit(:tour_id, :mode_id)
-        when "tour"
-          params.require(:tour).permit(:title, :published, :default_lng, :map_type, :description, :meta_description, :link_address, :link_text, :is_geo, :restrict_bounds, :restrict_bounds_to_overlay, :use_directions, :blank_map)
-        when "tour_set"
+        when 'tour'
+          params.require(:tour).permit(
+            :title,
+            :published,
+            :default_lng,
+            :map_type,
+            :description,
+            :meta_description,
+            :link_address,
+            :link_text,
+            :is_geo,
+            :restrict_bounds,
+            :restrict_bounds_to_overlay,
+            :use_directions,
+            :blank_map,
+          )
+        when 'tour_set'
           params.require(:tour_set).permit(:name, :logo)
+        when 'tour_set_admin'
+          params.require(:tour_set_admin).permit(:user_id, :tour_set_id)
         end
       end
 

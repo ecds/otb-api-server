@@ -6,14 +6,16 @@ module Searchable
 
   included do
     searchkick index_name: -> { "otb_#{Apartment::Tenant.current}_#{model_name.plural}_#{Rails.env}" },
-    callbacks: false,
-    deep_paging: true,
-    merge_mappings: true, mappings: {
-      properties: {
-        slugs: { type: "keyword" }
-      }
-    },
-    searchable: [ :slugs ], word: false
+      callbacks: false,
+      deep_paging: true,
+      merge_mappings: true,
+      mappings: {
+        properties: {
+          slugs: { type: 'keyword' },
+        },
+      },
+      searchable: [:slugs],
+      word: false
 
     after_commit :reindex_record
   end

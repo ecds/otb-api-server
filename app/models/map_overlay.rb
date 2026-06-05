@@ -14,7 +14,7 @@ class MapOverlay < MediumBaseRecord
   end
 
   def set_initial_bounds
-    return if tour.nil? || tour&.bounds.nil? || tour&.stop_count < 2
+    return if tour.nil? || tour&.bounds.nil? || (tour&.stop_count&.< 2)
 
     self.south = tour.bounds[:south] if south.to_f.zero?
     self.north = tour.bounds[:north] if north.to_f.zero?
@@ -30,7 +30,7 @@ class MapOverlay < MediumBaseRecord
       north: north.to_f,
       south: south.to_f,
       west: west.to_f,
-      rotation:
+      rotation:,
     }
   end
 end

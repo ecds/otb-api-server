@@ -57,14 +57,14 @@ class MediumUploader < CarrierWave::Uploader::Base
   # Add a white list of extensions which are allowed to be uploaded.
   # For images you might use something like this:
   def extension_whitelist
-    %w(JPG jpg jpeg gif png)
+    ['JPG', 'jpg', 'jpeg', 'gif', 'png']
   end
 
   def filename
     if model.video.present?
       "#{model.video}.jpg"
     elsif defined?(original_filname) && original_filename.starts_with?('original_image')
-      "#{DateTime.now.strftime('%Q')[0..8]}.#{file.extension}"
+      "#{DateTime.now.strftime("%Q")[0..8]}.#{file.extension}"
     else
       @filename
     end
@@ -72,21 +72,21 @@ class MediumUploader < CarrierWave::Uploader::Base
 
   private
 
-    def store_desktop_dimensions
-      if file && model
-        model.desktop_width, model.desktop_height = ::MiniMagick::Image.open(file.file)[:dimensions]
-      end
-    end
+  def store_desktop_dimensions
+    return unless file && model
 
-    def store_tablet_dimensions
-      if file && model
-        model.tablet_width, model.tablet_height = ::MiniMagick::Image.open(file.file)[:dimensions]
-      end
-    end
+    model.desktop_width, model.desktop_height = ::MiniMagick::Image.open(file.file)[:dimensions]
+  end
 
-    def store_mobile_dimensions
-      if file && model
-        model.mobile_width, model.mobile_height = ::MiniMagick::Image.open(file.file)[:dimensions]
-      end
-    end
+  def store_tablet_dimensions
+    return unless file && model
+
+    model.tablet_width, model.tablet_height = ::MiniMagick::Image.open(file.file)[:dimensions]
+  end
+
+  def store_mobile_dimensions
+    return unless file && model
+
+    model.mobile_width, model.mobile_height = ::MiniMagick::Image.open(file.file)[:dimensions]
+  end
 end

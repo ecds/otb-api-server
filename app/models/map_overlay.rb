@@ -24,7 +24,7 @@ class MapOverlay < MediumBaseRecord
     {
       id:,
       east: east.to_f,
-      image_url: original_image_url,
+      image_url: http_path,
       north: north.to_f,
       south: south.to_f,
       west: west.to_f,

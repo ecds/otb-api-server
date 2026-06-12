@@ -90,4 +90,8 @@ class MediumBaseRecord < ApplicationRecord
       self.content_type = 'image/jpeg'
     end
   end
+
+  def http_path
+    "#{Rails.application.routes.default_url_options[:host]}/#{Apartment::Tenant.current}/v4/public/media/#{CGI.escape(file.key || "")}"
+  end
 end

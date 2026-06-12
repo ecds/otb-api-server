@@ -60,7 +60,6 @@ class Medium < MediumBaseRecord
   end
 
   def search_data
-    http_path = "#{Rails.application.routes.default_url_options[:host]}/#{Apartment::Tenant.current}/v4/public/media/#{CGI.escape(file.key || "")}"
     {
       caption:,
       desktop_width:,

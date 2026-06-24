@@ -104,19 +104,12 @@ class TourSet < ApplicationRecord
 
   def create_tenant
     Apartment::Tenant.create(subdir)
-    # This is a bit of hack to fake the migrations from the
-    # auth engine. Hopefully this will be replaced when we
-    # redo the auth engine.
+    versions = ActiveRecord::SchemaMigration.all.pluck(:version)
+    Apartment::Tenant.switch!(subdir)
+    versions.each do |version|
+      ActiveRecord::SchemaMigration.find_or_create_by!(version:)
+    end
     Apartment::Tenant.reset
-    # schemas = ActiveRecord::SchemaMigration.all
-
-    # schemas.each do |schema|
-    #   Apartment::Tenant.switch!(subdir)
-    #   migration = ActiveRecord::SchemaMigration.find_by_version(schema.version)
-    #   if migration.nil?
-    #     ActiveRecord::SchemaMigration.create(version: schema.version)
-    #   end
-    # end
   end
 
   def create_defaults

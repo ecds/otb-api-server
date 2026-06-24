@@ -3,11 +3,11 @@
 class User < ApplicationRecord
   include Searchable
   after_update :update_index
-  has_many :tour_set_admins
+  has_many :tour_set_admins, dependent: :destroy
   has_many :tour_sets, through: :tour_set_admins
-  has_many :tour_authors
+  has_many :tour_authors, dependent: :destroy
   has_many :tours, through: :tour_authors
-  has_many :access_requests
+  has_many :access_requests, dependent: :destroy
 
   validates :email, presence: true
 

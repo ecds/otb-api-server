@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 # Model class for a tour stop.
-class Stop < ApplicationRecord
+class Stop < ContentBase
   include HtmlSanitizer
+
+  self.html_fields = ['description', 'direction_notes']
 
   has_many :tour_stops, dependent: :destroy
   has_many :tours, -> { distinct }, through: :tour_stops
-  has_many :stop_media
+  has_many :stop_media, dependent: :destroy
   has_many :media, through: :stop_media
   belongs_to :medium, optional: true
   belongs_to :map_icon, optional: true

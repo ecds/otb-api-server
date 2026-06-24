@@ -50,6 +50,7 @@ Rails.application.routes.draw do
         get 'users', to: 'users#index'
         get 'users/me', to: 'users#show'
         get 'tour_sets/:slug', to: 'tour_sets#show'
+        get 'resolve_url', to: 'services#url_resolver'
       end
     end
   end

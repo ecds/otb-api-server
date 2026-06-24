@@ -14,7 +14,7 @@ class TourSet < ApplicationRecord
 
   has_one_attached 'logo'
 
-  has_many :tour_set_admins
+  has_many :tour_set_admins, dependent: :destroy
   has_many :admins, through: :tour_set_admins, source: :user
 
   attr_accessor :published_tours

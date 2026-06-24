@@ -27,4 +27,30 @@ RSpec.describe(Stop, type: :model) do
     create(:stop, title:)
     expect(build(:stop, title:)).not_to(be_valid)
   end
+
+  context 'when html field contains _blank link with no rel or aria-label' do
+    it 'adds rel="noopener noreferrer" to link.' do
+      description = 'click <a href="http://example.org" target="_blank">here</a>'
+      stop = create(:stop, description:)
+      expect(stop.description).to(include('rel="noopener noreferrer"'))
+    end
+
+    it 'adds aria-label="here (opens in a new tab)" to link.' do
+      description = 'click <a href="http://example.org" target="_blank">here</a>'
+      stop = create(:stop, description:)
+      expect(stop.description).to(include('aria-label="here (opens in a new tab)"'))
+    end
+
+    it 'adds rel="noopener noreferrer" to link in direction notes.' do
+      direction_notes = 'click <a href="http://example.org" target="_blank">here</a>'
+      stop = create(:stop, direction_notes:)
+      expect(stop.direction_notes).to(include('rel="noopener noreferrer"'))
+    end
+
+    it 'adds aria-label="here (opens in a new tab)" to link in direction notes.' do
+      direction_notes = 'click <a href="http://example.org" target="_blank">here</a>'
+      stop = create(:stop, direction_notes:)
+      expect(stop.direction_notes).to(include('aria-label="here (opens in a new tab)"'))
+    end
+  end
 end

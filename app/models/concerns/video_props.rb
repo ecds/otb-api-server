@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'open-uri'
 require 'httparty'
 require 'json'
 
@@ -22,14 +21,14 @@ module VideoProps
       thumbnail_height = metadata['thumbnail_height']
       scale_by = 1000 / thumbnail_width
       thumbnail_url = "#{metadata["thumbnail_url"].split("_")[0]}_#{thumbnail_width * scale_by}x#{thumbnail_height * scale_by}"
-      downloaded_image = URI.open(thumbnail_url)
+      downloaded_image = HTTParty.get(thumbnail_url).body
     when 'youtube'
       begin
         metadata = Yt::Video.new(id: medium.video)
         medium.title = metadata.title
         medium.caption = metadata.description
         medium.embed = "//www.youtube.com/embed/#{medium.video}"
-        downloaded_image = URI.open("https://img.youtube.com/vi/#{medium.video}/0.jpg")
+        downloaded_image = HTTParty.get("https://img.youtube.com/vi/#{medium.video}/0.jpg").body
       rescue Yt::Errors::NoItems
         medium.provider = nil
         medium.video = nil
@@ -47,15 +46,50 @@ module VideoProps
         downloaded_image = if track_data[:thumbnail_url].nil?
           File.open(Rails.root.join('public/soundcloud.jpg').to_s).read
         else
-          URI.open(track_data[:thumbnail_url])
+          HTTParty.get(track_data[:thumbnail_url]).body
         end
       end
+    when 'sketchfab'
+      embed_url = if medium.video.include?('iframe')
+        embed_code = Nokogiri::HTML(medium.video)
+        embed_code.xpath('//iframe').first[:src]
+      elsif medium.video.ends_with?('embed')
+        medium.video
+      elsif medium.video.start_with?('http')
+        model_id = UrlResolver.resolve(medium.video)[/[0-9a-f]{32}/]
+        "https://sketchfab.com/models/#{model_id}/embed"
+      else
+        "https://sketchfab.com/models/#{medium.video}/embed"
+      end
 
+      doc = Nokogiri::HTML(HTTParty.get(embed_url).body)
+      medium.title = doc.xpath('/html/head/meta[@property="og:title"]').first[:content]
+      medium.embed = "//sketchfab.com#{URI.parse(embed_url).path}"
+      medium.video = medium.embed.split('/')[-2]
+      image_url = doc.xpath('/html/head/meta[@property="og:image"]').first[:content]
+      medium.filename = File.basename(URI.parse(image_url).path)
+      downloaded_image = HTTParty.get(image_url).body
+
+    when 'matterport'
+      medium.embed = "//my.matterport.com/show/?m=#{medium.video}"
+      doc = Nokogiri::HTML(HTTParty.get('https:' + medium.embed))
+      medium.title = doc.xpath('/html/head/meta[@property="og:title"]').first[:content]
+      image_url = doc.xpath('/html/head/meta[@property="og:image"]').first[:content]
+      medium.filename = medium.video + '.jpg'
+      downloaded_image = HTTParty.get(image_url).body
+
+    when 'unknown'
+      url = medium.video.starts_with?('http') ? medium.video : "https:#{medium.video}"
+      doc = Nokogiri::HTML(HTTParty.get(url))
+      medium.title = doc.xpath('/html/head/title').first.text
+      medium.embed = medium.video
+      medium.filename = 'otblogo.png'
+      downloaded_image = File.open(Rails.root.join('public/otblogo.png').to_s).read
     end
 
     return if downloaded_image.nil?
 
-    medium.filename = "#{medium.video}.jpg"
+    medium.filename ||= "#{medium.video}.jpg"
     medium.base_sixty_four = encode_image(downloaded_image)
     medium.attach_file unless medium.file.attached?
   end

@@ -18,12 +18,12 @@ class Medium < MediumBaseRecord
   # end
 
   # mount_base64_uploader :original_image, MediumUploader
-  has_many :stop_media
+  has_many :stop_media, dependent: :destroy
   has_many :stops, through: :stop_media
-  has_many :tour_media
+  has_many :tour_media, dependent: :destroy
   has_many :tours, through: :tour_media
 
-  enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
+  enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3, sketchfab: 4, unknown: 5, matterport: 6 }
   attr_accessor :insecure
 
   def props
@@ -76,7 +76,7 @@ class Medium < MediumBaseRecord
       lqip_width:,
       mobile_width:,
       original_image:,
-      provider:,
+      provider: provider || video_provider,
       tablet_width:,
       title:,
       video:,

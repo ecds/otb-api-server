@@ -3,7 +3,7 @@
 require 'uri'
 
 # Model class for a tour.
-class Tour < ApplicationRecord
+class Tour < ContentBase
   include ActionView::Helpers::DateHelper
   include HtmlSanitizer
   include Searchable
@@ -13,12 +13,12 @@ class Tour < ApplicationRecord
   has_many :tour_modes, autosave: true, dependent: :destroy
   has_many :modes, through: :tour_modes
   belongs_to :mode, default: -> { Mode.last }
-  has_many :tour_media
+  has_many :tour_media, dependent: :destroy
   has_many :media, through: :tour_media
   belongs_to :medium, optional: true
-  has_many :tour_flat_pages
+  has_many :tour_flat_pages, dependent: :destroy
   has_many :flat_pages, through: :tour_flat_pages
-  has_many :tour_authors
+  has_many :tour_authors, dependent: :destroy
   has_many :users, through: :tour_authors
   has_many :slugs, dependent: :delete_all
   has_one :map_overlay, dependent: :destroy
@@ -55,6 +55,7 @@ class Tour < ApplicationRecord
   before_save :calculate_duration
   before_save :check_url
   before_save :check_for_overlay
+  before_save :check_published
   after_save :ensure_slug
   after_create :add_modes
 
@@ -162,6 +163,14 @@ class Tour < ApplicationRecord
     end
 
     self.duration = durations.compact.sum.zero? ? nil : durations.sum
+  end
+
+  def check_published
+    if published? && published_on.nil?
+      self.published_on = Time.current
+    elsif !published?
+      self.published_on = nil
+    end
   end
 
   def search_data

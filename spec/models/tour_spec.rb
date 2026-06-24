@@ -243,4 +243,51 @@ RSpec.describe(Tour, type: :model) do
       end
     end
   end
+
+  describe 'dependent associations' do
+    it 'destroys tour_flat_pages join records when tour is deleted but preserves flat pages' do
+      tour = create(:tour_with_flat_pages, flat_pages_count: 2)
+      flat_page_ids = tour.flat_pages.pluck(:id)
+      tour.reload.destroy
+      expect(TourFlatPage.where(tour_id: tour.id)).to(be_empty)
+      expect(FlatPage.where(id: flat_page_ids).count).to(eq(flat_page_ids.size))
+    end
+
+    it 'destroys tour_flat_pages join records when flat page is deleted but preserves tour' do
+      tour = create(:tour_with_flat_pages, flat_pages_count: 1)
+      flat_page = tour.flat_pages.first
+      expect { flat_page.destroy }.to(change(TourFlatPage, :count).by(-1))
+      expect(Tour.exists?(tour.id)).to(be(true))
+    end
+  end
+
+  context 'when description contains _blank link with no rel or aria-label' do
+    it 'adds rel="noopener noreferrer" to link.' do
+      description = 'click <a href="http://example.org" target="_blank">here</a>'
+      tour = create(:tour, description:)
+      expect(tour.description).to(include('rel="noopener noreferrer"'))
+    end
+
+    it 'adds aria-label="here (opens in a new tab)" to link.' do
+      description = 'click <a href="http://example.org" target="_blank">here</a>'
+      tour = create(:tour, description:)
+      expect(tour.description).to(include('aria-label="here (opens in a new tab)"'))
+    end
+  end
+
+  context 'when the published status of a tour is changed' do
+    it 'sets published_on when published' do
+      tour = create(:tour, published: false)
+      expect(tour.published_on).to(be_nil)
+      tour.update(published: true)
+      expect(tour.published_on).to(be_present)
+    end
+
+    it 'sets published_on to null when unpublished' do
+      tour = create(:tour, published: true)
+      expect(tour.published_on).to(be_present)
+      tour.update(published: false)
+      expect(tour.published_on).to(be_nil)
+    end
+  end
 end

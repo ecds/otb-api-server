@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_21_125403) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_24_172750) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -333,6 +333,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_21_125403) do
     t.boolean "restrict_bounds", default: true
     t.boolean "open_geographies"
     t.string "open_geographies_endpoint"
+    t.date "published_on"
+    t.index "lower((title)::text)", name: "index_articles_on_lower_title", unique: true
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"

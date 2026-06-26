@@ -104,10 +104,12 @@ class TourSet < ApplicationRecord
 
   def create_tenant
     Apartment::Tenant.create(subdir)
-    versions = ActiveRecord::SchemaMigration.all.pluck(:version)
+    versions = ActiveRecord::Base.connection.select_values('SELECT version FROM schema_migrations')
     Apartment::Tenant.switch!(subdir)
     versions.each do |version|
-      ActiveRecord::SchemaMigration.find_or_create_by!(version:)
+      ActiveRecord::Base.connection.execute(
+        "INSERT INTO schema_migrations (version) VALUES ('#{version}') ON CONFLICT DO NOTHING"
+      )
     end
     Apartment::Tenant.reset
   end

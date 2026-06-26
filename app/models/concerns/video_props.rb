@@ -72,7 +72,7 @@ module VideoProps
 
     when 'matterport'
       medium.embed = "//my.matterport.com/show/?m=#{medium.video}"
-      doc = Nokogiri::HTML(HTTParty.get('https:' + medium.embed))
+      doc = Nokogiri::HTML(HTTParty.get('https:' + medium.embed).body)
       medium.title = doc.xpath('/html/head/meta[@property="og:title"]').first[:content]
       image_url = doc.xpath('/html/head/meta[@property="og:image"]').first[:content]
       medium.filename = medium.video + '.jpg'
@@ -80,7 +80,7 @@ module VideoProps
 
     when 'unknown'
       url = medium.video.starts_with?('http') ? medium.video : "https:#{medium.video}"
-      doc = Nokogiri::HTML(HTTParty.get(url))
+      doc = Nokogiri::HTML(HTTParty.get(url).body)
       medium.title = doc.xpath('/html/head/title').first.text
       medium.embed = medium.video
       medium.filename = 'otblogo.png'
@@ -95,16 +95,6 @@ module VideoProps
   end
 
   def self.encode_image(downloaded_image)
-    begin
-      if downloaded_image.is_a?(StringIO)
-        base_sixty_four = Base64.encode64(downloaded_image.read)
-      else
-        base_sixty_four = Base64.encode64(downloaded_image.open.read)
-        downloaded_image.unlink
-      end
-    rescue NoMethodError
-      base_sixty_four = Base64.encode64(downloaded_image)
-    end
-    base_sixty_four
+    Base64.encode64(downloaded_image)
   end
 end

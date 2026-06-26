@@ -4,7 +4,7 @@ module V4
   module Public
     class MediaController < V4Controller
       def show
-        return 404 if @record.nil?
+        return head(:not_found) if @record.nil?
 
         if params[:variant]
           redirect_to(@record.files[params[:variant].to_sym], allow_other_host: true)

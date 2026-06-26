@@ -42,7 +42,7 @@ module V4
       end
 
       def tour_summary(tour)
-        { id: tour.id, title: tour.title, slug: tour.slug, published: tour.published }
+        { id: tour.id, title: tour.title, slug: tour.slug, published: tour.published, published_on: tour.published_on }
       end
 
       def user_authorized?; end

@@ -5,7 +5,6 @@ module V4
     class UsersController < V4Controller
       def index
         head(:unauthorized) and return unless current_user&.super
-        return unless current_user.current_tenant_admin?
 
         render(
           json: User.all.map(&:preview_data).sort_by do |u|

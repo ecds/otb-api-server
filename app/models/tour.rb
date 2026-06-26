@@ -193,6 +193,7 @@ class Tour < ContentBase
       modes: tour_modes.map(&:search_data),
       open_geographies_endpoint:,
       published:,
+      published_on:,
       restrict_bounds:,
       restrict_bounds_to_overlay:,
       sanitized_description:,

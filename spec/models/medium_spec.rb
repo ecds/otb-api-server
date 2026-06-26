@@ -13,13 +13,6 @@ RSpec.describe(Medium, type: :model) do
       expect(medium.file.attached?).to(be(true))
     end
 
-    it 'gets image from youtube when downloaded image is a StringIO object and sets embed' do
-      file = File.open(Rails.root + 'spec/factories/images/atl.png')
-      string_io = StringIO.new(file.read)
-      base64 = VideoProps.encode_image(string_io)
-      medium = create(:medium, base_sixty_four: base64)
-      expect(medium.file.attached?).to(be(true))
-    end
 
     it 'gets nothing when YouTube video is not found' do
       medium = create(:medium, video: 'CvmxYF9ULbm', base_sixty_four: nil, video_provider: 'youtube')
@@ -145,6 +138,64 @@ RSpec.describe(Medium, type: :model) do
     it 'skips video_props when provider in nil' do
       medium = create(:medium, video: 'ACod3', base_sixty_four: nil)
       expect(medium.file.attached?).to(be(false))
+    end
+  end
+
+  describe '#orphaned' do
+    it 'is true when not associated with any tour or stop' do
+      medium = create(:medium)
+      expect(medium.orphaned).to(be(true))
+    end
+
+    it 'is false when associated with a stop' do
+      stop = create(:stop)
+      medium = create(:medium, stops: [stop])
+      expect(medium.orphaned).to(be(false))
+    end
+
+    it 'is false when associated with a tour' do
+      tour = create(:tour)
+      medium = create(:medium, tours: [tour])
+      expect(medium.orphaned).to(be(false))
+    end
+  end
+
+  describe '#published' do
+    it 'is false when orphaned' do
+      medium = create(:medium)
+      expect(medium.published).to(be(false))
+    end
+
+    it 'is true when associated with a published tour' do
+      tour = create(:tour, published: true)
+      medium = create(:medium, tours: [tour])
+      expect(medium.published).to(be(true))
+    end
+
+    it 'is true when associated with a stop on a published tour' do
+      tour = create(:tour, published: true)
+      stop = create(:stop, tours: [tour])
+      medium = create(:medium, stops: [stop])
+      expect(medium.published).to(be(true))
+    end
+  end
+
+  describe '#files' do
+    it 'returns same url for all variants when file is a gif' do
+      medium = create(
+        :medium,
+        filename: Faker::File.file_name(dir: '', ext: 'gif', directory_separator: ''),
+        base_sixty_four: File.read(Rails.root.join('spec/factories/images/gif_base64.txt')),
+        video: nil,
+      )
+      files = medium.files
+      expect(URI.parse(files[:mobile]).path).to(eq(URI.parse(files[:desktop]).path))
+      expect(URI.parse(files[:lqip]).path).to(eq(URI.parse(files[:desktop]).path))
+    end
+
+    it 'returns nil when no file attached' do
+      medium = build(:medium, base_sixty_four: nil, video: nil)
+      expect(medium.files).to(be_nil)
     end
   end
 

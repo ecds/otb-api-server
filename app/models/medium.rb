@@ -4,9 +4,11 @@ require 'cgi'
 
 # Model for media associated with stops.
 class Medium < MediumBaseRecord
-  include VideoProps
+  include EmbedProps
   include Rails.application.routes.url_helpers
 
+  # TODO: get rid of VideoProps after next release.
+  before_create :v_props
   before_create :props
   before_save :add_widths
   before_update :replace_video
@@ -23,13 +25,19 @@ class Medium < MediumBaseRecord
   has_many :tour_media, dependent: :destroy
   has_many :tours, through: :tour_media
 
-  enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3, sketchfab: 4, unknown: 5, matterport: 6 }
+  enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3, sketchfab: 4, unknown: 5, matterport: 6, morphosource: 7 }
   attr_accessor :insecure
 
-  def props
-    return if video.blank?
+  def v_props
+    return if embed_id.present? || video.blank?
 
     VideoProps.props(self)
+  end
+
+  def props
+    return if embed_id.blank?
+
+    EmbedProps.props(self)
   end
 
   def published
@@ -64,6 +72,7 @@ class Medium < MediumBaseRecord
       caption:,
       desktop_width:,
       embed:,
+      embed_id:,
       filename:,
       files: {
         original: http_path,

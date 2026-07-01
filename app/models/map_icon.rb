@@ -4,9 +4,12 @@ class MapIcon < MediumBaseRecord
   validate :check_dimensions
   validates :file, dimension: { width: 80, height: 80, message: 'Icons should be no bigger that 80 by 80 pixels' }
 
-  has_one :stop
+  has_one :stop, dependent: :nullify
+  has_one :tour, dependent: :nullify
 
-  delegate :published, to: :stop
+  def published
+    (stop || tour)&.published || false
+  end
 
   def search_data
     { id: }

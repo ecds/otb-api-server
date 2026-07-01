@@ -76,7 +76,7 @@ module V4
       def allowed_params
         case params[:model]
         when 'medium'
-          params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video)
+          params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video, :embed_id)
         when 'tour_medium'
           params.require(:tour_medium).permit(:medium_id, :tour_id, :position)
         when 'stop_medium'
@@ -113,6 +113,7 @@ module V4
           params.require(:tour).permit(
             :title,
             :published,
+            :map_icon_id,
             :default_lng,
             :map_type,
             :description,
@@ -133,7 +134,7 @@ module V4
       end
 
       def default_location
-        return unless params[:stop][:lng].nil? || params[:stop][:lng].nil?
+        return unless params[:stop][:lng].nil? || params[:stop][:lat].nil?
 
         location = Geocoder.search(request.remote_ip).first
         params[:stop][:lat] = location.latitude.to_f

@@ -16,6 +16,7 @@ class Tour < ContentBase
   has_many :tour_media, dependent: :destroy
   has_many :media, through: :tour_media
   belongs_to :medium, optional: true
+  belongs_to :map_icon, optional: true
   has_many :tour_flat_pages, dependent: :destroy
   has_many :flat_pages, through: :tour_flat_pages
   has_many :tour_authors, dependent: :destroy
@@ -185,6 +186,7 @@ class Tour < ContentBase
       is_geo:,
       link_address:,
       link_text:,
+      map_icon: map_icon&.original_image_url || nil,
       map_overlay: map_overlay&.search_data,
       map_type: map_type || 'hybrid',
       media: tour_media.sort_by(&:position).map(&:search_data),

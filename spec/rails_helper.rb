@@ -156,7 +156,7 @@ RSpec.configure do |config|
     stub_request(:get, %r{https://soundcloud\.com/oembed})
       .to_return(
         status: 200,
-        body: '{"thumbnail_url": "https://i1.sndcdn.com/artworks-stub-0-t500x500.jpg"}',
+        body: '{"title": "A SoundCloud Track", "thumbnail_url": "https://i1.sndcdn.com/artworks-stub-0-t500x500.jpg"}',
         headers: { 'Content-Type' => 'application/json' },
       )
 
@@ -182,6 +182,14 @@ RSpec.configure do |config|
         status: 200,
         body: '<html><head><title>A Model</title></head><body></html>',
         headers: { 'Content-Type' => 'text/html' },
+      )
+
+    # MorphoSource IIIF manifest
+    stub_request(:get, %r{https://www\.morphosource\.org/manifests/.*\.json})
+      .to_return(
+        status: 200,
+        body: '{"label":{"@none":["Fragment [Mesh] [StrLight]"]},"summary":{"@none":["Italic terra sigillata fragment"]}}',
+        headers: { 'Content-Type' => 'application/json' },
       )
 
     # Matterport model

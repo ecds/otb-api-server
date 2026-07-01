@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_24_172750) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_27_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -141,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_24_172750) do
     t.string "desktop"
     t.string "filename"
     t.integer "lqip_width"
+    t.string "embed_id"
   end
 
   create_table "modes", force: :cascade do |t|
@@ -334,7 +335,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_24_172750) do
     t.boolean "open_geographies"
     t.string "open_geographies_endpoint"
     t.date "published_on"
+    t.bigint "map_icon_id"
     t.index "lower((title)::text)", name: "index_articles_on_lower_title", unique: true
+    t.index ["map_icon_id"], name: "index_tours_on_map_icon_id"
     t.index ["medium_id"], name: "index_tours_on_medium_id"
     t.index ["mode_id"], name: "index_tours_on_mode_id"
     t.index ["theme_id"], name: "index_tours_on_theme_id"
@@ -359,6 +362,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_24_172750) do
   add_foreign_key "stops", "media"
   add_foreign_key "tour_set_admins", "roles"
   add_foreign_key "tour_sets", "tours"
+  add_foreign_key "tours", "map_icons"
   add_foreign_key "tours", "media"
   add_foreign_key "tours", "media", column: "splash_image_medium_id"
   add_foreign_key "tours", "modes"

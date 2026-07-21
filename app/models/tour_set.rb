@@ -4,7 +4,9 @@
 class TourSet < ApplicationRecord
   include Searchable
 
-  before_save :set_subdir
+  before_validation :compute_subdir
+  validate :subdir_available, if: :will_save_change_to_subdir?
+  before_save :rename_tenant_schema, if: :renaming_tenant?
   before_save :attach_file
   after_create :create_tenant
   after_create :create_defaults
@@ -16,8 +18,7 @@ class TourSet < ApplicationRecord
 
   has_many :tour_set_admins, dependent: :destroy
   has_many :admins, through: :tour_set_admins, source: :user
-
-  attr_accessor :published_tours
+  has_many :subdir_histories, class_name: 'TourSetSubdirHistory', dependent: :destroy
 
   def published_tours
     Apartment::Tenant.switch!(subdir)
@@ -97,8 +98,30 @@ class TourSet < ApplicationRecord
 
   private
 
-  def set_subdir
-    self.subdir = name.parameterize_intl
+  def compute_subdir
+    self.subdir = name.parameterize_intl if name.present? && (new_record? || will_save_change_to_name?)
+  end
+
+  def subdir_available
+    return unless TourSet.where(subdir:).where.not(id:).exists? ||
+      TourSetSubdirHistory.where(subdir:).exists?
+
+    errors.add(:subdir, 'is already in use')
+  end
+
+  def renaming_tenant?
+    !new_record? && will_save_change_to_subdir? && subdir_was.present?
+  end
+
+  # Postgres schema rename is metadata-only (no data copy) and, since this
+  # runs inside the same before_save transaction as the record's own update,
+  # rolls back automatically if anything else in this save fails.
+  def rename_tenant_schema
+    old_subdir = subdir_was
+    ActiveRecord::Base.connection.execute(
+      %(ALTER SCHEMA "#{old_subdir}" RENAME TO "#{subdir}"),
+    )
+    subdir_histories.create!(subdir: old_subdir)
   end
 
   def create_tenant
@@ -107,7 +130,7 @@ class TourSet < ApplicationRecord
     Apartment::Tenant.switch!(subdir)
     versions.each do |version|
       ActiveRecord::Base.connection.execute(
-        "INSERT INTO schema_migrations (version) VALUES ('#{version}') ON CONFLICT DO NOTHING"
+        "INSERT INTO schema_migrations (version) VALUES ('#{version}') ON CONFLICT DO NOTHING",
       )
     end
     Apartment::Tenant.reset

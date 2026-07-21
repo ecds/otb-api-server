@@ -28,6 +28,18 @@ module OpenTourApi
   # Base class for the app.
   class Application < Rails::Application
     class DirectoryElevator < Apartment::Elevators::Generic
+      def call(env)
+        request = Rack::Request.new(env)
+        tenant_name = parse_tenant_name(request)
+
+        return @app.call(env) unless tenant_name
+
+        redirect = renamed_tenant_redirect(tenant_name, request)
+        return redirect if redirect
+
+        Apartment::Tenant.switch(tenant_name) { @app.call(env) }
+      end
+
       def parse_tenant_name(request)
         # request is an instance of Rack::Request
         tenant_name = request.fullpath.split('/')[1]
@@ -36,6 +48,22 @@ module OpenTourApi
         return 'public' if tenants_to_ignore.include?(tenant_name)
 
         tenant_name
+      end
+
+      private
+
+      # If `tenant_name` is a subdir a TourSet used to have (before a rename),
+      # redirect to the same path under its current subdir instead of trying
+      # (and failing) to switch to a Postgres schema that no longer exists
+      # under that name.
+      def renamed_tenant_redirect(tenant_name, request)
+        return if TourSet.exists?(subdir: tenant_name)
+
+        history = TourSetSubdirHistory.find_by(subdir: tenant_name)
+        return unless history
+
+        new_path = request.fullpath.sub("/#{tenant_name}", "/#{history.tour_set.subdir}")
+        [308, { 'Location' => new_path }, []]
       end
     end
     # Initialize configuration defaults for originally generated Rails version.

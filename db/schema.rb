@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_27_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_21_191705) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -282,6 +282,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000000) do
     t.index ["user_id"], name: "index_tour_set_admins_on_user_id"
   end
 
+  create_table "tour_set_subdir_histories", force: :cascade do |t|
+    t.bigint "tour_set_id", null: false
+    t.string "subdir", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["subdir"], name: "index_tour_set_subdir_histories_on_subdir", unique: true
+    t.index ["tour_set_id"], name: "index_tour_set_subdir_histories_on_tour_set_id"
+  end
+
   create_table "tour_sets", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", precision: nil, null: false
@@ -294,6 +303,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000000) do
     t.text "base_sixty_four"
     t.string "logo_title"
     t.text "description"
+    t.index ["name"], name: "index_tour_sets_on_name", unique: true
+    t.index ["subdir"], name: "index_tour_sets_on_subdir", unique: true
     t.index ["tour_id"], name: "index_tour_sets_on_tours_id"
   end
 
@@ -361,6 +372,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000000) do
   add_foreign_key "stops", "map_icons"
   add_foreign_key "stops", "media"
   add_foreign_key "tour_set_admins", "roles"
+  add_foreign_key "tour_set_subdir_histories", "tour_sets"
   add_foreign_key "tour_sets", "tours"
   add_foreign_key "tours", "map_icons"
   add_foreign_key "tours", "media"

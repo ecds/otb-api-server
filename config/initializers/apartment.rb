@@ -8,6 +8,7 @@ Apartment.configure do |config|
     'Role',
     'TourSetAdmin',
     'TourSet',
+    'TourSetSubdirHistory',
     'EcdsRailsAuthEngine::Login',
     'EcdsRailsAuthEngine::Token',
     'Theme',

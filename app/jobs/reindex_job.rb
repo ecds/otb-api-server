@@ -6,7 +6,6 @@ class ReindexJob < ApplicationJob
   def perform(tenant:, class_name:, id:)
     Apartment::Tenant.switch!(tenant)
     model = class_name.constantize
-    record = model.find(id)
-    record.presence&.reindex
+    ReindexService.call(model.find_by(id:))
   end
 end

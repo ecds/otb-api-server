@@ -98,7 +98,6 @@ class TourSet < ApplicationRecord
   private
 
   def set_subdir
-    TourSet.reindex
     self.subdir = name.parameterize_intl
   end
 

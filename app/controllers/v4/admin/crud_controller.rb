@@ -55,14 +55,7 @@ module V4
       end
 
       def update_index
-        if params[:reindex] && params[:model] == 'tour'
-          Tour.find(params[:reindex][:id]).reindex
-        else
-          @record.reindex if @record.respond_to?(:reindex)
-          @record.tours.each(&:reindex) if @record.respond_to?(:tours)
-          @record.tour&.reindex if @record.respond_to?(:tour)
-        end
-        sleep(1)
+        ReindexService.call(@record)
       end
 
       def update_params
@@ -76,7 +69,7 @@ module V4
       def allowed_params
         case params[:model]
         when 'medium'
-          params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video, :embed_id)
+          params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video, :embed_id, :title)
         when 'tour_medium'
           params.require(:tour_medium).permit(:medium_id, :tour_id, :position)
         when 'stop_medium'

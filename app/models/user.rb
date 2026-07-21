@@ -2,7 +2,6 @@
 
 class User < ApplicationRecord
   include Searchable
-  after_update :update_index
   has_many :tour_set_admins, dependent: :destroy
   has_many :tour_sets, through: :tour_set_admins
   has_many :tour_authors, dependent: :destroy
@@ -90,10 +89,6 @@ class User < ApplicationRecord
 
   def as_site_editor
     as_author.map { |t| t[:tour_set] }
-  end
-
-  def update_index
-    reindex
   end
 
   def last_sign_in

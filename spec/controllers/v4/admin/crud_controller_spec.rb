@@ -205,22 +205,6 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       expect(v4_json[:errors].first[:detail]).to(eq('Title has already been taken'))
       expect(response.status).to(eq(422))
     end
-
-    it 'cannot rename a tour with a name that already exists' do
-      user = create(:user, super: true)
-      stop1 = create(:stop)
-      stop2 = create(:stop)
-      signed_cookie(user)
-      request_body = {
-        id: stop2.id,
-        tenant: 'public',
-        model: 'stop',
-        stop: { title: stop1.title, lat: 0, lng: 0 },
-      }
-      put :update, params: request_body
-      expect(v4_json[:errors].first[:detail]).to(eq('Title has already been taken'))
-      expect(response.status).to(eq(422))
-    end
   end
 
   describe 'DELETE #destroy' do

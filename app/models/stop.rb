@@ -13,8 +13,6 @@ class Stop < ContentBase
   belongs_to :medium, optional: true
   belongs_to :map_icon, optional: true
   has_many :stop_slugs, dependent: :delete_all
-  validates :title, presence: true, uniqueness: { case_sensitive: false }
-
   before_validation -> { self.title ||= 'untitled' }
 
   validates :title, presence: true

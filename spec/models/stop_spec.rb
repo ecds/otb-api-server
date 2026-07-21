@@ -22,10 +22,10 @@ RSpec.describe(Stop, type: :model) do
     expect(stop.splash[:title]).to(eq(StopMedium.find_by(position: 1).medium.title))
   end
 
-  it 'does not allow a title with a duplicate name' do
+  it 'allows two stops with the same title' do
     title = Faker::Movies::HitchhikersGuideToTheGalaxy.location
     create(:stop, title:)
-    expect(build(:stop, title:)).not_to(be_valid)
+    expect(build(:stop, title:)).to(be_valid)
   end
 
   describe '#orphaned' do

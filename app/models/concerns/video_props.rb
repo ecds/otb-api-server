@@ -20,9 +20,14 @@ module VideoProps
       medium.embed = "//player.vimeo.com/video/#{medium.video}"
       thumbnail_width = metadata['thumbnail_width']
       thumbnail_height = metadata['thumbnail_height']
-      scale_by = 1000 / thumbnail_width
-      thumbnail_url = "#{metadata["thumbnail_url"].split("_")[0]}_#{thumbnail_width * scale_by}x#{thumbnail_height * scale_by}"
-      downloaded_image = URI.open(thumbnail_url)
+      if thumbnail_height.present?
+        scale_by = 1000 / thumbnail_width
+        thumbnail_url = "#{metadata["thumbnail_url"].split("_")[0]}_#{thumbnail_width * scale_by}x#{thumbnail_height * scale_by}"
+        downloaded_image = URI.open(thumbnail_url)
+      else
+        medium.filename ||= 'otblogo.png'
+        downloaded_image = File.open(Rails.root.join('public/otblogo.png').to_s).read
+      end
     when 'youtube'
       begin
         metadata = Yt::Video.new(id: medium.video)

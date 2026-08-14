@@ -1,13 +1,12 @@
 #!/bin/bash
 set -e
 
-# TAG=$([ "$BRANCH" == "main" ] && echo "stable" || echo "latest")
+# TAG, AWS_ECS_CLUSTER, and AWS_ECS_SERVICE are resolved by the calling
+# workflow (see .github/workflows/deploy.yml's "Resolve deploy target"
+# step) based on which environment this deploy actually targets — this
+# script just builds/pushes/deploys whatever it's told.
 
-# AWS_ECS_CLUSTER=$([ "$BRANCH" == "main" ] && echo "$AWS_ECS_CLUSTER_PROD" || echo "$AWS_ECS_CLUSTER_DEV")
-
-# AWS_ECS_SERVICE=$([ "$BRANCH" == "main" ] && echo "$AWS_ECS_SERVICE_PROD" || echo "$AWS_ECS_SERVICE_DEV")
-
-# echo "Building image for branch: $BRANCH with tag: $TAG"
+echo "Building image with tag: $TAG"
 
 docker build \
        --platform linux/amd64 \
@@ -21,10 +20,10 @@ aws ecr get-login-password --region us-east-1 |
 echo "Logged in successfully"
 
 echo "Tagging image with $TAG"
-docker tag otb 310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:latest
+docker tag otb "310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:${TAG}"
 
 echo "Pushing image"
-docker push 310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:latest
+docker push "310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:${TAG}"
 
 echo "Force update service"
-aws ecs update-service --cluster otb-dev --service otb-dev --force-new-deployment --region us-east-1
+aws ecs update-service --cluster "${AWS_ECS_CLUSTER}" --service "${AWS_ECS_SERVICE}" --force-new-deployment --region us-east-1

@@ -1,10 +1,13 @@
 name: Test
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  # Lets deploy.yml call this same job for push-triggered runs instead of
+  # keeping a second, separate copy of the test job that can drift out of
+  # sync (which is what happened before — the old copy in deploy.yml was
+  # missing the elasticsearch/redis services and RAILS_MASTER_KEY below).
+  workflow_call:
 
 env:
   RAILS_ENV: test

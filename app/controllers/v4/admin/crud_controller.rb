@@ -78,6 +78,8 @@ module V4
           params.require(:map_overlay).permit(:file, :filename, :south, :east, :north, :west)
         when 'map_icon'
           params.require(:map_icon).permit(:file, :filename)
+        when 'voice_over'
+          params.require(:voice_over).permit(:file, :language, :tour_id, :stop_id)
         when 'flat_page'
           params.require(:flat_page).permit(:title, :body)
         when 'tour_flat_page'
@@ -120,7 +122,7 @@ module V4
             :blank_map,
           )
         when 'tour_set'
-          params.require(:tour_set).permit(:name, :logo)
+          params.require(:tour_set).permit(:name, :logo, :description)
         when 'tour_set_admin'
           params.require(:tour_set_admin).permit(:user_id, :tour_set_id)
         end

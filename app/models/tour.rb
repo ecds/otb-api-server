@@ -23,6 +23,7 @@ class Tour < ContentBase
   has_many :users, through: :tour_authors
   has_many :slugs, dependent: :delete_all
   has_one :map_overlay, dependent: :destroy
+  has_many :voice_overs, dependent: :destroy
 
   belongs_to :theme, default: -> { Theme.first }
 
@@ -209,6 +210,7 @@ class Tour < ContentBase
       title:,
       theme: { id: theme.id, title: theme.title },
       type: 'tour',
+      voice_overs: voice_overs.map(&:search_data),
       use_directions:,
     }
   end

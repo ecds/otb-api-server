@@ -47,6 +47,7 @@ Rails.application.routes.draw do
         resources :tour_sets, only: [:index]
         resources :media, only: [:index]
         resources :stops, only: [:index]
+        resources :tour_authors, only: [:index, :destroy]
         get 'users', to: 'users#index'
         get 'users/me', to: 'users#show'
         get 'tour_sets/:slug', to: 'tour_sets#show'

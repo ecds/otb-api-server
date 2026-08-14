@@ -13,6 +13,7 @@ class AccessRequest < ApplicationRecord
       email: user.email,
       site: tour_set.name,
       tours: requested_tours.map(&:title) || nil,
+      tour_ids: requested_tours.map(&:id) || nil,
       date: created_at.strftime('%B %d, %Y'),
     }
   end

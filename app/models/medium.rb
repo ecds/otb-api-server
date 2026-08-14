@@ -7,6 +7,15 @@ class Medium < MediumBaseRecord
   include EmbedProps
   include Rails.application.routes.url_helpers
 
+  ALLOWED_CONTENT_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+  ].freeze
+
+  validates :file, content_type: { in: ALLOWED_CONTENT_TYPES }
+
   # TODO: get rid of VideoProps after next release.
   before_create :v_props
   before_create :props

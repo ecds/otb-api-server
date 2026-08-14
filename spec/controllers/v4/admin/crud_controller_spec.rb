@@ -78,6 +78,79 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       expect(response).to(have_http_status(:created))
       expect(new_user.tour_sets).to(include(new_tenant))
     end
+
+    it 'uploads a voice over mp3' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      file = Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/audio/sample.mp3'),
+        'audio/mpeg',
+      )
+      Apartment::Tenant.switch!(TourSet.first.subdir)
+      tour = create(:tour)
+      post :create, params: { tenant: TourSet.first.subdir, model: 'voice_over', voice_over: { file: file, tour_id: tour.id } }
+      voice_over = VoiceOver.find(v4_json[:id])
+      expect(voice_over.file).to(be_attached)
+      expect(v4_json[:filename]).to(eq('sample.mp3'))
+      expect(response).to(have_http_status(:created))
+    end
+
+    it 'uploads a voice over m4a' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      file = Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/audio/sample.m4a'),
+        'audio/mp4',
+      )
+      Apartment::Tenant.switch!(TourSet.first.subdir)
+      stop = create(:stop)
+      post :create, params: { tenant: TourSet.first.subdir, model: 'voice_over', voice_over: { file: file, stop_id: stop.id } }
+      voice_over = VoiceOver.find(v4_json[:id])
+      expect(voice_over.file).to(be_attached)
+      expect(response).to(have_http_status(:created))
+    end
+
+    it 'uploads a voice over audio/x-m4a' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      file = Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/audio/sample.m4a'),
+        'audio/x-m4a',
+      )
+      Apartment::Tenant.switch!(TourSet.first.subdir)
+      stop = create(:stop)
+      post :create, params: { tenant: TourSet.first.subdir, model: 'voice_over', voice_over: { file: file, stop_id: stop.id } }
+      voice_over = VoiceOver.find(v4_json[:id])
+      expect(voice_over.file).to(be_attached)
+      expect(response).to(have_http_status(:created))
+    end
+
+    it 'rejects a voice over wav' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      file = Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/audio/sample.wav'),
+        'audio/wave',
+      )
+      Apartment::Tenant.switch!(TourSet.first.subdir)
+      tour = create(:tour)
+      post :create, params: { tenant: TourSet.first.subdir, model: 'voice_over', voice_over: { file: file, tour_id: tour.id } }
+      expect(v4_json[:errors].first[:detail]).to(eq('File must be an MP3 or M4A audio file'))
+      expect(response).to(have_http_status(:unprocessable_entity))
+    end
+
+    it 'rejects a voice over with no tour or stop' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      file = Rack::Test::UploadedFile.new(
+        Rails.root.join('spec/fixtures/audio/sample.mp3'),
+        'audio/mpeg',
+      )
+      Apartment::Tenant.switch!(TourSet.first.subdir)
+      post :create, params: { tenant: TourSet.first.subdir, model: 'voice_over', voice_over: { file: file } }
+      expect(v4_json[:errors].first[:detail]).to(eq('must belong to exactly one of tour or stop'))
+      expect(response).to(have_http_status(:unprocessable_entity))
+    end
   end
 
   describe 'PUT #update' do

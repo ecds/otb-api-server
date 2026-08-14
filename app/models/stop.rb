@@ -13,6 +13,7 @@ class Stop < ContentBase
   belongs_to :medium, optional: true
   belongs_to :map_icon, optional: true
   has_many :stop_slugs, dependent: :delete_all
+  has_many :voice_overs, dependent: :destroy
   before_validation -> { self.title ||= 'untitled' }
 
   validates :title, presence: true
@@ -93,6 +94,7 @@ class Stop < ContentBase
       type: 'stop',
       video_embed:,
       video_poster:,
+      voice_overs: voice_overs.map(&:search_data),
     }
   end
 

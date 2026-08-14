@@ -26,9 +26,16 @@ jobs:
 
     services:
       elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+        # Gemfile.lock uses the elasticsearch gem (~> 8), whose client
+        # refuses to talk to a pre-8.x server (it checks for the
+        # X-Elastic-Product header, which 7.x doesn't send) — that
+        # mismatch is what was causing
+        # Elasticsearch::UnsupportedProductError in delete_test_indices.
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
         env:
-          STACK_VERSION: 7.17.1
+          # 8.x's default heap sizing is much larger than 7.x's and gets
+          # OOM-killed on a standard runner without this.
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
           xpack.security.enabled: false
           cluster.name: otb-elasticsearch
           http.port: 9200

@@ -8,7 +8,7 @@ namespace :ImportOTB1 do
   task import: :environment do
     options = {
       dump: nil,
-      set: nil
+      set: nil,
     }
 
     opts = OptionParser.new
@@ -31,7 +31,7 @@ namespace :ImportOTB1 do
     tour_set = TourSet.find_by(name: options[:set])
     p "Switching to #{tour_set.subdir}"
     # Switch to TourSet
-    Apartment::Tenant.switch! tour_set.subdir
+    Apartment::Tenant.switch!(tour_set.subdir)
 
     p "Current tenant: #{Apartment::Tenant.current}"
 
@@ -76,18 +76,18 @@ namespace :ImportOTB1 do
     p 'Creating stops'
     d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
       if s['fields']['position'] == 0
-        p "#{s['fields']['name']} is inro stop"
-        tour = Tour.where(title: d.select { |d1| d1['model'] === 'tour.tour' && d1['pk'] === s['fields']['tour'] }.first['fields']['name']).first
+        p "#{s["fields"]["name"]} is inro stop"
+        tour = Tour.where(title: d.select do |d1|
+          d1['model'] === 'tour.tour' && d1['pk'] === s['fields']['tour']
+        end.first['fields']['name']).first
         tour.description = s['fields']['description']
         tour.article_link = s['fields']['article_link']
         tour.save
 
-        if !s['fields']['embed'].nil?
-          medium = Medium.create(video: s['fields']['embed'], tours: [tour])
-        end
+        Medium.create(video: s['fields']['embed'], tours: [tour]) unless s['fields']['embed'].nil?
 
       else
-        p s['fields']['name']        
+        p s['fields']['name']
         stop = Stop.find_or_create_by(title: s['fields']['name'])
         stop.title = s['fields']['name']
         stop.description = s['fields']['description']
@@ -114,13 +114,13 @@ namespace :ImportOTB1 do
     # Set Stop Position
     p 'Setting stop positions'
     d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
-      if s['fields']['position'] != 0
-        stop = Stop.where(title: s['fields']['name']).first
-        tour = stop.tours.first
-        tour_stop = TourStop.where(stop_id: stop.id).where(tour_id: tour.id).first
-        tour_stop.position = s['fields']['position']
-        tour_stop.save
-      end
+      next if s['fields']['position'] == 0
+
+      stop = Stop.where(title: s['fields']['name']).first
+      tour = stop.tours.first
+      tour_stop = TourStop.where(stop_id: stop.id).where(tour_id: tour.id).first
+      tour_stop.position = s['fields']['position']
+      tour_stop.save
     end
 
     # Create the Flat Pages
@@ -146,22 +146,22 @@ namespace :ImportOTB1 do
     # Create Tour Media
     p 'Creating tour media'
     d.select { |d1| d1['model'] === 'tour.tourstop' }.each do |s|
-      if s['fields']['position'] == 0
-        intro_id = s['pk']
-        tour_id = s['fields']['tour']
+      next unless s['fields']['position'] == 0
 
-        d.select { |d1| d1['model'] === 'tour.tourstopmedia' && d1['fields']['tour_stop'] == intro_id }.each do |m|
-          p "http://api-campustour.ecdsweb.org/media/#{m['fields']['image']}"
-          if m['fields']['tour_stop'] == intro_id
-            medium = Medium.new
-            medium.title = m['fields']['title']
-            medium.caption = m['fields']['caption']
-            medium.remote_original_image_url = "http://api-campustour.ecdsweb.org/media/#{m['fields']['image']}"
-            medium.tours = [tour]
-            medium.save
-            d.delete(m)
-          end
-        end
+      intro_id = s['pk']
+      s['fields']['tour']
+
+      d.select { |d1| d1['model'] === 'tour.tourstopmedia' && d1['fields']['tour_stop'] == intro_id }.each do |m|
+        p "http://api-campustour.ecdsweb.org/media/#{m["fields"]["image"]}"
+        next unless m['fields']['tour_stop'] == intro_id
+
+        medium = Medium.new
+        medium.title = m['fields']['title']
+        medium.caption = m['fields']['caption']
+        medium.remote_original_image_url = "http://api-campustour.ecdsweb.org/media/#{m["fields"]["image"]}"
+        medium.tours = [tour]
+        medium.save
+        d.delete(m)
       end
     end
 
@@ -180,12 +180,14 @@ namespace :ImportOTB1 do
     # Create Stop Media
     p 'Creating stop media'
     d.select { |d1| d1['model'] === 'tour.tourstopmedia' }.each do |m|
-      p "http://api-campustour.ecdsweb.org/media/#{m['fields']['image']}"
+      p "http://api-campustour.ecdsweb.org/media/#{m["fields"]["image"]}"
       medium = Medium.new
       medium.title = m['fields']['title']
       medium.caption = m['fields']['caption']
-      medium.remote_original_image_url = "http://api-campustour.ecdsweb.org/media/#{m['fields']['image']}"
-      medium.stops = [Stop.where(title: d.select { |d1| d1['model'] === 'tour.tourstop' && d1['pk'] === m['fields']['tour_stop'] }.first['fields']['name']).first]
+      medium.remote_original_image_url = "http://api-campustour.ecdsweb.org/media/#{m["fields"]["image"]}"
+      medium.stops = [Stop.where(title: d.select do |d1|
+        d1['model'] === 'tour.tourstop' && d1['pk'] === m['fields']['tour_stop']
+      end.first['fields']['name']).first]
       medium.save
     end
 
@@ -205,7 +207,7 @@ namespace :ImportOTB1 do
   task import_jsonapi: :environment do
     options = {
       dump: nil,
-      set: nil
+      set: nil,
     }
 
     opts = OptionParser.new
@@ -228,7 +230,7 @@ namespace :ImportOTB1 do
 
     p "Switching to #{tour_set.subdir}"
     # Switch to TourSet
-    Apartment::Tenant.switch! tour_set.subdir
+    Apartment::Tenant.switch!(tour_set.subdir)
 
     p "Current tenant: #{Apartment::Tenant.current}"
 
@@ -280,7 +282,7 @@ namespace :ImportOTB1 do
       medium = Medium.new
       medium.title = m['attributes']['title']
       medium.caption = m['attributes']['caption']
-      medium.remote_original_image_url = "https://otp-api.ecdsdev.org#{m['attributes']['original_image']['ulr']}"
+      medium.remote_original_image_url = "https://otp-api.ecdsdev.org#{m["attributes"]["original_image"]["ulr"]}"
       medium.save
     end
     p 'DONE!!!!'
@@ -290,7 +292,7 @@ namespace :ImportOTB1 do
     options = {
       dump: nil,
       set: nil,
-      media: nil
+      media: nil,
     }
 
     opts = OptionParser.new
@@ -314,12 +316,13 @@ namespace :ImportOTB1 do
 
     p "Switching to #{tour_set.subdir}"
     # Switch to TourSet
-    Apartment::Tenant.switch! tour_set.subdir
+    Apartment::Tenant.switch!(tour_set.subdir)
 
     p "Current tenant: #{Apartment::Tenant.current}"
 
     d.select { |stops| stops['model'] === 'tour.tourstop' }.each do |v2_stop|
       next if v2_stop['fields']['position'] == 0
+
       v3_stop = Stop.find_by(title: v2_stop['fields']['name'])
       v2_tour = d.select { |t| t['model'] === 'tour.tour' && t['pk'] === v2_stop['fields']['tour'] }.first
       v3_tour = Tour.find_by(title: v2_tour['fields']['name'])
@@ -330,13 +333,15 @@ namespace :ImportOTB1 do
       v3_stop.save
 
       # Stop Media
-      d.select { |m| m['model'] === 'tour.tourstopmedia' && m['fields']['tour_stop'] == v2_stop['pk'] }.each do |v2_medium|
+      d.select do |m|
+        m['model'] === 'tour.tourstopmedia' && m['fields']['tour_stop'] == v2_stop['pk']
+      end.each do |v2_medium|
         v3_medium = Medium.new
         v3_medium.title = v2_medium['fields']['title']
         v3_medium.caption = v2_medium['fields']['caption']
-        v3_medium.embed = "#{v2_medium['fields']['metadata']} ||| #{v2_medium['fields']['source_link']}"
-        p "Fetching #{options[:media]}/media/#{v2_medium['fields']['image']}"
-        v3_medium.remote_original_image_url = "#{options[:media]}/media/#{v2_medium['fields']['image']}"
+        v3_medium.embed = "#{v2_medium["fields"]["metadata"]} ||| #{v2_medium["fields"]["source_link"]}"
+        p "Fetching #{options[:media]}/media/#{v2_medium["fields"]["image"]}"
+        v3_medium.remote_original_image_url = "#{options[:media]}/media/#{v2_medium["fields"]["image"]}"
         v3_medium.save
         v3_stop.media << v3_medium
       end
@@ -396,7 +401,6 @@ end
 #     end
 #   end
 # end
-
 
 # file = File.read('vienna.json')
 # d = JSON.parse(file)

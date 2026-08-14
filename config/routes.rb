@@ -1,18 +1,12 @@
 # frozen_string_literal: true
 
-# config/routes.rb
-# The subdomain constraint determins the tenant.
-# class SubdomainConstraint
-#   def self.matches?(request)
-#     subdomains = %w(www admin public)
-#     request.subdomain.present? && !subdomains.include?(request.subdomain)
-#   end
-# end
+require 'sidekiq/web'
 
 Rails.application.routes.draw do
-
+  root 'welcome#index'
+  get 'health' => 'rails/health#show', as: :rails_health_check
   resources :tour_set_admins
-  scope ':tenant' do
+  scope ':tenant', defaults: { format: :json } do
     scope module: :v3, constraints: ApiVersion.new('v3', true) do
       resources :tour_authors, path: 'tour-authors'
       resources :users
@@ -34,8 +28,33 @@ Rails.application.routes.draw do
       resources :flat_pages, path: 'flat-pages'
       resources :tour_flat_pages, path: 'tour-flat-pages'
       resources :geojson_tours
-
+    end
+    namespace :v4 do
+      namespace :public do
+        resources :tours, only: [:index]
+        resources :modes, only: [:index]
+        resources :stops, only: [:index]
+        resources :tour_sets, only: [:index], path: 'tour-sets'
+        get 'tours/:slug', to: 'tours#show'
+        get 'stops/:slug', to: 'stops#show'
+        get 'media/:key', to: 'media#show'
+      end
+      namespace :admin do
+        resources :crud
+        resources :access_requests
+        resources :tours, only: [:index, :show]
+        resources :flat_pages, only: [:index]
+        resources :tour_sets, only: [:index]
+        resources :media, only: [:index]
+        resources :stops, only: [:index]
+        resources :tour_authors, only: [:index, :destroy]
+        get 'users', to: 'users#index'
+        get 'users/me', to: 'users#show'
+        get 'tour_sets/:slug', to: 'tour_sets#show'
+        get 'resolve_url', to: 'services#url_resolver'
+      end
     end
   end
   mount EcdsRailsAuthEngine::Engine, at: '/auth'
+  mount Sidekiq::Web => '/sidekiq'
 end

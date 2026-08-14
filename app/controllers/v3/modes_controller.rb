@@ -5,11 +5,11 @@ module V3
   class ModesController < ApplicationController
     # GET /modes
     def index
-      json_response Mode.all
+      json_response(Mode.all)
     end
 
     def show
-      json_response Mode.find(params[:id])
+      json_response(Mode.find(params[:id]))
     end
   end
 end

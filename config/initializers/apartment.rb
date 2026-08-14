@@ -2,7 +2,17 @@
 
 # require 'directory_elevator'
 Apartment.configure do |config|
-  config.tenant_names = -> { TourSet.pluck :subdir }
-  config.excluded_models = ['User', 'Role', 'TourSetAdmin', 'TourSet', 'EcdsRailsAuthEngine::Login', 'EcdsRailsAuthEngine::Token', 'Theme']
+  config.tenant_names = -> { TourSet.pluck(:subdir) }
+  config.excluded_models = [
+    'User',
+    'Role',
+    'TourSetAdmin',
+    'TourSet',
+    'TourSetSubdirHistory',
+    'EcdsRailsAuthEngine::Login',
+    'EcdsRailsAuthEngine::Token',
+    'Theme',
+    'AccessRequest',
+  ]
   config.persistent_schemas = ['shared_extensions']
 end

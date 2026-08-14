@@ -1,10 +1,23 @@
 # frozen_string_literal: true
 
+require 'cgi'
+
 # Model for media associated with stops.
 class Medium < MediumBaseRecord
-  include VideoProps
+  include EmbedProps
   include Rails.application.routes.url_helpers
 
+  ALLOWED_CONTENT_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+  ].freeze
+
+  validates :file, content_type: { in: ALLOWED_CONTENT_TYPES }
+
+  # TODO: get rid of VideoProps after next release.
+  before_create :v_props
   before_create :props
   before_save :add_widths
   before_update :replace_video
@@ -16,41 +29,46 @@ class Medium < MediumBaseRecord
   # end
 
   # mount_base64_uploader :original_image, MediumUploader
-  has_many :stop_media
+  has_many :stop_media, dependent: :destroy
   has_many :stops, through: :stop_media
-  has_many :tour_media
+  has_many :tour_media, dependent: :destroy
   has_many :tours, through: :tour_media
 
-  enum video_provider: { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3 }
-
+  enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3, sketchfab: 4, unknown: 5, matterport: 6, morphosource: 7 }
   attr_accessor :insecure
 
-  def props
-    return if self.video.nil? || self.video.empty?
+  def v_props
+    return if embed_id.present? || video.blank?
 
     VideoProps.props(self)
   end
 
+  def props
+    return if embed_id.blank?
+
+    EmbedProps.props(self)
+  end
+
   def published
-    tours.any? { |tour| tour.published } || stops.any? { |stop| stop.published }
+    tours.any?(&:published) || stops.any?(&:published)
   end
 
   def files
-    return nil if !self.file.attached?
+    return unless file.attached?
 
     if file.content_type.include?('gif')
       return {
-        lqip: file.variant(resize_to_limit: [50, 50], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        mobile: file.variant(resize_to_limit: [300, 300], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        tablet: file.variant(resize_to_limit: [400, 400], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url,
-        desktop: file.variant(resize_to_limit: [750, 750], coalesce: true, layers: 'Optimize', deconstruct: true, loader: { page: nil }).processed.url
+        lqip: file.url,
+        mobile: file.url,
+        tablet: file.url,
+        desktop: file.url,
       }
     end
     {
       lqip: file.variant(resize_to_limit: [5, 5]).processed.url,
       mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
       tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
-      desktop: file.variant(resize_to_limit: [750, 750]).processed.url
+      desktop: file.variant(resize_to_limit: [750, 750]).processed.url,
     }
   end
 
@@ -58,18 +76,45 @@ class Medium < MediumBaseRecord
     tours.empty? && stops.empty?
   end
 
+  def search_data
+    {
+      caption:,
+      desktop_width:,
+      embed:,
+      embed_id:,
+      filename:,
+      files: {
+        original: http_path,
+        mobile: "#{http_path}?variant=mobile",
+        tablet: "#{http_path}?variant=tablet",
+        desktop: "#{http_path}?variant=desktop",
+        lqip: "#{http_path}?variant=lqip",
+      },
+      id: id,
+      lqip_width:,
+      mobile_width:,
+      original_image:,
+      provider: provider || video_provider,
+      tablet_width:,
+      title:,
+      video:,
+    }
+  end
+
+  private
+
   def replace_video
-    if video.present? && base_sixty_four.present?
-      attach_file
-    end
+    return if video.blank?
+
+    attach_file
   end
 
   def add_widths
     return unless file.attached?
 
-    self.lqip_width = MiniMagick::Image.open(files[:lqip])[:width] || 50
-    self.mobile_width = MiniMagick::Image.open(files[:mobile])[:width] || 300
-    self.tablet_width = MiniMagick::Image.open(files[:tablet])[:width] || 400
-    self.desktop_width = MiniMagick::Image.open(files[:desktop])[:width] || 750
+    self.lqip_width = 50
+    self.mobile_width = 300
+    self.tablet_width = 400
+    self.desktop_width = 750
   end
 end

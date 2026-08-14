@@ -3,9 +3,8 @@
 # /app/controllers/v3/tour_relations_controller.rb
 module V3
   class TourRelationsController < V3Controller
-
     def destroy
-      head 405
+      head(:method_not_allowed)
     end
 
     def allowed?
@@ -15,7 +14,7 @@ module V3
 
     def crud_allowed?
       current_user&.current_tenant_admin? ||
-      current_user.tours&.any? { |tour| Tour.all.include?(tour) }
+        current_user.tours&.any? { |tour| Tour.all.include?(tour) }
     end
   end
 end

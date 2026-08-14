@@ -8,7 +8,7 @@ class MediumBaseRecord < ApplicationRecord
   before_create :attach_file
   before_destroy :purge
 
-  validates_presence_of :filename
+  validates :filename, presence: true
 
   # has_one_attached "#{Apartment::Tenant.current.underscore}_file"
   has_one_attached 'file'
@@ -22,7 +22,8 @@ class MediumBaseRecord < ApplicationRecord
   # end
 
   def tmp_file_path
-    return Rails.root.join('public', 'storage', 'tmp', filename) if self.filename
+    return Rails.root.join('public', 'storage', 'tmp', filename) if filename
+
     nil
   end
 
@@ -44,22 +45,23 @@ class MediumBaseRecord < ApplicationRecord
 
     # file.blob.delete if file.attached?
 
-    self.parse_base64
+    parse_base64
     File.open(tmp_file_path, 'wb') do |f|
       f.write(Base64.decode64(base_sixty_four))
+      f.rewind
     end
 
-    self.file.attach(
+    file.attach(
       io: File.open(tmp_file_path),
       filename: filename,
-      content_type: self.content_type
+      content_type: content_type,
     )
 
     self.base_sixty_four = nil
   end
 
   def remove_tmp_file
-    File.delete(tmp_file_path) if File.exists?(tmp_file_path)
+    File.delete(tmp_file_path) if File.exist?(tmp_file_path)
   end
 
   def purge
@@ -70,22 +72,26 @@ class MediumBaseRecord < ApplicationRecord
   def check_content_type
     return if base_sixty_four.nil?
 
-    self.parse_base64
+    parse_base64
 
-    if self.content_type.include?('jp2')
-      errors.add(:base, 'JPEG 2000 fils are not supported. Plese convert the image to a reqular JPEG or WebP format.')
-    end
+    return if content_type.exclude?('jp2')
+
+    errors.add(:base, 'JPEG 2000 fils are not supported. Please convert the image to a regular JPEG or WebP format.')
   end
 
   private
 
-    def parse_base64
-      if base_sixty_four.include?('data:')
-        headers, self.base_sixty_four = base_sixty_four.split(',')
-        headers =~ /^data:(.*?)$/
-        self.content_type = Regexp.last_match(1).split(';base64').first
-      else
-        self.content_type = 'image/jpeg'
-      end
+  def parse_base64
+    if base_sixty_four.include?('data:')
+      headers, self.base_sixty_four = base_sixty_four.split(',')
+      headers =~ /^data:(.*?)$/
+      self.content_type = Regexp.last_match(1).split(';base64').first
+    else
+      self.content_type = 'image/jpeg'
     end
+  end
+
+  def http_path
+    "#{Rails.application.routes.default_url_options[:host]}/#{Apartment::Tenant.current}/v4/public/media/#{CGI.escape(file.key || "")}"
+  end
 end

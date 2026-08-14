@@ -24,21 +24,59 @@ require 'database_cleaner'
 # require only the support files necessary.
 #
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
-
 # Checks for pending migration and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
 ActiveRecord::Migration.maintain_test_schema!
 
 Shoulda::Matchers.configure do |config|
   config.integrate do |with|
-    with.test_framework :rspec
-    with.library :rails
+    with.test_framework(:rspec)
+    with.library(:rails)
+  end
+end
+
+def delete_test_indices
+  Searchkick.client.indices.get(index: 'otb_*_test').keys.each_slice(10) do |batch|
+    Searchkick.client.indices.delete(index: batch.join(','))
+  end
+end
+
+def reset_test_db!
+  # Drop every Apartment tenant schema so factory-created schemas from a
+  # previous run (or a force-killed run) don't accumulate or conflict.
+  Apartment::Tenant.reset
+  TourSet.pluck(:subdir).each do |subdir|
+    Apartment::Tenant.drop(subdir)
+  rescue StandardError
+    nil
+  end
+
+  # Wipe all public-schema tables. Order matters for FK constraints.
+  tables = [
+    'active_storage_attachments',
+    'active_storage_blobs',
+    'active_storage_variant_records',
+    'tour_set_admins',
+    'access_requests',
+    'tour_authors',
+    'logins',
+    'tokens',
+    'tour_sets',
+    'users',
+    'modes',
+    'roles',
+    'themes',
+  ]
+  tables.each do |t|
+    ActiveRecord::Base.connection.execute("TRUNCATE #{t} RESTART IDENTITY CASCADE")
+  rescue
+    nil
   end
 end
 
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -47,208 +85,204 @@ RSpec.configure do |config|
     # config.use_transactional_fixtures = true
   end
 
-  config.include RequestSpecHelper, type: :request
+  config.include(RequestSpecHelper, type: :request)
   config.include(RequestSpecHelper, type: :controller)
   config.include(SignedCookieHelper, type: :request)
   config.include(SignedCookieHelper, type: :controller)
-  config.include FactoryBot::Syntax::Methods
+  config.include(FactoryBot::Syntax::Methods)
   # start by truncating all the tables but then use the faster transaction strategy the rest of the time.
   config.before(:suite) do
-    # DatabaseCleaner.clean_with(:truncation, except: [:modes, :roles])
-    # DatabaseCleaner.strategy = :transaction
-    # Truncating doesn't drop schemas, ensure we're clean here, app *may not* exist
-    # begin
-    #   Apartment::Tenant.drop('atlanta')
-    # rescue
-    #   nil
-    # end
-    # # Create the default tenant for our tests
-    # TourSet.create(name: 'Atlanta')
+    # Start from a clean slate every run so re-seeding is safe and
+    # schemas from a previous (possibly force-killed) run don't linger.
+    reset_test_db!
+    delete_test_indices
+    Rails.application.routes.default_url_options = { host: 'www.example.com', protocol: 'https' }
+    ActiveStorage::Current.url_options = { protocol: 'https', host: 'example.com', port: 443 }
     load Rails.root + 'db/seeds.rb'
   end
 
   # config.use_transactional_fixtures = true
 
   # start the transaction strategy as examples are run
-  config.around(:each) do |example|
-    example.run
-  end
 
-  config.before(:each) do
-    MiniMagick.configure do |config|
-      config.validate_on_create = false
-    end
+  config.before do
+    # MiniMagick.configure do |config|
+    #   config.validate_on_create = false
+    # end
     # Start transaction for this test
     # DatabaseCleaner.start
     # Switch into the default tenant
-    Apartment::Tenant.switch! TourSet.find(TourSet.pluck(:id).sample).subdir
-
+    Apartment::Tenant.switch!(TourSet.find(TourSet.pluck(:id).sample).subdir)
     # Set the host for ActiveStorage urls
-    ActiveStorage::Current.host = 'http://test.host'
-    # Switch to the below version for Rails 7
-    # ActiveStorage::Current.url_options = { host: 'http://test.host' }
-    # host! 'atlanta.lvh.me'
-    # load Rails.root + 'db/seeds.rb'
+    ActiveStorage::Current.url_options = { host: 'http://test.host' }
 
-    # Stub a network requests
+    # request.env["ipinfo"] = { city: Faker::Address.city, county: Faker::Address.country_code }
+
+    # Stub network requests
     stub_request(:get, 'https://placehold.it/300x300.png_1000x1000')
-      .to_return(
-        body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
-        status: 200
-    )
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/0.jpg'), status: 200)
 
-    stub_request(:get, 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/310645255')
-      .to_return(
-        body: "{ title: 'CycloramaBattleSites.org Stop 2', thumbnail_url: 'https://placehold.it/300x300.png' }",
-        status: 200
-      )
-
-    stub_request(:get, 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/video/310645255')
-      .with(
-        headers: {
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent': 'Ruby'
-        }
-      )
+    # Vimeo — matches any video ID
+    stub_request(:get, %r{https://vimeo\.com/api/oembed\.json\?url=https://vimeo\.com/video/\d+})
       .to_return(
         status: 200,
-        body: '{ "title": "CycloramaBattleSites.org Stop 2", "thumbnail_url": "https://placehold.it/300x300.png", "thumbnail_width": 100, "thumbnail_height": 100 }',
-        headers: { 'content-type': 'application/json' }
-      )
-
-    stub_request(:get, 'https://vimeo.com/310645255')
-      .to_return(
-        status: 200
-      )
-
-    stub_request(:get, 'https://youtu.be/F9ULbmCvmxY')
-      .to_return(
-        status: 200
+        body: '{"title": "CycloramaBattleSites.org Stop 2", "description": "A stub description", "thumbnail_url": "https://placehold.it/300x300.png", "thumbnail_width": 100, "thumbnail_height": 100}',
+        headers: { 'content-type' => 'application/json' },
       )
 
     stub_request(:get, 'https://img.youtube.com/vi/F9ULbmCvmxY/0.jpg')
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/0.jpg'), status: 200)
+
+    stub_request(:get, %r{http://test\.host/rails/active_storage/.*})
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/atl.png'), status: 200)
+
+    # YouTube — valid video
+    stub_request(:get, 'https://www.googleapis.com/youtube/v3/videos?id=F9ULbmCvmxY&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet')
       .to_return(
-        body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
-        status: 200
+        status: 200,
+        body: '{"items": [{"id": "F9ULbmCvmxY", "snippet": {"title": "Goodie Mob - Black Ice (Sky High) ft. OutKast", "description": "Music video by Goodie Mob feat. OutKast performing Black Ice (Sky High). (C) 1998 LaFace Records LLC"}}]}',
+        headers: { 'content-type' => 'application/json' },
       )
 
-    stub_request(:get, /http:\/\/test\.host\/rails\/active_storage\/.*/)
-    .to_return(
-      body: File.open(Rails.root + 'spec/factories/images/atl.png'),
-      status: 200
-    )
-
-    stub_request(
-      :get,
-      'https://www.googleapis.com/youtube/v3/videos?id=F9ULbmCvmxY&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet'
-    )
-    .to_return(
-      status: 200,
-      body: '{"items": [{ "id": "F9ULbmCvmxY",  "snippet": { "title": "Goodie Mob - Black Ice (Sky High) ft. OutKast", "description": "Music video by Goodie Mob feat. OutKast performing Black Ice (Sky High). (C) 1998 LaFace Records LLC" }}] }',
-      headers: { 'content-type': 'application/json' }
-    )
-
-    stub_request(:get, 'https://www.youtube.com/watch?v=F9ULbmCvmxY')
-      .to_return(status: 200, body: '', headers: {})
-
-    stub_request(:get, 'https://vimeo.com/F9ULbmCvmxY')
-      .to_return(status: 404, body: '', headers: {})
-
-    stub_request(:get, 'https://vimeo.com/https://youtu.be/F9ULbmCvmxY')
-      .to_return(status: 404, body: '', headers: {})
-
+    # YouTube — not found
     stub_request(:get, 'https://www.googleapis.com/youtube/v3/videos?id=CvmxYF9ULbm&key=AIzaSyAafrj3VvNLJNXeW5-NNCVwY5cdB06p1_s&part=snippet')
       .to_return(
         status: 200,
-        body: '{"kind": "youtube#videoListResponse", "etag": "YIUPVpqNjppyCWOZfL-19bLb7uk", "items": [ ], "pageInfo": { "totalResults": 0, "resultsPerPage": 0 } }',
-        headers: { 'content-type': 'application/json' }
+        body: '{"kind": "youtube#videoListResponse", "items": [], "pageInfo": {"totalResults": 0, "resultsPerPage": 0}}',
+        headers: { 'content-type' => 'application/json' },
       )
 
-    stub_request(:get, 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/431162745&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true&sharing=false')
+    # SoundCloud oembed — matches any track URL (HTTParty sorts params alphabetically)
+    stub_request(:get, %r{https://soundcloud\.com/oembed})
       .to_return(
         status: 200,
-        body: '<html><span style="background-image:url(//i1.sndcdn.com/artworks-KsTDkyGJ8S6x-0-t500x500.jpg);width:100%;height:100%;" class="sc-artwork sc-artwork-placeholder-3 image__full g-transition-opacity" aria-label="Boca Raton (with A$AP Ferg)" aria-role="img"></span></html>',
-        headers: {}
+        body: '{"title": "A SoundCloud Track", "thumbnail_url": "https://i1.sndcdn.com/artworks-stub-0-t500x500.jpg"}',
+        headers: { 'Content-Type' => 'application/json' },
       )
 
-    stub_request(:get, 'https://w.soundcloud.com/player/?auto_play=false&color=%23ff5500&hide_related=true&sharing=false&show_comments=false&show_reposts=false&show_teaser=false&show_user=false&url=https://api.soundcloud.com/tracks/457871163&visual=true')
+    # SoundCloud thumbnail image
+    stub_request(:get, %r{https://i1\.sndcdn\.com/artworks-.*\.jpg})
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/0.jpg'), status: 200)
+
+    # Sketchfab embed page — matches any model ID
+    stub_request(:get, %r{https://sketchfab\.com/models/.+/embed})
       .to_return(
         status: 200,
-        body: '<html><div class="image sc-artwork sc-artwork-placeholder-9"><span style="width:100%;height:100%;" class="sc-artwork sc-artwork-placeholder-9 image__full g-transition-opacity" aria-label="Subsatellite Launch" aria-role="img"></span></div></html>',
-        headers: {}
+        body: '<html><head><meta property="og:title" content="A Sketchfab Model"><meta property="og:image" content="https://media.sketchfab.com/models/4b570878a3cc4ca786af824a03ada414/thumbnails/d8899e68c4a7435bbe229764bf4c2f57/fd4348dc5c7f48eea5c0d0b8ef376f8b.jpeg"></head><body></body></html>',
+        headers: { 'Content-Type' => 'text/html' },
       )
 
-    stub_request(:get, /https:\/\/i1\.sndcdn.com\/artworks-.*\.jpg/)
+    # Sketchfab thumbnail image
+    stub_request(:get, %r{https://media\.sketchfab\.com/.*\.jpe?g})
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/0.jpg'), status: 200)
+
+    # Generic iframe from unknown origin.
+    stub_request(:get, 'https://3d-api.si.edu/voyager/3d_package:a1651b35')
       .to_return(
-        body: File.open(Rails.root + 'spec/factories/images/0.jpg'),
         status: 200,
-        headers: {}
+        body: '<html><head><title>A Model</title></head><body></html>',
+        headers: { 'Content-Type' => 'text/html' },
       )
 
-    stub_request(:get, /http:\/\/127\.0\.0\.1:.*\/json\/version/).to_return(body: '{}', status: 200)
+    # MorphoSource IIIF manifest
+    stub_request(:get, %r{https://www\.morphosource\.org/manifests/.*\.json})
+      .to_return(
+        status: 200,
+        body: '{"label":{"@none":["Fragment [Mesh] [StrLight]"]},"summary":{"@none":["Italic terra sigillata fragment"]}}',
+        headers: { 'Content-Type' => 'application/json' },
+      )
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*BICYCLING.*/)
+    # Matterport model
+    stub_request(:get, 'https://my.matterport.com/show/?m=matterport_id')
+      .to_return(
+        status: 200,
+        body: '<html><head><meta property="og:title" content="A Matterport Model"><meta property="og:image" content="https://my.matterport.com/api/v2/player/models/matterport_id/thumb/"></head><body></body></html>',
+        headers: { 'Content-Type' => 'text/html' },
+      )
+
+    # Matterport thumbnail image
+    stub_request(:get, %r{https://my\.matterport\.com/.*\/thumb})
+      .to_return(body: File.open(Rails.root + 'spec/factories/images/0.jpg'), status: 200)
+
+    stub_request(:get, %r{http://127\.0\.0\.1:.*/json/version}).to_return(body: '{}', status: 200)
+
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*BICYCLING.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*TRANSIT.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*TRANSIT.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix2.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*WALKING.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*WALKING.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, /http.*:\/\/maps\.googleapis\.com\/maps\/api\/.*DRIVING.*/)
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*DRIVING.*})
       .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200, headers: { 'Content-Type': 'application/json' })
+
+    stub_request(:get, 'http://og.ecds.io')
+      .to_return(
+        status: 200,
+        body: '{"stops": ["Open Geographies"], "bounds": {"east": -83.8150232, "west": -83.2818954, "south": 32.6648851, "north": 33.8113142}}',
+        headers: { 'Content-Type' => 'application/json' },
+      )
+
+    stub_request(:get, %r{http.*://ipinfo\.io/.*/geo.*})
+      .with(
+        headers: {
+          'Accept' => '*/*',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent' => 'Ruby',
+        },
+      )
+      .to_return(status: 200, headers: {}, body: ip_info_body)
+
+    stub_request(:get, %r{http.*://ipinfo\.io/.*\?token.*})
+      .with(
+        headers: {
+          'Accept' => 'application/json',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Authorization' => 'Bearer d3bb06e9a6567d',
+          'User-Agent' => 'IPinfoClient/Ruby/2.4.0',
+        },
+      )
+      .to_return(status: 200, body: ip_info_body, headers: {})
   end
 
-  config.after(:each) do
-    # Reset tentant back to `public`
-    # Apartment::Tenant.reset
-    # Rollback transaction
-    # DatabaseCleaner.clean
-  end
-
-  # RSpec Rails can automatically mix in different behaviours to your tests
-  # based on their file location, for example enabling you to call `get` and
-  # `post` in specs under `spec/controllers`.
-  #
-  # You can disable this behaviour by removing the line below, and instead
-  # explicitly tag your specs with their type, e.g.:
-  #
-  #     RSpec.describe UsersController, :type => :controller do
-  #       # ...
-  #     end
-  #
-  # The different available types are documented in the features, such as in
-  # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
 
   # Filter lines from Rails gems in backtraces.
   config.filter_rails_from_backtrace!
-  # arbitrary gems may also be filtered via:
-  # config.filter_gems_from_backtrace("gem name")
 
   # Clean up uploaded images
   config.after(:all) do
     # Get rid of the linked images
     if Rails.env.test?
-      FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/test/[^.]*"])
-      FileUtils.rm_rf(Dir["#{Rails.root}/public/uploads/tmp/test/[^.]*"])
+      FileUtils.rm_rf(Dir[Rails.root.join('public/uploads/test/[^.]*').to_s])
+      FileUtils.rm_rf(Dir[Rails.root.join('public/uploads/tmp/test/[^.]*').to_s])
     end
   end
 
   config.after(:suite) do
-    # TourSet.all.each { |ts| ts.destroy }
+    delete_test_indices
   end
 
   # Class to mock IPinfo
   class MockIpinfo
-    def longitude
-      Faker::Address.longitude
-    end
+    delegate :longitude, to: :'Faker::Address'
 
-    def latitude
-      Faker::Address.latitude
-    end
+    delegate :latitude, to: :'Faker::Address'
+  end
+
+  def ip_info_body
+    {
+      ip: Faker::Internet.ip_v4_address,
+      hostname: Faker::Internet.domain_name,
+      city: Faker::Address.city,
+      region: Faker::Address.state,
+      country: Faker::Address.country_code,
+      loc: "#{Faker::Address.latitude},#{Faker::Address.longitude}",
+      org: Faker::Company.name,
+      postal: Faker::Address.zip,
+      timezone: Faker::Address.time_zone,
+    }.to_json
   end
 end

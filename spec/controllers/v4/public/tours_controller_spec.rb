@@ -122,6 +122,8 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
         west: -82.88327699999999,
         south: 32.6648851,
         north: 33.8113142,
+        centerLat: 33.238099649999995,
+        centerLng: -83.3491501,
       }))
       expect(v4_json[:tour][:title]).to(eq(tour.title))
     end

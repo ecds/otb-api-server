@@ -12,9 +12,10 @@ RSpec.describe(Tour, type: :model) do
 
   it 'gets a duration' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
+    tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 300).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(7336))
+    expect(tour.duration).to(eq(15284))
   end
 
   it 'gets no duration when unpublished' do
@@ -26,22 +27,24 @@ RSpec.describe(Tour, type: :model) do
 
   it 'gets duration when tour is updated to published' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
+    tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
     tour.update(published: false)
     expect(tour.duration).to(be_nil)
     tour.update(published: true)
     expect(tour.saved_change_to_attribute?(:published)).to(be(true))
-    expect(tour.duration).to(eq(7336))
+    expect(tour.duration).to(eq(15394))
   end
 
   it 'updates duration when mode changes' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
+    tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 222).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(7336))
+    expect(tour.duration).to(eq(15194))
     tour.mode = Mode.find_by(title: 'TRANSIT')
     expect(tour.will_save_change_to_mode_id?).to(be(true))
     tour.save
-    expect(tour.duration).to(eq(6336))
+    expect(tour.duration).to(eq(11194))
     expect(tour.saved_change_to_attribute?(:duration)).to(be(true))
     expect(tour.saved_change_to_attribute?(:saved_stop_order)).to(be(false))
   end
@@ -49,9 +52,10 @@ RSpec.describe(Tour, type: :model) do
   it 'updates duration when stop order changes' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), published: false)
     5.times { |i| create(:tour_stop, tour: tour, stop: create(:stop), position: i + 1) }
+    tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(7336))
+    expect(tour.duration).to(eq(15394))
     # Trick the network stub to fetch different distance matrix but doesn't persist a
     # change to the tour's mode.
     tour.mode.title = 'TRANSIT'
@@ -62,7 +66,7 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.will_save_change_to_published?).to(be(false))
     expect(tour.will_save_change_to_saved_stop_order?).to(be(true))
     tour.save
-    expect(tour.duration).to(eq(6336))
+    expect(tour.duration).to(eq(11394))
     expect(tour.saved_change_to_attribute?(:duration)).to(be(true))
   end
 
@@ -70,24 +74,25 @@ RSpec.describe(Tour, type: :model) do
     tour = create(:tour, mode: Mode.find_by(title: 'DRIVING'), stops: create_list(:stop, 5), published: false)
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(be_nil)
+    expect(tour.travel_duration).to(be_zero)
   end
 
   it 'gets no duration whin response has ZERO_RESULTS' do
     tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 4), published: false)
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(be_nil)
+    expect(tour.travel_duration).to(be_zero)
   end
 
-  it 'does not update the duration when other attributes are updaeted' do
+  it 'does not update the duration when other attributes are updated' do
     tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
+    tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(7336))
-    # Trick the network stub to fetch different distance matrix but doesn't presist a
+    expect(tour.duration).to(eq(15394))
+    # Trick the network stub to fetch different distance matrix but doesn't persist a
     # change to the tour's mode. In this case, it should NOT fetch. This is just to
-    # test that it does not actually make teh request when we don't want it to.
+    # test that it does not actually make the request when we don't want it to.
     tour.mode.title = 'TRANSIT'
     tour.update(
       title: Faker::Music::Prince.band,
@@ -98,7 +103,7 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.saved_change_to_attribute?(:duration)).to(be(false))
     expect(tour.saved_change_to_attribute?(:published)).to(be(false))
     expect(tour.saved_change_to_attribute?(:saved_stop_order)).to(be(false))
-    expect(tour.duration).to(eq(7336))
+    expect(tour.duration).to(eq(15394))
   end
 
   it 'when restricted to overlay bounds, tour bounds mirror overlay' do
@@ -257,7 +262,7 @@ RSpec.describe(Tour, type: :model) do
       tour = create(:tour_with_flat_pages, flat_pages_count: 1)
       flat_page = tour.flat_pages.first
       expect { flat_page.destroy }.to(change(TourFlatPage, :count).by(-1))
-      expect(Tour.exists?(tour.id)).to(be(true))
+      expect(described_class.exists?(tour.id)).to(be(true))
     end
   end
 

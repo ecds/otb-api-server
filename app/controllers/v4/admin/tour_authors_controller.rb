@@ -13,6 +13,22 @@ module V4
         render(json: @records.map(&:user), status: :ok)
       end
 
+      def create
+        head(:unauthorized) and return unless authorized?
+
+        @record = if params[:username]
+          TourAuthor.new(user: User.find_by(display_name: params[:username]), tour_id: params[:tour_id])
+        else
+          TourAuthor.new(user_id: params[:user_id], tour_id: params[:tour_id])
+        end
+
+        if @record.save
+          render(json: @record, status: :created) and return
+        else
+          render(json: serialize_errors, status: :unprocessable_entity)
+        end
+      end
+
       def destroy
         head(:unauthorized) and return unless authorized?
         head(:not_found) and return if @record.nil?

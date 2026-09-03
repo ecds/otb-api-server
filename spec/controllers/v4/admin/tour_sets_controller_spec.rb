@@ -88,10 +88,13 @@ RSpec.describe(V4::Admin::TourSetsController, type: :controller) do
       tour2 = create(:tour)
       user1 = create(:user, tours: [tour1, tour2])
       user2 = create(:user, display_name: nil, email: 'rwoodruf@emory.edu', tours: [tour2])
+      user2.tour_set_admins << create(:tour_set_admin, user:, tour_set:, role: Role.find_by(title: 'Tour Creator'))
       Apartment::Tenant.reset
       get :show, params: { tenant: 'public', slug: tour_set.subdir }
       expect(v4_json[:tour_authors].select { |ta| ta[:user] == user1.display_name }.count).to(eq(2))
       expect(v4_json[:tour_authors].select { |ta| ta[:user] == user2.email }.count).to(eq(1))
+      expect(v4_json[:tour_authors].find { |ta| ta[:user] == user2.email }[:may_create_tour]).to(be(true))
+      expect(v4_json[:tour_authors].find { |ta| ta[:user] == user1.display_name }[:may_create_tour]).to(be(false))
     end
 
     it 'returns no content when user is a tour editor within the site (not a site admin)' do

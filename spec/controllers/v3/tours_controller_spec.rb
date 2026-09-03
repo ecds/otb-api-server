@@ -93,14 +93,15 @@ RSpec.describe(V3::ToursController, type: :controller) do
         :tour,
         published: false,
         mode: Mode.find_by(title: 'BICYCLING'),
-        stops: create_list(:stop, rand(5..7)),
+        stops: create_list(:stop, 5),
       )
+      tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
       tour.update(published: true)
       tour.save
       get :show, params: { tenant: tour.tenant, id: tour.id }
       expect(response.status).to(eq(200))
       expect(attributes[:title]).to(eq(tour.title))
-      expect(attributes[:est_time]).to(eq('About 2 hours bicycling'))
+      expect(attributes[:est_time]).to(eq('About 4 hours bicycling'))
     end
 
     # This is for when an authenticated person is viewing an unpublished tour.
@@ -141,7 +142,7 @@ RSpec.describe(V3::ToursController, type: :controller) do
       expect(attributes[:title]).to(eq(tour.title))
     end
 
-    it 'retuns a tour with center lat/lng based on request' do
+    it 'returns a tour with center lat/lng based on request' do
       request.env['ipinfo'] = MockIpinfo.new
       tour = create(:tour, stops: [])
       user = create(:user, super: true)

@@ -19,9 +19,22 @@ class User < ApplicationRecord
   #
   def current_tenant_admin?
     return true if self.super
-    return false if tour_sets.empty?
 
-    tour_sets.map(&:subdir).include?(Apartment::Tenant.current)
+    admin_role = Role.find_by(title: 'Tour Admin')
+    admin_tour_sets = tour_set_admins.where(role: admin_role).map(&:tour_set)
+    return false if admin_tour_sets.empty?
+
+    admin_tour_sets.map(&:subdir).include?(Apartment::Tenant.current)
+  end
+
+  def current_tenant_tour_creator?
+    return true if current_tenant_admin?
+
+    tour_creator_role = Role.find_by(title: 'Tour Creator')
+    tour_creator_sets = tour_set_admins.where(role: tour_creator_role).map(&:tour_set)
+    return false if tour_creator_sets.empty?
+
+    tour_creator_sets.map(&:subdir).include?(Apartment::Tenant.current)
   end
 
   def preview_data
@@ -42,6 +55,7 @@ class User < ApplicationRecord
     {
       **preview_data,
       current_tenant_admin: current_tenant_admin?,
+      may_create_tour: current_tenant_tour_creator?,
       tours: as_author,
     }
   end

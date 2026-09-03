@@ -153,18 +153,15 @@ class Tour < ContentBase
       return
     end
 
-    durations = []
-    destinations = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
+    waypoints = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
 
-    # The direction matrix API limits the number of destinations to 25.
-    # Calculate the duration in chunks to stay below the limit.
-    destinations.each_slice(24) do |group|
-      origin = group.shift
-      g_directions = GoogleDirections.new(origin, group, group.count + 1, mode.title)
-      durations.push(g_directions.duration)
-    end
+    self.travel_duration = waypoints.each_cons(2).map do |origin, destination|
+      GoogleDirections.new(origin, [destination], 1, mode.title).durations&.sum
+    end.compact.sum
 
-    self.duration = durations.compact.sum.zero? ? nil : durations.sum
+    self.read_duration = stops.map { |stop| (stop.sanitized_description.split.size / 4.4).to_i }.sum
+
+    self.duration = travel_duration + read_duration
   end
 
   def check_published
@@ -181,7 +178,6 @@ class Tour < ContentBase
       bounds:,
       default_lng:,
       description:,
-      est_time: duration ? "#{distance_of_time_in_words(duration).capitalize} #{mode.title.downcase}" : nil,
       flat_pages: tour_flat_pages.sort_by(&:position).map(&:search_data),
       id:,
       is_geo:,
@@ -197,6 +193,7 @@ class Tour < ContentBase
       open_geographies_endpoint:,
       published:,
       published_on:,
+      read_duration: [duration_in_words(read_duration), 'reading'].join(' '),
       restrict_bounds:,
       restrict_bounds_to_overlay:,
       sanitized_description:,
@@ -208,6 +205,7 @@ class Tour < ContentBase
       tenant:,
       tenant_title:,
       title:,
+      travel_duration: [duration_in_words(travel_duration), mode.title.downcase].join(' '),
       theme: { id: theme.id, title: theme.title },
       type: 'tour',
       voice_overs: voice_overs.map(&:search_data),
@@ -271,5 +269,11 @@ class Tour < ContentBase
     return if stops.empty?
 
     stops.map(&:media).flatten.first
+  end
+
+  def duration_in_words(dur)
+    return if dur.nil? || dur.zero?
+
+    distance_of_time_in_words(dur).capitalize
   end
 end

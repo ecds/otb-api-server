@@ -221,7 +221,7 @@ RSpec.configure do |config|
     stub_request(:get, 'http://og.ecds.io')
       .to_return(
         status: 200,
-        body: '{"stops": ["Open Geographies"], "bounds": {"east": -83.8150232, "west": -83.2818954, "south": 32.6648851, "north": 33.8113142}}',
+        body: file_fixture('open_geographies.json'),
         headers: { 'Content-Type' => 'application/json' },
       )
 

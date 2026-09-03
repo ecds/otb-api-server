@@ -40,6 +40,9 @@ Role.create!(
     {
       title: 'Author',
     },
+    {
+      title: 'Tour Creator',
+    },
   ],
 )
 
@@ -80,7 +83,10 @@ User.all.find_each do |u|
   # u.tours = Tour.all.order(Arel.sql('random()')).limit(Random.new.rand(2..3))
   Random.new.rand(2..3).times do
     Apartment::Tenant.switch!(TourSet.find(TourSet.pluck(:id).sample).subdir)
-    u.tours << Tour.find(Tour.pluck(:id).sample)
+    tour = Tour.find(Tour.pluck(:id).sample)
+    # The same tour can be sampled more than once across iterations; skip it
+    # if this user is already an author (TourAuthor now enforces this).
+    u.tours << tour unless TourAuthor.exists?(tour_id: tour.id, user_id: u.id)
   end
   u.save
 end

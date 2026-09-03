@@ -20,8 +20,11 @@ RSpec.describe(V4::Public::TourSetsController, type: :controller) do
 
   describe 'GET #index' do
     it 'returns a 200 and only TourSets with published tours when unauthenticated' do
+      Apartment::Tenant.switch!(TourSet.first.subdir)
+      create_list(:tour, 2, published: true)
       published_tour_sets = TourSet.all.select(&:should_index?)
       get :index, params: { tenant: 'public' }
+      expect(v4_json.count).not_to(be_zero)
       expect(v4_json.count).to(eq(published_tour_sets.count))
       expect(TourSet.count).to(be > published_tour_sets.count)
       expect(response.status).to(eq(200))

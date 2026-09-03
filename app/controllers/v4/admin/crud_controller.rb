@@ -8,6 +8,8 @@ module V4
       def create
         head(:unauthorized) and return unless crud_allowed?
 
+        render(json: { error: 'Cannot create tour using this endpoint.' }, status: :unauthorized) and return if params[:model] == 'tour'
+
         model = params[:model].camelize.constantize
         @record = model.new(allowed_params)
 

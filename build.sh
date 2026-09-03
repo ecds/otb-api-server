@@ -6,7 +6,7 @@ set -e
 # step) based on which environment this deploy actually targets — this
 # script just builds/pushes/deploys whatever it's told.
 
-echo "Building image with tag: $TAG"
+echo "Building image with tag: latest"
 
 docker build \
        --platform linux/amd64 \
@@ -19,11 +19,11 @@ aws ecr get-login-password --region us-east-1 |
        docker login --username AWS --password-stdin 310867200447.dkr.ecr.us-east-1.amazonaws.com
 echo "Logged in successfully"
 
-echo "Tagging image with $TAG"
-docker tag otb "310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:${TAG}"
+echo "Tagging image with latest"
+docker tag otb "310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:latest"
 
 echo "Pushing image"
-docker push "310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:${TAG}"
+docker push "310867200447.dkr.ecr.us-east-1.amazonaws.com/otb:latest"
 
 echo "Force update service"
-aws ecs update-service --cluster "${AWS_ECS_CLUSTER}" --service "${AWS_ECS_SERVICE}" --force-new-deployment --region us-east-1
+aws ecs update-service --cluster otb-dev --service otb-dev --force-new-deployment --region us-east-1

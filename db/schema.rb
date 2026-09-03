@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_27_130000) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_24_123820) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -233,6 +233,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_27_130000) do
   create_table "tour_authors", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "user_id"
+    t.index ["tour_id", "user_id"], name: "index_tour_authors_on_tour_id_and_user_id", unique: true
     t.index ["tour_id"], name: "index_tour_authors_on_tour_id"
     t.index ["user_id"], name: "index_tour_authors_on_user_id"
   end
@@ -347,6 +348,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_27_130000) do
     t.string "open_geographies_endpoint"
     t.date "published_on"
     t.bigint "map_icon_id"
+    t.integer "travel_duration"
+    t.integer "read_duration"
     t.index "lower((title)::text)", name: "index_articles_on_lower_title", unique: true
     t.index ["map_icon_id"], name: "index_tours_on_map_icon_id"
     t.index ["medium_id"], name: "index_tours_on_medium_id"

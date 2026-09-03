@@ -33,10 +33,43 @@ module V4
         head(:not_found)
       end
 
+      def create
+        set_tour_set
+        render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless current_user&.current_tenant_tour_creator?
+
+        @record = Tour.new(allowed_params)
+
+        if @record.save
+          current_user.tours << @record unless current_user.super || current_user.current_tenant_admin?
+          render(json: @record.search_data, status: :created) and return
+        else
+          render(json: serialize_errors, status: :unprocessable_entity)
+        end
+      end
+
       private
 
       def set_record
         @record = Tour.search('*', load: false, limit: 1).where(id: params[:id]).first
+      end
+
+      def allowed_params
+        params.require(:tour).permit(
+          :title,
+          :published,
+          :map_icon_id,
+          :default_lng,
+          :map_type,
+          :description,
+          :meta_description,
+          :link_address,
+          :link_text,
+          :is_geo,
+          :restrict_bounds,
+          :restrict_bounds_to_overlay,
+          :use_directions,
+          :blank_map,
+        )
       end
     end
   end

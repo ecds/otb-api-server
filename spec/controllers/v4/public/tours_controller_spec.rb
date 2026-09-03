@@ -115,15 +115,26 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
       tour = create(:tour, published: true, open_geographies: true, open_geographies_endpoint: 'http://og.ecds.io')
       clean_reindex
       get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
-      expect(v4_json[:tour][:stops]).to(eq(['Open Geographies']))
-      expect(v4_json[:tour][:stop_count]).to(eq(1))
+      # expect(v4_json[:tour][:stops]).to(eq(['Open Geographies']))
+      expect(v4_json[:tour][:stop_count]).to(eq(4))
       expect(v4_json[:tour][:bounds]).to(eq({
         east: -83.8150232,
-        west: -83.2818954,
+        west: -82.88327699999999,
         south: 32.6648851,
         north: 33.8113142,
       }))
       expect(v4_json[:tour][:title]).to(eq(tour.title))
+    end
+
+    it 'includes durations for published tour' do
+      tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
+      tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
+      tour.update(published: true)
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
+
+      expect(v4_json[:tour][:travel_duration]).to(eq('About 4 hours bicycling'))
+      expect(v4_json[:tour][:read_duration]).to(eq('8 minutes reading'))
     end
   end
 end

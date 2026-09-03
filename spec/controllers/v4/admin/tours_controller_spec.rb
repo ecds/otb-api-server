@@ -131,4 +131,48 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       expect(response.status).to(eq(401))
     end
   end
+
+  describe 'POST #create' do
+    it 'responds with 401 a tour when user is super' do
+      user = create(:user, super: false)
+      signed_cookie(user)
+      post :create, params: { tenant: TourSet.first.subdir, tour: { title: 'A New Tour' } }
+      expect(response).to(have_http_status(:unauthorized))
+    end
+
+    it 'creates a tour when user is super' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      post :create, params: { tenant: TourSet.first.subdir, tour: { title: 'A New Tour' } }
+      expect(response).to(have_http_status(:created))
+    end
+
+    it 'creates a tour when user is tour set admin' do
+      tour_set = TourSet.last
+      user = create(:user, super: false, tour_sets: [tour_set])
+      signed_cookie(user)
+      post :create, params: { tenant: tour_set.subdir, tour: { title: 'A New Tour' } }
+      expect(response).to(have_http_status(:created))
+    end
+
+    it 'creates a tour when user is can create tours' do
+      tour_set = TourSet.first
+      user = create(:user, super: false)
+      create(:tour_set_admin, user:, tour_set:, role: Role.find_by(title: 'Tour Creator'))
+      signed_cookie(user)
+      post :create, params: { tenant: TourSet.first.subdir, tour: { title: 'A New Tour' } }
+      expect(response).to(have_http_status(:created))
+      Apartment::Tenant.switch!(tour_set.subdir)
+      expect(user.tours).to(include(Tour.find(v4_json[:id])))
+    end
+
+    it 'returns 401 when user is not tour creator for current tenant' do
+      tour_set = TourSet.first
+      user = create(:user, super: false)
+      create(:tour_set_admin, user:, tour_set:, role: Role.find_by(title: 'Tour Creator'))
+      signed_cookie(user)
+      post :create, params: { tenant: TourSet.last.subdir, tour: { title: 'A New Tour' } }
+      expect(response).to(have_http_status(:unauthorized))
+    end
+  end
 end

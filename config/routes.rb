@@ -42,12 +42,12 @@ Rails.application.routes.draw do
       namespace :admin do
         resources :crud
         resources :access_requests
-        resources :tours, only: [:index, :show]
+        resources :tours, only: [:index, :show, :create]
         resources :flat_pages, only: [:index]
         resources :tour_sets, only: [:index]
         resources :media, only: [:index]
         resources :stops, only: [:index]
-        resources :tour_authors, only: [:index, :destroy]
+        resources :tour_authors, only: [:index, :create, :destroy]
         get 'users', to: 'users#index'
         get 'users/me', to: 'users#show'
         get 'tour_sets/:slug', to: 'tour_sets#show'

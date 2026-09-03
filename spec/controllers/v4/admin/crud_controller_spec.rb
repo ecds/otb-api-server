@@ -9,6 +9,13 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       expect(response.status).to(eq(401))
     end
 
+    it 'returns 422 when creating tour via CrudController' do
+      user = create(:user, super: true)
+      signed_cookie(user)
+      post :create, params: { tenant: TourSet.first.subdir, model: 'tour', tour: { title: 'Not Here' } }
+      expect(response).to(have_http_status(:unauthorized))
+    end
+
     it 'uploads a file' do
       user = create(:user, super: true)
       signed_cookie(user)
@@ -27,7 +34,7 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       signed_cookie(user)
       tour = create(:tour)
       medium = create(:medium)
-      expect(medium.file.attached?)
+      expect(medium.file.attached?).to(be(true))
       post :create, params: { tenant: Apartment::Tenant.current, model: 'tour_medium', tour_medium: { tour_id: tour.id, medium_id: medium.id, position: 2 } }
       expect(response).to(have_http_status(:created))
     end

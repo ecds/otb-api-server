@@ -13,6 +13,7 @@ Apartment.configure do |config|
     'EcdsRailsAuthEngine::Token',
     'Theme',
     'AccessRequest',
+    'OpenGeographiesMedium',
   ]
   config.persistent_schemas = ['shared_extensions']
 end

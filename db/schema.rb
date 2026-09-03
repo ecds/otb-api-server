@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_24_123820) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_03_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -149,6 +149,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_24_123820) do
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
     t.string "icon"
+  end
+
+  create_table "open_geographies_media", force: :cascade do |t|
+    t.string "uuid", null: false
+    t.string "provider"
+    t.string "embed_url"
+    t.string "thumbnail_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid"], name: "index_open_geographies_media_on_uuid", unique: true
   end
 
   create_table "roles", force: :cascade do |t|

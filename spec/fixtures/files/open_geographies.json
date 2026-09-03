@@ -16,6 +16,7 @@
   "identifiers": [],
   "stops": [
     {
+      "@context": "https://opengeographies.org/api/v1/context.json",
       "uuid": "46149c73-1234-4362-bfea-b72a0481880e",
       "slug": "antioch-baptist",
       "slugs": ["antioch-baptist"],
@@ -748,6 +749,7 @@
       "order": 50
     },
     {
+      "@context": "https://opengeographies.org/api/v1/context.json",
       "uuid": "347ea1da-562c-4a67-8cf7-706a5ea882bf",
       "slug": "hardison-baptist",
       "slugs": ["hardison-baptist"],
@@ -1085,6 +1087,7 @@
       "order": 20
     },
     {
+      "@context": "https://opengeographies.org/api/v1/context.json",
       "uuid": "3c64edbd-54e4-4b97-a8ca-c2e1ed2bae28",
       "slug": "oconee-baptist-2",
       "slugs": ["oconee-baptist-2", "oconee-baptist"],
@@ -1651,6 +1654,7 @@
       "order": 10
     },
     {
+      "@context": "https://opengeographies.org/api/v1/context.json",
       "uuid": "54449ba8-e705-413a-8109-dffbddffcdd4",
       "slug": "adgateville-baptist",
       "slugs": ["adgateville-baptist"],

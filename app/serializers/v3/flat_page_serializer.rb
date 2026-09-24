@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 module V3
-    class FlatPageSerializer < ActiveModel::Serializer
+  class FlatPageSerializer < ActiveModel::Serializer
     has_many :tours
     attributes :id, :title, :body, :slug, :orphaned
   end

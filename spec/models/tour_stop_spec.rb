@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe TourStop, type: :model do
-  it { should belong_to(:tour) }
-  it { should belong_to(:stop) }
+RSpec.describe(TourStop, type: :model) do
+  it { is_expected.to(belong_to(:tour)) }
+  it { is_expected.to(belong_to(:stop)) }
 end

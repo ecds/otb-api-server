@@ -1,10 +1,13 @@
 name: Test
 
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+  # Lets deploy.yml call this same job for push-triggered runs instead of
+  # keeping a second, separate copy of the test job that can drift out of
+  # sync (which is what happened before — the old copy in deploy.yml was
+  # missing the elasticsearch/redis services and RAILS_MASTER_KEY below).
+  workflow_call:
 
 env:
   RAILS_ENV: test
@@ -13,14 +16,38 @@ env:
   DB_USERNAME: postgres
   DB_PASSWORD: postgres
   TEST_DB_NAME: otb_test
-  CI: 'github-actions'
-  BROWSER_PATH: /usr/bin/google-chrome
+  CI: "github-actions"
+  BROWSER_PATH: /usr/bin/chromium-browser
+  RAILS_MASTER_KEY: ${{ secrets.MASTER_KEY }}
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-24.04-arm
+
     services:
+      elasticsearch:
+        # Gemfile.lock uses the elasticsearch gem (~> 8), whose client
+        # refuses to talk to a pre-8.x server (it checks for the
+        # X-Elastic-Product header, which 7.x doesn't send) — that
+        # mismatch is what was causing
+        # Elasticsearch::UnsupportedProductError in delete_test_indices.
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+        env:
+          # 8.x's default heap sizing is much larger than 7.x's and gets
+          # OOM-killed on a standard runner without this.
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+          xpack.security.enabled: false
+          cluster.name: otb-elasticsearch
+          http.port: 9200
+          discovery.type: single-node
+        options: >-
+          --health-cmd "curl http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 9200:9200
+
       postgres:
         image: postgres:13
         env:
@@ -35,47 +62,57 @@ jobs:
         ports:
           - 5432:5432
 
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.1.2
-        bundler-cache: true
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4.4
+          bundler-cache: true
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation
-        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo dpkg -i google-chrome-stable_current_amd64.deb || true
-        sudo apt-get install -f -y
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev fonts-liberation libmagickwand-dev libvips chromium-browser
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || true
+          sudo apt-get install -f -y
 
-    - name: Create required directories
-      run: |
-        sudo mkdir -p /data/tmp
-        sudo chmod 777 /data/tmp
-        sudo chown $USER:$USER /data/tmp
-        mkdir -p public/storage/tmp
-        chmod 777 public/storage/tmp
+      - name: Create required directories
+        run: |
+          sudo mkdir -p /data/tmp
+          sudo chmod 777 /data/tmp
+          sudo chown $USER:$USER /data/tmp
+          mkdir -p public/storage/tmp
+          chmod 777 public/storage/tmp
 
-    - name: Wait for database to be ready
-      run: |
-        until pg_isready -h localhost -p 5432 -U postgres; do
-          echo "Waiting for PostgreSQL..."
-          sleep 2
-        done
+      - name: Wait for database to be ready
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
 
-    - name: Set up PostgreSQL database
-      run: |
-        export DB_ADAPTER=postgresql
-        bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=postgresql || true
-        bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
-        bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
-        bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=postgresql
+      - name: Set up PostgreSQL database
+        run: |
+          export DB_ADAPTER=postgresql
+          bundle exec rake db:drop RAILS_ENV=test DB_ADAPTER=postgresql || true
+          bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
+          bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
+          bundle exec rake db:migrate RAILS_ENV=test DB_ADAPTER=postgresql
 
-    - name: Run RSpec tests
-      run: |
-        DB_ADAPTER=postgresql bundle exec rspec --format progress
+      - name: Run RSpec tests
+        run: |
+          DB_ADAPTER=postgresql bundle exec rspec --format progress

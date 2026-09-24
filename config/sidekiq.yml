@@ -1,0 +1,6 @@
+:queues:
+  - default
+  - searchkick
+:verbose: false
+:concurrency: 10
+:timeout: 60

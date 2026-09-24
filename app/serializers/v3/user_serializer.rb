@@ -13,9 +13,8 @@ module V3
     end
 
     def all_tours
-      if @instance_options[:include_tours]
-        return object.all_tours
-      end
+      return object.all_tours if @instance_options[:include_tours]
+
       []
     end
   end

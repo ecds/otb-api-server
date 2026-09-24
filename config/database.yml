@@ -9,14 +9,30 @@ default: &default
   password: <%= ENV['DB_PASSWORD'] || 'password' %>
   database: <%= ENV['DB_NAME'] || 'otb' %>
 
-development:
-  <<: *default
-  database: <%= ENV['DB_NAME'] || 'otb_development' %>
-  username: <%= ENV['DB_USERNAME'] || 'user' %>
-  password: <%= ENV['DB_PASSWORD'] || 'password' %>
-  host: <%= ENV['DB_HOSTNAME'] || 'localhost' %>
+# development:
+#   <<: *default
+#   database: <%= ENV['DB_NAME'] || 'otb_development' %>
+#   username: <%= ENV['DB_USERNAME'] || 'user' %>
+#   password: <%= ENV['DB_PASSWORD'] || 'password' %>
+#   host: <%= ENV['DB_HOSTNAME'] || 'localhost' %>
 
 test:
   <<: *default
   database: <%= ENV['TEST_DB_NAME'] || 'otb_test' %>
+  password: <%= Rails.application.credentials.dig(:dbTest, :postgres, :pw) %>
+  username: <%= Rails.application.credentials.dig(:dbTest, :postgres, :user) %>
+
+production:
+  <<: *default
+  database: <%= Rails.application.credentials.dig(:rdsProduction, :db) %>
+  username: <%= Rails.application.credentials.dig(:rdsProduction, :user) %>
+  password: <%= Rails.application.credentials.dig(:rdsProduction, :pw) %>
+  host: <%= Rails.application.credentials.dig(:rdsProduction, :host) %>
+
+development:
+  <<: *default
+  database: <%= Rails.application.credentials.dig(:rdsProduction, :db) %>
+  username: <%= Rails.application.credentials.dig(:rdsProduction, :user) %>
+  password: <%= Rails.application.credentials.dig(:rdsProduction, :pw) %>
+  host: <%= Rails.application.credentials.dig(:rdsProduction, :host) %>
   

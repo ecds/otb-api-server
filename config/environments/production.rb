@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.configure do
-  config.hosts << 'api.opentour.site'
+  config.hosts = nil
   Rails.application.routes.default_url_options[:host] = 'https://api.opentour.site'
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -10,6 +10,8 @@ Rails.application.configure do
 
   # Code is not reloaded between requests.
   config.cache_classes = true
+
+  config.force_ssl = false
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -47,8 +49,8 @@ Rails.application.configure do
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
-  config.log_level = :debug
-
+  config.log_level = :error
+  config.active_record.logger = nil
   # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
 
@@ -64,6 +66,17 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
+  # Use the Amazon SESV2 API in the us-east-1 region
+  config.action_mailer.delivery_method = :ses_v2
+  config.action_mailer.ses_v2_settings = {
+    credentials: Aws::Credentials.new(
+      Rails.application.credentials.dig(:s3Staging, :access_key_id),
+      Rails.application.credentials.dig(:s3Staging, :secret_access_key),
+    ),
+    region: 'us-east-1',
+
+  }
+
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
@@ -72,14 +85,14 @@ Rails.application.configure do
   config.active_support.deprecation = :notify
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
+  config.log_formatter = Logger::Formatter.new
 
   # Use a different logger for distributed setups.
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 
   if ENV['RAILS_LOG_TO_STDOUT'].present?
-    logger = ActiveSupport::Logger.new(STDOUT)
+    logger = ActiveSupport::Logger.new($stdout)
     logger.formatter = config.log_formatter
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
@@ -89,5 +102,4 @@ Rails.application.configure do
 
   ENV['BASE_URL'] = 'https://api.opentour.site'
   ENV['INSECURE_IMAGE_BASE_URL'] = 'http://otbimages.ecdsdev.org'
-
 end

@@ -118,8 +118,8 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
       # expect(v4_json[:tour][:stops]).to(eq(['Open Geographies']))
       expect(v4_json[:tour][:stop_count]).to(eq(4))
       expect(v4_json[:tour][:bounds]).to(eq({
-        east: -83.8150232,
-        west: -82.88327699999999,
+        west: -83.8150232,
+        east: -82.88327699999999,
         south: 32.6648851,
         north: 33.8113142,
         centerLat: 33.238099649999995,
@@ -136,7 +136,7 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
       get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
 
       expect(v4_json[:tour][:travel_duration]).to(eq('About 4 hours bicycling'))
-      expect(v4_json[:tour][:read_duration]).to(eq('8 minutes reading'))
+      expect(v4_json[:tour][:read_duration]).to(eq('10 minutes reading'))
     end
   end
 end

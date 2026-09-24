@@ -51,11 +51,8 @@ module OpenGeographies
 
     def call
       uuid = @og_medium[:uuid]
-      cached = Apartment::Tenant.reset { OpenGeographiesMedium.find_by(uuid:) }
-
-      if cached && !cached.stale?
-        return cached
-      end
+      cached = OpenGeographiesMedium.find_by(uuid:)
+      return cached if cached && !cached.stale?
 
       resolved = resolve
       attrs = {
@@ -65,13 +62,11 @@ module OpenGeographies
         thumbnail_url: resolved[:thumbnail_url],
       }
 
-      Apartment::Tenant.reset do
-        if cached
-          cached.update(attrs)
-          cached
-        else
-          OpenGeographiesMedium.create(attrs)
-        end
+      if cached
+        cached.update(attrs)
+        cached
+      else
+        OpenGeographiesMedium.create(attrs)
       end
     end
 

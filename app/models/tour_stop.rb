@@ -33,22 +33,14 @@ class TourStop < ApplicationRecord
   end
 
   def search_data
+    search_data_with_neighbors(prev_stop: previous&.stop, next_stop: self.next&.stop)
+  end
+
+  def search_data_with_neighbors(prev_stop:, next_stop:)
     {
-      next: if self.next.present?
-              {
-                id: self.next.stop.id,
-                slug: self.next.stop.slug,
-                title: self.next.stop.title,
-              }
-            end,
-      position: position,
-      previous: if previous.present?
-                  {
-                    id: previous.stop.id,
-                    slug: previous.stop.slug,
-                    title: previous.stop.title,
-                  }
-                end,
+      next: next_stop && { id: next_stop.id, slug: next_stop.slug, title: next_stop.title },
+      position:,
+      previous: prev_stop && { id: prev_stop.id, slug: prev_stop.slug, title: prev_stop.title },
       relation_id: id,
       **stop.search_data,
     }

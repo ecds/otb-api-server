@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# app/models/concerns/html_saintizer.rb
+# app/models/concerns/html_sanitizer.rb
 module HtmlSanitizer
   extend ActiveSupport::Concern
 

@@ -21,6 +21,14 @@ RSpec.describe(V4::Public::MediaController, type: :controller) do
 
     it 'redirects to variant url when variant param is given' do
       medium = create(:medium)
+      # rubocop:disable RSpec/AnyInstance
+      allow_any_instance_of(Medium).to(receive(:files).and_return({
+        desktop: 'http://example.com/desktop.jpg',
+        tablet: 'http://example.com/tablet.jpg',
+        mobile: 'http://example.com/mobile.jpg',
+        lqip: 'http://example.com/lqip.jpg',
+      }))
+      # rubocop:enable RSpec/AnyInstance
       get :show, params: { tenant: tour_set.subdir, key: medium.file.blob.key, variant: 'desktop' }
       expect(response).to(have_http_status(:redirect))
     end

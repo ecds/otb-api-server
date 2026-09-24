@@ -21,6 +21,7 @@ class Medium < MediumBaseRecord
   before_create :props
   before_save :add_widths
   before_update :replace_video
+  after_create_commit -> { ProcessMediumVariantsJob.perform_later(id) }
 
   # has_one_attached :file do |attachable|
   #   attachable.variant :mobile, resize: '200x200'
@@ -65,10 +66,10 @@ class Medium < MediumBaseRecord
       }
     end
     {
-      lqip: file.variant(resize_to_limit: [5, 5]).processed.url,
-      mobile: file.variant(resize_to_limit: [300, 300]).processed.url,
-      tablet: file.variant(resize_to_limit: [400, 400]).processed.url,
-      desktop: file.variant(resize_to_limit: [750, 750]).processed.url,
+      lqip: file.variant(resize_to_limit: [5, 5]).url,
+      mobile: file.variant(resize_to_limit: [300, 300]).url,
+      tablet: file.variant(resize_to_limit: [400, 400]).url,
+      desktop: file.variant(resize_to_limit: [750, 750]).url,
     }
   end
 

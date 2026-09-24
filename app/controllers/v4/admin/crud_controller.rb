@@ -122,6 +122,7 @@ module V4
             :restrict_bounds_to_overlay,
             :use_directions,
             :blank_map,
+            :mode_id,
           )
         when 'tour_set'
           params.require(:tour_set).permit(:name, :logo, :description)

@@ -3,10 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe(Tour, type: :model) do
+  subject(:tour) { described_class.new }
+
   # it { should validate_presence_of(:title) }
   # it { expect(subject).to validate_presence_of :title }
-  it { expect(subject).to(have_many(:stops)) }
-  it { expect(subject).to(have_many(:tour_stops)) }
+  it { expect(tour).to(have_many(:stops)) }
+  it { expect(tour).to(have_many(:tour_stops)) }
   it { expect(described_class.reflect_on_association(:theme).macro).to(eq(:belongs_to)) }
   it { expect(described_class.reflect_on_association(:mode).macro).to(eq(:belongs_to)) }
 
@@ -15,7 +17,7 @@ RSpec.describe(Tour, type: :model) do
     tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 300).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(15284))
+    expect(tour.duration).to(eq(15394))
   end
 
   it 'gets no duration when unpublished' do
@@ -32,7 +34,7 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.duration).to(be_nil)
     tour.update(published: true)
     expect(tour.saved_change_to_attribute?(:published)).to(be(true))
-    expect(tour.duration).to(eq(15394))
+    expect(tour.duration).to(eq(15549))
   end
 
   it 'updates duration when mode changes' do
@@ -40,11 +42,11 @@ RSpec.describe(Tour, type: :model) do
     tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 222).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(15194))
+    expect(tour.duration).to(eq(15279))
     tour.mode = Mode.find_by(title: 'TRANSIT')
     expect(tour.will_save_change_to_mode_id?).to(be(true))
     tour.save
-    expect(tour.duration).to(eq(11194))
+    expect(tour.duration).to(eq(11279))
     expect(tour.saved_change_to_attribute?(:duration)).to(be(true))
     expect(tour.saved_change_to_attribute?(:saved_stop_order)).to(be(false))
   end
@@ -55,7 +57,7 @@ RSpec.describe(Tour, type: :model) do
     tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(15394))
+    expect(tour.duration).to(eq(15549))
     # Trick the network stub to fetch different distance matrix but doesn't persist a
     # change to the tour's mode.
     tour.mode.title = 'TRANSIT'
@@ -66,7 +68,7 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.will_save_change_to_published?).to(be(false))
     expect(tour.will_save_change_to_saved_stop_order?).to(be(true))
     tour.save
-    expect(tour.duration).to(eq(11394))
+    expect(tour.duration).to(eq(11549))
     expect(tour.saved_change_to_attribute?(:duration)).to(be(true))
   end
 
@@ -89,7 +91,7 @@ RSpec.describe(Tour, type: :model) do
     tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }
     tour.update(published: true)
     tour.save
-    expect(tour.duration).to(eq(15394))
+    expect(tour.duration).to(eq(15549))
     # Trick the network stub to fetch different distance matrix but doesn't persist a
     # change to the tour's mode. In this case, it should NOT fetch. This is just to
     # test that it does not actually make the request when we don't want it to.
@@ -103,7 +105,7 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.saved_change_to_attribute?(:duration)).to(be(false))
     expect(tour.saved_change_to_attribute?(:published)).to(be(false))
     expect(tour.saved_change_to_attribute?(:saved_stop_order)).to(be(false))
-    expect(tour.duration).to(eq(15394))
+    expect(tour.duration).to(eq(15549))
   end
 
   it 'when restricted to overlay bounds, tour bounds mirror overlay' do

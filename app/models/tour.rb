@@ -64,6 +64,19 @@ class Tour < ContentBase
   scope :published, -> { where(published: true) }
   scope :mapable, -> { where(is_geo: true) }
   scope :has_stops, -> { includes(:stops).where.not(stops: { id: nil }) }
+  scope :search_import, -> {
+    includes(
+      :slugs,
+      :tour_flat_pages,
+      :map_icon,
+      :map_overlay,
+      :mode,
+      :tour_modes,
+      :voice_overs,
+      tour_media: :medium,
+      tour_stops: { stop: [:stop_slugs, :voice_overs, { stop_media: :medium }] },
+    )
+  }
 
   def sanitized_description
     HtmlSanitizer.accessible(description)
@@ -156,10 +169,11 @@ class Tour < ContentBase
     waypoints = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
 
     self.travel_duration = waypoints.each_cons(2).map do |origin, destination|
-      GoogleDirections.new(origin, [destination], 1, mode.title).durations&.sum
+      GoogleDirections.new(origin, [destination], 1, mode.title.downcase).durations&.sum
     end.compact.sum
 
-    self.read_duration = stops.map { |stop| (stop.sanitized_description.split.size / 4.4).to_i }.sum
+    # 3.3 is ~ 200 words per-minute, but we need it in seconds, so 200 / 60 = 3.3
+    self.read_duration = stops.map { |stop| (stop.sanitized_description.split.size / 3.3).to_i }.sum
 
     self.duration = travel_duration + read_duration
   end
@@ -201,7 +215,15 @@ class Tour < ContentBase
       slug:,
       slugs: slugs.map(&:slug),
       stop_count:,
-      stops: tour_stops.sort_by(&:position).map(&:search_data),
+      stops: begin
+        sorted = tour_stops.sort_by(&:position)
+        sorted.each_with_index.map do |ts, i|
+          ts.search_data_with_neighbors(
+            prev_stop: i > 0 ? sorted[i - 1].stop : nil,
+            next_stop: sorted[i + 1]&.stop,
+          )
+        end
+      end,
       tenant:,
       tenant_title:,
       title:,

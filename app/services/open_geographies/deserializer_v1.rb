@@ -34,8 +34,8 @@ module OpenGeographies
       {
         south: bbox.min_y,
         north: bbox.max_y,
-        west: bbox.max_x,
-        east: bbox.min_x,
+        west: bbox.min_x,
+        east: bbox.max_x,
         centerLat: bbox.center_y,
         centerLng: bbox.center_x,
       }
@@ -49,16 +49,20 @@ module OpenGeographies
         previous_stop = neighbor(@og_data[:stops][index - 1]) if index.nonzero?
 
         {
-          position:,
-          next: next_stop,
-          previous: previous_stop,
           address: og_stop[:address],
-          title: og_stop[:name],
           description: og_stop[:description],
-          meta_description: og_stop[:short_description],
+          id: og_stop[:uuid],
           lat: og_stop[:geo][:point][:lat],
           lng: og_stop[:geo][:point][:lon],
           media: media(og_stop[:media] || []),
+          meta_description: og_stop[:short_description],
+          next: next_stop,
+          position:,
+          previous: previous_stop,
+          sanitized_description: HtmlSanitizer.accessible(og_stop[:description]),
+          slug: og_stop[:slug],
+          slugs: og_stop[:slugs],
+          title: og_stop[:name],
         }
       end
     end
@@ -78,12 +82,12 @@ module OpenGeographies
         {
           title: medium[:name],
           provider: cached&.provider,
+          embed: medium[:embed_url],
           files: {
             original: medium[:content_url],
             mobile: thumbnail,
             tablet: medium[:preview] || thumbnail,
             desktop: medium[:content_url],
-            embed: medium[:embed_url],
           },
         }
       end

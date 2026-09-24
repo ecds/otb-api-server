@@ -184,6 +184,10 @@ RSpec.configure do |config|
         headers: { 'Content-Type' => 'text/html' },
       )
 
+    # Open Geographies media content_url HEAD check (iiif-cloud)
+    stub_request(:head, %r{https://iiif-cloud\.ecds\.io/.*})
+      .to_return(status: 200)
+
     # MorphoSource IIIF manifest
     stub_request(:get, %r{https://www\.morphosource\.org/manifests/.*\.json})
       .to_return(
@@ -206,16 +210,16 @@ RSpec.configure do |config|
 
     stub_request(:get, %r{http://127\.0\.0\.1:.*/json/version}).to_return(body: '{}', status: 200)
 
-    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*BICYCLING.*})
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*bicycling.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*TRANSIT.*})
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*transit.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix2.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*WALKING.*})
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*walking.*})
       .to_return(body: File.read(Rails.root + 'spec/factories/distance_matrix_zero.json'), status: 200, headers: { 'Content-Type': 'application/json' })
 
-    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*DRIVING.*})
+    stub_request(:get, %r{http.*://maps\.googleapis\.com/maps/api/.*driving.*})
       .to_return(body: '{"status": "INVALID_REQUEST"}', status: 200, headers: { 'Content-Type': 'application/json' })
 
     stub_request(:get, 'http://og.ecds.io')

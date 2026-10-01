@@ -113,6 +113,7 @@ module V4
             :map_icon_id,
             :default_lng,
             :map_type,
+            :icon_color,
             :description,
             :meta_description,
             :link_address,

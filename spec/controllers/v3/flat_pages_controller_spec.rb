@@ -12,7 +12,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       expect(response.status).to(eq(200))
       expect(Tour.count).to(be > Tour.published.count)
       json.each do |flat_page|
-        expect(FlatPage.find(flat_page[:id]).tours.any?(&:published))
+        expect(FlatPage.find(flat_page[:id]).tours.any?(&:published)).to(be(true))
       end
       expect(json.count).to(be < FlatPage.count)
     end
@@ -29,7 +29,7 @@ RSpec.describe(V3::FlatPagesController, type: :controller) do
       expect(response.status).to(eq(200))
       expect(Tour.count).to(be > Tour.published.count)
       json.each do |flat_page|
-        expect(FlatPage.find(flat_page[:id]).tours.any?(&:published))
+        expect(FlatPage.find(flat_page[:id]).tours.any?(&:published)).to(be(true))
       end
       expect(json.count).to(eq(FlatPage.all.reject { |fp| !fp.published }.count))
     end

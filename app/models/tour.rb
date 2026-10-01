@@ -175,7 +175,7 @@ class Tour < ContentBase
     # 3.3 is ~ 200 words per-minute, but we need it in seconds, so 200 / 60 = 3.3
     self.read_duration = stops.map { |stop| (stop.sanitized_description.split.size / 3.3).to_i }.sum
 
-    self.duration = travel_duration + read_duration
+    self.duration = travel_duration + read_duration if travel_duration
   end
 
   def check_published
@@ -193,6 +193,7 @@ class Tour < ContentBase
       default_lng:,
       description:,
       flat_pages: tour_flat_pages.sort_by(&:position).map(&:search_data),
+      icon_color:,
       id:,
       is_geo:,
       link_address:,

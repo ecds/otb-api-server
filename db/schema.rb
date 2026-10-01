@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_03_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_01_134924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -360,6 +360,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_03_000000) do
     t.bigint "map_icon_id"
     t.integer "travel_duration"
     t.integer "read_duration"
+    t.string "icon_color", default: "#D32F2F"
     t.index "lower((title)::text)", name: "index_articles_on_lower_title", unique: true
     t.index ["map_icon_id"], name: "index_tours_on_map_icon_id"
     t.index ["medium_id"], name: "index_tours_on_medium_id"

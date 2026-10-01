@@ -1,0 +1,5 @@
+Request for access to <%= @tour_set.name %> Open Tour Site
+
+  <%= @access_request.user.display_name %> (<%= @access_request.user.email %>) has requested access to your Open Tour site <%= @tour_set.name %>.
+
+  Use this link to view and approve the request: https://opentour.site/admin/approve/<%= @access_request.id %>

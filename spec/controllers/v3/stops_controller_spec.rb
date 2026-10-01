@@ -2,19 +2,19 @@
 
 require 'rails_helper'
 
-RSpec.describe V3::StopsController, type: :controller do
+RSpec.describe(V3::StopsController, type: :controller) do
   describe 'GET #index' do
     it 'returns a 200 response with stops connected to published tours' do
       create_list(:tour_with_stops, 5, theme: create(:theme), mode: create(:mode))
       Tour.first.update(published: true)
       Tour.last.update(published: false)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(Tour.count).to be > Tour.published.count
+      expect(response.status).to(eq(200))
+      expect(Tour.count).to(be > Tour.published.count)
       json.each do |stop|
-        expect(Stop.find(stop[:id]).tours.any? { |tour| tour.published })
+        expect(Stop.find(stop[:id]).tours.any?(&:published))
       end
-      expect(json.count).to be < Stop.count
+      expect(json.count).to(be < Stop.count)
     end
 
     it 'returns a 200 response with no stops when request is authenticated by person with no access' do
@@ -22,20 +22,18 @@ RSpec.describe V3::StopsController, type: :controller do
       Tour.first.update(published: true) if Tour.published.empty?
       Tour.last.update(published: false) if Tour.published.count == Tour.count
       Tour.last.stops.tours = [] if Tour.last.stops.count > 1
-      if Stop.all.all? { |s| s.published }
-        Stop.last.update(tours: [])
-      end
+      Stop.last.update(tours: []) if Stop.all.all?(&:published)
       user = create(:user)
       user.tour_sets = []
       user.tours = []
       signed_cookie(user)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(Tour.count).to be > Tour.published.count
+      expect(response.status).to(eq(200))
+      expect(Tour.count).to(be > Tour.published.count)
       json.each do |stop|
-        expect(Stop.find(stop[:id]).tours.any? { |tour| tour.published })
+        expect(Stop.find(stop[:id]).tours.any?(&:published))
       end
-      expect(json.count).to be < Stop.count
+      expect(json.count).to(be < Stop.count)
     end
 
     it 'returns a 200 response with stops when request is authenticated by tenant admin and tour is unpublished' do
@@ -45,9 +43,9 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
       get :index, params: { tenant: tour.tenant }
-      expect(Stop.count).to be > 1
-      expect(response.status).to eq(200)
-      expect(json.count).to eq(Stop.count)
+      expect(Stop.count).to(be > 1)
+      expect(response.status).to(eq(200))
+      expect(json.count).to(eq(Stop.count))
     end
 
     it 'returns a 200 response when request is authenticated by tour author and tour is unpublished' do
@@ -57,9 +55,9 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tours << Tour.first
       signed_cookie(user)
       get :index, params: { tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(200)
-      expect(json.count).to eq(Tour.first.stops.count)
-      expect(json.count).to be < Stop.count
+      expect(response.status).to(eq(200))
+      expect(json.count).to(eq(Tour.first.stops.count))
+      expect(json.count).to(be < Stop.count)
     end
   end
 
@@ -67,29 +65,29 @@ RSpec.describe V3::StopsController, type: :controller do
     it 'returns a 200 response that is empty stop' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       # Make sure the stop is only associated with the newly created tour
       tour.stops.last.update(tours: [tour])
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
-      expect(response.status).to eq(200)
-      expect(json[:id]).to eq(tour.stops.last.id.to_s)
-      expect(attributes[:title]).to be_nil
+      expect(response.status).to(eq(200))
+      expect(json[:id]).to(eq(tour.stops.last.id.to_s))
+      expect(attributes[:title]).to(be_nil)
     end
 
     it 'returns a 200 response and stop when stop is part of published tour' do
       tour = create(:tour)
       tour.update(published: true)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.last.update(tours: [tour])
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
-      expect(response.status).to eq(200)
-      expect(attributes[:title]).to eq(tour.stops.last.title)
+      expect(response.status).to(eq(200))
+      expect(attributes[:title]).to(eq(tour.stops.last.title))
     end
 
     it 'returns a 200 response that is empty stop when request is authenticated by someone w/o permission' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.last.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -97,15 +95,15 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets = []
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.last.id }
-      expect(response.status).to eq(200)
-      expect(json[:id]).to eq(tour.stops.last.id.to_s)
-      expect(attributes[:title]).to be_nil
+      expect(response.status).to(eq(200))
+      expect(json[:id]).to(eq(tour.stops.last.id.to_s))
+      expect(attributes[:title]).to(be_nil)
     end
 
     it 'returns a 200 response that is a stop when request is authenticated by a tour author' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.first.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -113,14 +111,14 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets = []
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.first.id }
-      expect(response.status).to eq(200)
-      expect(attributes[:title]).to eq(tour.stops.first.title)
+      expect(response.status).to(eq(200))
+      expect(attributes[:title]).to(eq(tour.stops.first.title))
     end
 
     it 'returns a 200 response that is a stop when request is authenticated by a tenant admin' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.first.update(tours: [tour])
       user = create(:user)
       user.update(super: false)
@@ -128,14 +126,14 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.first.id }
-      expect(response.status).to eq(200)
-      expect(attributes[:title]).to eq(tour.stops.first.title)
+      expect(response.status).to(eq(200))
+      expect(attributes[:title]).to(eq(tour.stops.first.title))
     end
 
     it 'returns a 200 response that is a stop when request is authenticated by a super user' do
       tour = create(:tour)
       tour.update(published: false)
-      Stop.all.each { |stop| tour.stops << stop }
+      Stop.all.find_each { |stop| tour.stops << stop }
       tour.stops.first.update(tours: [tour])
       user = create(:user)
       user.update(super: true)
@@ -143,17 +141,17 @@ RSpec.describe V3::StopsController, type: :controller do
       user.tour_sets = []
       signed_cookie(user)
       get :show, params: { tenant: Apartment::Tenant.current, id: tour.stops.first.id }
-      expect(response.status).to eq(200)
-      expect(attributes[:title]).to eq(tour.stops.first.title)
+      expect(response.status).to(eq(200))
+      expect(attributes[:title]).to(eq(tour.stops.first.title))
     end
   end
 
   describe 'POST #create' do
     context 'with valid params' do
       it 'return 401 when unauthenciated' do
-          post :create, params: { data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
-          expect(response.status).to eq(401)
-        end
+        post :create, params: { data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(401))
+      end
 
       it 'return 401 when authenciated but not an admin for current tenant' do
         user = create(:user)
@@ -162,7 +160,7 @@ RSpec.describe V3::StopsController, type: :controller do
         user.tours = []
         signed_cookie(user)
         post :create, params: { data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(401)
+        expect(response.status).to(eq(401))
       end
 
       it 'return 201 when authenciated but an admin for current tenant' do
@@ -172,9 +170,9 @@ RSpec.describe V3::StopsController, type: :controller do
         signed_cookie(user)
         original_stop_count = Stop.count
         post :create, params: { data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(201)
-        expect(attributes[:title]).to eq('Burrito Stop')
-        expect(Stop.count).to eq(original_stop_count + 1)
+        expect(response.status).to(eq(201))
+        expect(attributes[:title]).to(eq('Burrito Stop'))
+        expect(Stop.count).to(eq(original_stop_count + 1))
       end
 
       it 'return 201 when authenciated by super' do
@@ -184,9 +182,9 @@ RSpec.describe V3::StopsController, type: :controller do
         signed_cookie(user)
         original_stop_count = Stop.count
         post :create, params: { data: { type: 'stops', attributes: { title: 'Taco Stop' } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(201)
-        expect(attributes[:title]).to eq('Taco Stop')
-        expect(Stop.count).to eq(original_stop_count + 1)
+        expect(response.status).to(eq(201))
+        expect(attributes[:title]).to(eq('Taco Stop'))
+        expect(Stop.count).to(eq(original_stop_count + 1))
       end
 
       it 'return 201 when authenciated by a tour author' do
@@ -197,9 +195,9 @@ RSpec.describe V3::StopsController, type: :controller do
         signed_cookie(user)
         original_stop_count = Stop.count
         post :create, params: { data: { type: 'stops', attributes: { title: 'Elmyr' } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(201)
-        expect(attributes[:title]).to eq('Elmyr')
-        expect(Stop.count).to eq(original_stop_count + 1)
+        expect(response.status).to(eq(201))
+        expect(attributes[:title]).to(eq('Elmyr'))
+        expect(Stop.count).to(eq(original_stop_count + 1))
       end
     end
   end
@@ -208,8 +206,9 @@ RSpec.describe V3::StopsController, type: :controller do
     context 'with valid params' do
       it 'return 401 when unauthenciated' do
         create(:tour)
-        post :update, params: { id: Stop.last.id, data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(401)
+        post :update,
+          params: { id: Stop.last.id, data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(401))
       end
 
       it 'return 401 when authenciated but not an admin for current tenant' do
@@ -219,8 +218,9 @@ RSpec.describe V3::StopsController, type: :controller do
         user.tour_sets = []
         user.tours = []
         signed_cookie(user)
-        post :update, params: { id: Stop.first.id, data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(401)
+        post :update,
+          params: { id: Stop.first.id, data: { type: 'stops', attributes: { title: 'Burrito Stop' } }, tenant: Apartment::Tenant.current }
+        expect(response.status).to(eq(401))
       end
 
       it 'return 200 and updated tour when authenciated but an admin for current tenant' do
@@ -232,10 +232,10 @@ RSpec.describe V3::StopsController, type: :controller do
         original_stop_title = Stop.last.title
         new_title = Faker::Name.unique.name
         post :update, params: { id: Stop.first.id, data: { type: 'stops', attributes: { title: new_title } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(200)
-        expect(attributes[:title]).not_to eq(original_stop_title)
-        expect(attributes[:title]).to eq(new_title)
-        expect(Stop.first.title).to eq(new_title)
+        expect(response.status).to(eq(200))
+        expect(attributes[:title]).not_to(eq(original_stop_title))
+        expect(attributes[:title]).to(eq(new_title))
+        expect(Stop.first.title).to(eq(new_title))
       end
 
       it 'return 200 and updated tour when authenciated by super' do
@@ -248,10 +248,10 @@ RSpec.describe V3::StopsController, type: :controller do
         original_stop_title = Stop.last.title
         new_title = Faker::Name.unique.name
         post :update, params: { id: Stop.last.id, data: { type: 'stops', attributes: { title: new_title } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(200)
-        expect(attributes[:title]).not_to eq(original_stop_title)
-        expect(attributes[:title]).to eq(new_title)
-        expect(Stop.last.title).to eq(new_title)
+        expect(response.status).to(eq(200))
+        expect(attributes[:title]).not_to(eq(original_stop_title))
+        expect(attributes[:title]).to(eq(new_title))
+        expect(Stop.last.title).to(eq(new_title))
       end
 
       it 'return 200 and updated tour when authenciated by tour author' do
@@ -264,10 +264,10 @@ RSpec.describe V3::StopsController, type: :controller do
         original_stop_title = Stop.last.title
         new_title = Faker::Name.unique.name
         post :update, params: { id: Stop.first.id, data: { type: 'stops', attributes: { title: new_title } }, tenant: Apartment::Tenant.current }
-        expect(response.status).to eq(200)
-        expect(attributes[:title]).not_to eq(original_stop_title)
-        expect(attributes[:title]).to eq(new_title)
-        expect(Stop.first.title).to eq(new_title)
+        expect(response.status).to(eq(200))
+        expect(attributes[:title]).not_to(eq(original_stop_title))
+        expect(attributes[:title]).to(eq(new_title))
+        expect(Stop.first.title).to(eq(new_title))
       end
     end
 
@@ -286,21 +286,21 @@ RSpec.describe V3::StopsController, type: :controller do
     it 'return 401 when unauthenciated' do
       create(:tour)
       post :destroy, params: { id: Stop.first.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(401)
+      expect(response.status).to(eq(401))
     end
 
     it 'return 401 when authenciated but not an admin for current tenant' do
-      tour = create(:tour)
+      create(:tour)
       user = create(:user)
       user.update(super: false)
       user.tour_sets = []
       signed_cookie(user)
       post :destroy, params: { id: Stop.first.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(401)
+      expect(response.status).to(eq(401))
     end
 
     it 'return 204 and one less tour when authenciated but an admin for current tenant' do
-      tour = create(:tour)
+      create(:tour)
       user = create(:user)
       user.update(super: false)
       user.tour_sets << TourSet.find_by(subdir: Apartment::Tenant.current)
@@ -309,12 +309,12 @@ RSpec.describe V3::StopsController, type: :controller do
       Stop.last.update(tours: [])
       post :destroy, params: { id: Stop.last.id, tenant: Apartment::Tenant.current }
       Stop.last.update(tours: [])
-      expect(response.status).to eq(204)
-      expect(Stop.count).to eq(stop_count - 1)
+      expect(response.status).to(eq(204))
+      expect(Stop.count).to(eq(stop_count - 1))
     end
 
     it 'return 204 and one less tour when authenciated by super' do
-      tour = create(:tour)
+      create(:tour)
       user = create(:user)
       user.tour_sets = []
       user.update(super: true)
@@ -322,8 +322,8 @@ RSpec.describe V3::StopsController, type: :controller do
       Stop.first.update(tours: [])
       stop_count = Stop.count
       post :destroy, params: { id: Stop.first.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(204)
-      expect(Stop.count).to eq(stop_count - 1)
+      expect(response.status).to(eq(204))
+      expect(Stop.count).to(eq(stop_count - 1))
     end
 
     it 'return 204 and one less stop when authenciated by tour author and Stop does not belong to a Tour' do
@@ -336,8 +336,8 @@ RSpec.describe V3::StopsController, type: :controller do
       Stop.last.update(tours: [])
       stop_count = Stop.count
       post :destroy, params: { id: Stop.last.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(204)
-      expect(Stop.count).to eq(stop_count - 1)
+      expect(response.status).to(eq(204))
+      expect(Stop.count).to(eq(stop_count - 1))
     end
 
     it 'return 405 and does not delete Stop when Stop belongs to a Tour and requested by super' do
@@ -348,8 +348,8 @@ RSpec.describe V3::StopsController, type: :controller do
       signed_cookie(user)
       stop_count = Stop.count
       post :destroy, params: { id: Stop.last.id, tenant: Apartment::Tenant.current }
-      expect(response.status).to eq(405)
-      expect(Stop.count).to eq(stop_count)
+      expect(response.status).to(eq(405))
+      expect(Stop.count).to(eq(stop_count))
     end
   end
 end

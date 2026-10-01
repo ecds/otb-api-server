@@ -1,9 +1,9 @@
+# frozen_string_literal: true
+
 class RenameMetadescription < ActiveRecord::Migration[5.2]
   def change
-    begin
-      rename_column :stops, :metadescription, :meta_description
-    rescue
-      # It's fine
-    end
+    rename_column(:stops, :metadescription, :meta_description)
+  rescue StandardError
+    # It's fine
   end
 end

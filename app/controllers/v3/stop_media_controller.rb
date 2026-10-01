@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module V3
   class StopMediaController < V3::TourRelationsController
     # GET /v3/stop_media
@@ -14,23 +16,24 @@ module V3
         @stop_media = @stop_media.reject { |stop_medium| !stop_medium.stop.published }
       end
 
-      render json: @stop_media
+      render(json: @stop_media)
     end
 
     private
-      # Only allow a trusted parameter "white list" through.
-      def record_params
-        ActiveModelSerializers::Deserialization
-            .jsonapi_parse(
-              params, only: [
-                    :medium, :stop, :position
-                ]
-            )
-      end
 
-      def set_record
-        _record = StopMedium.find(params[:id])
-        @record = _record&.published || @allowed ? _record : StopMedium.new(id: params[:id])
-      end
+    # Only allow a trusted parameter "white list" through.
+    def record_params
+      ActiveModelSerializers::Deserialization
+        .jsonapi_parse(
+          params, only: [
+            :medium, :stop, :position,
+          ]
+        )
+    end
+
+    def set_record
+      _record = StopMedium.find(params[:id])
+      @record = _record&.published || @allowed ? _record : StopMedium.new(id: params[:id])
+    end
   end
 end

@@ -7,24 +7,24 @@ class V3Controller < ApplicationController
 
   # GET /<record>/1
   def show
-    render json: @record
+    render(json: @record)
   end
 
   # POST /v3/tour_media
   def create
-    render json: {}, status: :unauthorized
+    render(json: {}, status: :unauthorized)
   end
 
   # PATCH/PUT /media/1
   def update
     if crud_allowed?
       if @record.update(record_params)
-        render json: @record
+        render(json: @record)
       else
-        render json: serialize_errors, status: :unprocessable_entity
+        render(json: serialize_errors, status: :unprocessable_entity)
       end
     else
-      render json: {}, status: :unauthorized
+      render(json: {}, status: :unauthorized)
     end
   end
 
@@ -32,32 +32,30 @@ class V3Controller < ApplicationController
     if crud_allowed?
       @record.destroy
     else
-      render json: {}, status: :unauthorized
+      render(json: {}, status: :unauthorized)
     end
   end
 
   def serialize_errors
     errors = []
-    if @record&.errors
-      @record.errors.full_messages.each do |error|
-        errors.push({
-          detail: error,
-          source: {
-            pointer: 'data/attributes'
-          }
-        })
-      end
+    @record&.errors&.full_messages&.each do |error|
+      errors.push({
+        detail: error,
+        source: {
+          pointer: 'data/attributes',
+        },
+      })
     end
     { errors: errors }
   end
 
   private
 
-    def allowed?
-      @allowed = @record&.published || crud_allowed?
-    end
+  def allowed?
+    @allowed = @record&.published || crud_allowed?
+  end
 
-    def crud_allowed?
-      current_user&.current_tenant_admin? || current_user.tours.present?
-    end
+  def crud_allowed?
+    current_user&.current_tenant_admin? || current_user.tours.present?
+  end
 end

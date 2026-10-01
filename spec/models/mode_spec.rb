@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Mode, type: :model do
-  it { should have_many(:tour_modes) }
-  it { should have_many(:tours) }
+RSpec.describe(Mode, type: :model) do
+  it { is_expected.to(have_many(:tour_modes)) }
+  it { is_expected.to(have_many(:tours)) }
 end

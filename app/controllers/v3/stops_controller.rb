@@ -3,27 +3,25 @@
 # /app/controllers/v3/stops_controller.rb
 module V3
   class StopsController < V3::TourRelationsController
-  # GET /stops
+    # GET /stops
     def index
       @records = if current_user.current_tenant_admin?
         Stop.all
       elsif current_user.tours.present?
-        current_user.tours.map { |tour| tour.stops }.flatten.uniq
+        current_user.tours.map(&:stops).flatten.uniq
       else
-        Tour.published.map { |tour| tour.stops }.flatten.uniq
+        Tour.published.map(&:stops).flatten.uniq
       end
-      render json: @records
+      render(json: @records)
     end
 
     # POST /stops
     def create
       if crud_allowed?
         @record = Stop.new(stop_params)
-        if @record.save
-          render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
-        end
+        render(json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}") if @record.save
       else
-        head 401
+        head(:unauthorized)
       end
     end
 
@@ -31,43 +29,52 @@ module V3
     def update
       if crud_allowed?
         if @record&.update(stop_params)
-          render json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}"
+          render(json: @record, location: "/#{Apartment::Tenant.current}/stops/#{@record.id}")
         end
       else
-        head 401
+        head(:unauthorized)
       end
     end
 
     def destroy
       if !crud_allowed?
-        head 401
+        head(:unauthorized)
       elsif crud_allowed? && @record.orphaned
         @record.destroy
       elsif crud_allowed? && !@record.orphaned
-        head 405
+        head(:method_not_allowed)
       end
     end
 
-      private
+    private
 
-        # Only allow a trusted parameter "white list" through.
-        def stop_params
-          ActiveModelSerializers::Deserialization
-              .jsonapi_parse(
-                params, only: [
-                      :title, :description, :lat, :lng,
-                      :parking_lat, :parking_lng, :media,
-                      :address, :tours, :direction_notes,
-                      :meta_description, :parking_address,
-                      :icon_color, :map_icon
-                  ]
-              )
-        end
+    # Only allow a trusted parameter "white list" through.
+    def stop_params
+      ActiveModelSerializers::Deserialization
+        .jsonapi_parse(
+          params, only: [
+            :title,
+            :description,
+            :lat,
+            :lng,
+            :parking_lat,
+            :parking_lng,
+            :media,
+            :address,
+            :tours,
+            :direction_notes,
+            :meta_description,
+            :parking_address,
+            :icon_color,
+            :map_icon,
+          ]
+        )
+    end
 
-        # Callbacks
-        def set_record
-          _record = Stop.find_by(id: params[:id])
-          @record = _record&.published || @allowed ? _record : Stop.new(id: params[:id])
-        end
+    # Callbacks
+    def set_record
+      _record = Stop.find_by(id: params[:id])
+      @record = _record&.published || @allowed ? _record : Stop.new(id: params[:id])
+    end
   end
 end

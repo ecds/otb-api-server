@@ -13,7 +13,17 @@ module SignedCookieHelper
       value: login.tokens.first.token,
       httponly: true,
       same_site: :none,
-      secure: 'Secure'
+      secure: 'Secure',
+    }
+  end
+
+  # Used for mocking requests with bad credentials.
+  def invalid_signed_cooke
+    cookies.signed[:auth] = {
+      value: JWT.encode(Faker::Beer.style, Faker::Address.zip, 'HS256'),
+      httponly: true,
+      same_site: :none,
+      secure: 'Secure',
     }
   end
 end

@@ -2,17 +2,17 @@ name: Deploy
 
 on:
   push:
-    branches: [ develop, main ]
+    branches: [develop, main]
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy to'
+        description: "Environment to deploy to"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
-        - staging
-        - production
+          - staging
+          - production
 
 env:
   RAILS_ENV: production
@@ -22,91 +22,82 @@ permissions:
   contents: read
 
 jobs:
+  # Runs the exact same job defined in test.yml (via workflow_call) instead
+  # of keeping a separate copy here. deploy only runs if this passes.
   test:
-    runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: otb_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.1.2
-        bundler-cache: true
-
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client imagemagick libpq-dev gdal-bin libgdal-dev
-
-    - name: Create directories
-      run: |
-        sudo mkdir -p /data/tmp
-        sudo chmod 777 /data/tmp
-        mkdir -p public/storage/tmp
-
-    - name: Set up database
-      run: |
-        export DB_ADAPTER=postgresql
-        until pg_isready -h localhost -p 5432 -U postgres; do sleep 2; done
-        bundle exec rake db:create RAILS_ENV=test DB_ADAPTER=postgresql
-        bundle exec rake db:schema:load RAILS_ENV=test DB_ADAPTER=postgresql
-
-    - name: Run tests
-      run: |
-        DB_ADAPTER=postgresql bundle exec rspec --format progress
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    
+    # For a manual run, the picker below decides. For an ordinary push,
+    # there's no picker input, so this falls back to branch: main ->
+    # production, anything else (develop) -> staging.
+    environment: ${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE }}
-        aws-region: us-east-1
-        role-session-name: GitHub-OIDC-OTB
+      # A manual dispatch could otherwise pick "production" while running
+      # against a non-main branch, silently deploying untested branch code
+      # to production. This only ever fires for that specific case — a
+      # normal push always resolves its environment from the branch itself,
+      # never from this input, so it can't trip this guard.
+      - name: Refuse to deploy production from a non-main branch
+        if: github.event.inputs.environment == 'production' && github.ref_name != 'main'
+        run: |
+          echo "::error::Refusing to deploy to production from branch '${{ github.ref_name }}'. Production deploys must be triggered from main."
+          exit 1
 
-    - name: Deploy to ECS
-      env:
-        AWS_ECR: ${{ secrets.AWS_ECR }}
-        AWS_ECS_CLUSTER_DEV: ${{ secrets.AWS_ECS_CLUSTER_DEV }}
-        AWS_ECS_CLUSTER_PROD: ${{ secrets.AWS_ECS_CLUSTER_PROD }}
-        AWS_ECS_SERVICE_DEV: ${{ secrets.AWS_ECS_SERVICE_DEV }}
-        AWS_ECS_SERVICE_PROD: ${{ secrets.AWS_ECS_SERVICE_PROD }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        BRANCH: ${{ github.ref_name }}
-      run: |
-        chmod +x build.sh
-        ./build.sh
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: us-east-1
+          role-session-name: GitHub-OIDC-OTB
 
-    - name: Notify deployment status
-      if: always()
-      run: |
-        branch="${{ github.ref_name }}"
-        environment=$([ "$branch" == "main" ] && echo "production" || echo "staging")
-        if [[ "${{ job.status }}" == "success" ]]; then
-          echo "Successfully deployed to $environment via ECS"
-        else
-          echo "Deployment to $environment failed"
-        fi
+      # Turns the resolved environment (production/staging) into the actual
+      # image tag + ECS cluster/service build.sh needs. This is the one
+      # place that mapping lives now — build.sh just builds/pushes/deploys
+      # whatever it's told, it doesn't decide anything on its own anymore.
+      - name: Resolve deploy target
+        id: target
+        env:
+          DEPLOY_ENV: ${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+        run: |
+          if [ "$DEPLOY_ENV" = "production" ]; then
+            {
+              echo "tag=stable"
+              echo "cluster=${{ secrets.AWS_ECS_CLUSTER_PROD }}"
+              echo "service=${{ secrets.AWS_ECS_SERVICE_PROD }}"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "tag=latest"
+              echo "cluster=${{ secrets.AWS_ECS_CLUSTER_DEV }}"
+              echo "service=${{ secrets.AWS_ECS_SERVICE_DEV }}"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build, tag, push, and deploy
+        env:
+          AWS_ECR: ${{ secrets.AWS_ECR }}
+          TAG: ${{ steps.target.outputs.tag }}
+          AWS_ECS_CLUSTER: ${{ steps.target.outputs.cluster }}
+          AWS_ECS_SERVICE: ${{ steps.target.outputs.service }}
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Notify deployment status
+        if: always()
+        env:
+          DEPLOY_ENV: ${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || 'staging') }}
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "Successfully deployed to $DEPLOY_ENV via ECS"
+          else
+            echo "Deployment to $DEPLOY_ENV failed"
+          fi

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-# Through model TourSet and User assoiation.
+# Through model TourSet and User association.
 #
 class TourSetAdmin < ApplicationRecord
   belongs_to :user

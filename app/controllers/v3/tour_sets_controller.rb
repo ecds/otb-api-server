@@ -9,10 +9,10 @@ module V3
       @records = []
       if params[:subdir] && params[:subdir] != 'public'
         @records = TourSet.where(subdir: params[:subdir])
-        if !@records.first&.published_tours&.empty? || current_user&.tour_sets.include?(@records.first) || current_user&.super
-          render json: @records
+        if !@records.first&.published_tours&.empty? || current_user&.tour_sets&.include?(@records.first) || current_user&.super
+          render(json: @records)
         else
-          render json: TourSet.none
+          render(json: TourSet.none)
         end
         return
       elsif current_user&.tour_sets.present? && !current_user.super
@@ -22,21 +22,19 @@ module V3
       end
 
       if current_user.tour_sets.present? || current_user.super
-        render json: @records, include: [ 'admins' ]
+        render(json: @records, include: ['admins'])
       else
-        if current_user&.tour_sets.empty?
-          @records = published
-        end
-        render json: @records
+        @records = published if current_user&.tour_sets&.empty?
+        render(json: @records)
       end
     end
 
     # GET /tour_sets/1
     def show
       if @allowed
-        render json: @record
+        render(json: @record)
       else
-        render json: { data: { id: 0, type: 'tour_sets', attributes: { name: '....' } } }
+        render(json: { data: { id: 0, type: 'tour_sets', attributes: { name: '....' } } })
       end
     end
 
@@ -46,12 +44,12 @@ module V3
         @record = TourSet.new(record_params)
 
         if @record.save
-          render json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}"
+          render(json: @record, status: :created, location: "/#{Apartment::Tenant.current}/#{@record.id}")
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head 401
+        head(:unauthorized)
       end
     end
 
@@ -59,16 +57,16 @@ module V3
     def update
       if crud_allowed?
         if @record.update(record_params)
-          render json: @record
+          render(json: @record)
         else
-          render json: serialize_errors, status: :unprocessable_entity
+          render(json: serialize_errors, status: :unprocessable_entity)
         end
       else
-        head 401
+        head(:unauthorized)
       end
     end
 
-  private
+    private
 
     # Use callbacks to share common setup or constraints between actions.
     def set_record
@@ -95,11 +93,11 @@ module V3
     # Only allow a trusted parameter "white list" through.
     def record_params
       ActiveModelSerializers::Deserialization
-          .jsonapi_parse(
-            params, only: [
-                  :name, :tours, :admins, :base_sixty_four, :logo_title
-              ]
-          )
+        .jsonapi_parse(
+          params, only: [
+            :name, :tours, :admins, :base_sixty_four, :logo_title, :logo,
+          ]
+        )
     end
   end
 end

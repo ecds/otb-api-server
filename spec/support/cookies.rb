@@ -1,6 +1,12 @@
+# frozen_string_literal: true
+
 # spec/support/cookies.rb
-class Rack::Test::CookieJar
-  def encrypted; self; end
-  def signed; self; end
-  def permanent; self; end # I needed this, too
+module Rack
+  module Test
+    class CookieJar
+      def encrypted = self
+      def signed = self
+      def permanent = self # I needed this, too
+    end
+  end
 end

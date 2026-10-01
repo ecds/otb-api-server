@@ -1,0 +1,12 @@
+Request for access to edit <%= @access_request.tour_set.name %> tours on OpenTour
+====================================================================================
+
+<%= @access_request.user.display_name %> (<%= @access_request.user.email %>) has requested access to edit the following tours.
+
+You can approve each individually by clicking the links below, or approve all here:
+APPROVE ALL: <%= approve_all_url %>
+
+Tours requested:
+<% @access_request.requested_tours.each do |tour| %>
+  - <%= tour.title %>: <%= tour_url(tour) %>
+<% end %>

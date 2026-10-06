@@ -103,7 +103,7 @@ module V4
             :parking_lng,
           )
         when 'tour_stop'
-          params.require(:tour_stop).permit(:tour_id, :stop_id, :position)
+          params.require(:tour_stop).permit(:tour_id, :stop_id, :position, :icon_color, :map_icon_id)
         when 'tour_mode'
           params.require(:tour_mode).permit(:tour_id, :mode_id)
         when 'tour'

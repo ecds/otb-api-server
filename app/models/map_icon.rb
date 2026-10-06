@@ -6,6 +6,7 @@ class MapIcon < MediumBaseRecord
 
   has_one :stop, dependent: :nullify
   has_one :tour, dependent: :nullify
+  has_many :tour_stops, dependent: :nullify
 
   def published
     (stop || tour)&.published || false

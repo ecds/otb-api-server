@@ -175,4 +175,59 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       expect(response).to(have_http_status(:unauthorized))
     end
   end
+
+  describe 'PATCH #update' do
+    let(:tour) do
+      Apartment::Tenant.switch!(tour_set.subdir)
+      create(:tour_with_stops, published: false, stops_count: 3)
+    end
+
+    def patch_tour(document)
+      patch :update, params: { tenant: tour_set.subdir, id: tour.id, tour: document }, as: :json
+    end
+
+    it 'returns 401 when unauthenticated' do
+      patch_tour({ title: 'Nope' })
+      expect(response.status).to(eq(401))
+    end
+
+    it 'returns 401 for a user who is not an author of the tour' do
+      signed_cookie(create(:user, super: false))
+      patch_tour({ title: 'Nope' })
+      expect(response.status).to(eq(401))
+      expect(tour.reload.title).not_to(eq('Nope'))
+    end
+
+    it 'allows an author of the tour' do
+      user = create(:user, super: false)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      user.tours << tour
+      signed_cookie(user)
+      patch_tour({ title: 'By author' })
+      expect(response.status).to(eq(200))
+    end
+
+    it 'returns 404 for a missing tour' do
+      signed_cookie(create(:user, super: true))
+      patch :update, params: { tenant: tour_set.subdir, id: 0, tour: { title: 'x' } }, as: :json
+      expect(response.status).to(eq(404))
+    end
+
+    it 'saves the document and responds with the tour built from the database' do
+      signed_cookie(create(:user, super: true))
+      Apartment::Tenant.switch!(tour_set.subdir)
+      stops = tour.tour_stops.order(:position).map { |ts| { relation_id: ts.id, id: ts.stop_id } }
+      patch_tour({ title: 'Saved', stops: stops.reverse })
+      expect(response.status).to(eq(200))
+      expect(v4_json[:title]).to(eq('Saved'))
+      expect(v4_json[:stops].map { |s| s[:relation_id] }).to(eq(stops.reverse.map { |s| s[:relation_id] }))
+    end
+
+    it 'returns 422 with field paths for invalid documents' do
+      signed_cookie(create(:user, super: true))
+      patch_tour({ title: '' })
+      expect(response.status).to(eq(422))
+      expect(v4_json[:errors].first[:path]).to(eq('tour.title'))
+    end
+  end
 end

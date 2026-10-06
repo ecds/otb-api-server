@@ -54,6 +54,7 @@ class Tour < ContentBase
   before_validation -> { self.theme ||= Theme.first }
   before_validation -> { self.title ||= 'untitled' }
   before_validation :update_saved_stop_order
+  before_save :update_icon_colors
   before_save :calculate_duration
   before_save :check_url
   before_save :check_for_overlay
@@ -64,17 +65,36 @@ class Tour < ContentBase
   scope :published, -> { where(published: true) }
   scope :mapable, -> { where(is_geo: true) }
   scope :has_stops, -> { includes(:stops).where.not(stops: { id: nil }) }
+  # Everything search_data touches, so building it doesn't fall into N+1s.
+  # Attachments/blobs are needed for the media/icon/voice-over URLs.
+  WITH_FILE = { file_attachment: :blob }.freeze
   scope :search_import, -> {
     includes(
       :slugs,
-      :tour_flat_pages,
-      :map_icon,
-      :map_overlay,
+      :theme,
       :mode,
-      :tour_modes,
-      :voice_overs,
-      tour_media: :medium,
-      tour_stops: { stop: [:stop_slugs, :voice_overs, { stop_media: :medium }] },
+      { medium: WITH_FILE },
+      { map_icon: WITH_FILE },
+      { map_overlay: WITH_FILE },
+      { voice_overs: WITH_FILE },
+      { tour_modes: :mode },
+      { tour_flat_pages: { flat_page: :tours } },
+      { tour_media: { medium: WITH_FILE } },
+      {
+        tour_stops: [
+          { map_icon: WITH_FILE },
+          {
+            stop: [
+              :stop_slugs,
+              :tours,
+              { medium: WITH_FILE },
+              { map_icon: WITH_FILE },
+              { voice_overs: WITH_FILE },
+              { stop_media: { medium: WITH_FILE } },
+            ],
+          },
+        ],
+      },
     )
   }
 
@@ -99,13 +119,13 @@ class Tour < ContentBase
   def splash
     splash_medium = if medium.present?
       medium
-    elsif tour_media.present?
-      tour_media.order(:position).first.medium
-    elsif stops.present?
+    elsif tour_media.any?
+      tour_media.min_by(&:position).medium
+    elsif ordered_stops.any?
       first_stop_medium
     end
 
-    if splash_medium && splash_medium.files.present?
+    if splash_medium&.file&.attached?
       return {
         title: splash_medium.title,
         caption: splash_medium.caption,
@@ -117,7 +137,7 @@ class Tour < ContentBase
   end
 
   def stop_count
-    stops.count
+    tour_stops.size
   end
 
   def bounds
@@ -135,11 +155,11 @@ class Tour < ContentBase
         centerLat: box.center_y,
         centerLng: box.center_x,
       }
-    elsif stops.empty?
+    elsif ordered_stops.empty?
       return
     end
 
-    points = stops.map { |stop| RGeo::Geographic.spherical_factory.point(stop.lng, stop.lat) }
+    points = ordered_stops.map { |stop| RGeo::Geographic.spherical_factory.point(stop.lng, stop.lat) }
     box = RGeo::Cartesian::BoundingBox.create_from_points(points.pop, points.pop)
     points.each { |point| box.add(point) }
 
@@ -201,7 +221,7 @@ class Tour < ContentBase
       map_icon: map_icon&.original_image_url || nil,
       map_overlay: map_overlay&.search_data,
       map_type: map_type || 'hybrid',
-      media: tour_media.sort_by(&:position).map(&:search_data),
+      media: media_search_data(tour_media),
       meta_description: search_meta_description,
       mode: mode.search_data,
       modes: tour_modes.map(&:search_data),
@@ -289,14 +309,35 @@ class Tour < ContentBase
   end
 
   def first_stop_medium
-    return if stops.empty?
+    ordered_stops.each do |stop|
+      first = stop.stop_media.min_by(&:position)
+      return first.medium if first
+    end
+    nil
+  end
 
-    stops.map(&:media).flatten.first
+  # Stops in tour order, built from the (preloadable) tour_stops rather than
+  # the `stops` through-association, which would query again.
+  def ordered_stops
+    tour_stops.sort_by(&:position).map(&:stop)
   end
 
   def duration_in_words(dur)
     return if dur.nil? || dur.zero?
 
     distance_of_time_in_words(dur).capitalize
+  end
+
+  def update_icon_colors
+    if will_save_change_to_icon_color?
+      old_value, new_value = icon_color_change_to_be_saved
+      tour_stops.each do |ts|
+        # It should only sync the TourStop icon color if it
+        # currently the same as the Tour's.
+        next if ts.icon_color != old_value
+
+        ts.update(icon_color: new_value)
+      end
+    end
   end
 end

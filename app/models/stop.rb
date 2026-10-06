@@ -41,11 +41,11 @@ class Stop < ContentBase
   def splash
     splash_medium = if medium.present?
       medium
-    elsif stop_media.present?
-      stop_media.order(:position).first.medium
+    elsif stop_media.any?
+      stop_media.min_by(&:position).medium
     end
 
-    if splash_medium&.files
+    if splash_medium&.file&.attached?
       return {
         title: splash_medium.title,
         caption: splash_medium.caption,
@@ -75,12 +75,11 @@ class Stop < ContentBase
       description:,
       direction_intro:,
       direction_notes:,
-      icon_color:,
       id:,
       lat: lat&.to_f,
       lng: lng&.to_f,
       map_icon: map_icon&.original_image_url || nil,
-      media: stop_media.sort_by(&:position).map(&:search_data),
+      media: media_search_data(stop_media),
       meta_description:,
       orphaned:,
       parking_lat: parking_lat&.to_f,

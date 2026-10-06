@@ -21,7 +21,14 @@ class Medium < MediumBaseRecord
   before_create :props
   before_save :add_widths
   before_update :replace_video
-  after_create_commit -> { ProcessMediumVariantsJob.perform_later(id) }
+  after_create_commit -> { ProcessMediumVariantsJob.perform_later(tenant: Apartment::Tenant.current, id:) }
+
+  VARIANT_SIZES = {
+    lqip: [5, 5],
+    mobile: [300, 300],
+    tablet: [400, 400],
+    desktop: [750, 750],
+  }.freeze
 
   # has_one_attached :file do |attachable|
   #   attachable.variant :mobile, resize: '200x200'
@@ -57,20 +64,38 @@ class Medium < MediumBaseRecord
   def files
     return unless file.attached?
 
-    if file.content_type.include?('gif')
-      return {
-        lqip: file.url,
-        mobile: file.url,
-        tablet: file.url,
-        desktop: file.url,
-      }
-    end
-    {
-      lqip: file.variant(resize_to_limit: [5, 5]).url,
-      mobile: file.variant(resize_to_limit: [300, 300]).url,
-      tablet: file.variant(resize_to_limit: [400, 400]).url,
-      desktop: file.variant(resize_to_limit: [750, 750]).url,
-    }
+    VARIANT_SIZES.keys.index_with { |name| variant_url(name, process: false) }
+  end
+
+  # URL for a named variant. With process: true a missing variant is generated
+  # on the spot, so media whose background processing never ran still render.
+  def variant_url(name, process: true)
+    return unless file.attached?
+    return file.url if file.content_type.include?('gif')
+
+    size = VARIANT_SIZES[name.to_sym]
+    return if size.nil?
+
+    variant = file.variant(resize_to_limit: size)
+    process ? variant.processed.url : variant.url
+  end
+
+  # Inlines the tiny lqip variant as a data URI so a gallery can show a
+  # placeholder without waiting on another request. GIFs have no variants.
+  def store_lqip_data!
+    return unless file.attached?
+    return if file.content_type.include?('gif')
+
+    variant = file.variant(resize_to_limit: VARIANT_SIZES[:lqip]).processed
+    content_type = variant.image.blob.content_type
+    update!(lqip_data: "data:#{content_type};base64,#{Base64.strict_encode64(variant.download)}")
+    reindex_tours if saved_change_to_lqip_data?
+  end
+
+  # Tours that show this medium, directly or through one of their stops.
+  def tours_using
+    via_stops = TourStop.where(stop_id: stop_media.select(:stop_id)).select(:tour_id)
+    Tour.where(id: tour_media.select(:tour_id)).or(Tour.where(id: via_stops))
   end
 
   def orphaned
@@ -103,6 +128,14 @@ class Medium < MediumBaseRecord
   end
 
   private
+
+  # Tour search data embeds media (and the first one's lqip_data), but Medium
+  # isn't indexed itself, so nothing else would pick the change up.
+  def reindex_tours
+    tours_using.pluck(:id).each do |tour_id|
+      ReindexJob.perform_later(tenant: Apartment::Tenant.current, class_name: 'Tour', id: tour_id)
+    end
+  end
 
   def replace_video
     return if video.blank?

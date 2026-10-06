@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_01_134924) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_02_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -142,6 +142,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_01_134924) do
     t.string "filename"
     t.integer "lqip_width"
     t.string "embed_id"
+    t.text "lqip_data"
   end
 
   create_table "modes", force: :cascade do |t|
@@ -325,6 +326,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_01_134924) do
     t.integer "position"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.string "icon_color"
+    t.bigint "map_icon_id"
+    t.index ["map_icon_id"], name: "index_tour_stops_on_map_icon_id"
     t.index ["stop_id"], name: "index_tour_stops_on_stop_id"
     t.index ["tour_id"], name: "index_tour_stops_on_tour_id"
   end

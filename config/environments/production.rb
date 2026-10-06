@@ -61,6 +61,8 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "open_tour_api_#{Rails.env}"
   config.action_mailer.perform_caching = false
+  # Kill switch: set DISABLE_EMAIL=true in the task environment to stop all outgoing mail.
+  config.action_mailer.perform_deliveries = ENV['DISABLE_EMAIL'] != 'true'
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.

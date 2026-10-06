@@ -56,6 +56,8 @@ gem 'elasticsearch', '~> 8'
 gem 'faraday-httpclient', '~> 2.0'
 gem 'searchkick'
 gem 'sidekiq', '>=7.2.2', '<8'
+# Sidekiq 7.3.x calls ConnectionPool::TimedStack#pop with a positional timeout, which 3.x removed.
+gem 'connection_pool', '< 3'
 
 # Vidoe provider APIs
 gem 'vimeo'

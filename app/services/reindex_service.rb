@@ -8,10 +8,19 @@ class ReindexService
     def call(record)
       return unless record
 
-      record.reindex if record.respond_to?(:reindex)
-      tours_for(record).each(&:reindex)
+      preloaded(record).reindex if record.respond_to?(:reindex)
+      tours_for(record).each { |tour| preloaded(tour).reindex }
     rescue StandardError => e
       Rails.logger.error("ReindexService failed for #{record.class}##{record.id}: #{e.message}")
+    end
+
+    # Searchkick indexes the object it's given (it only applies search_import
+    # for bulk/async reindexes), so reload through search_import here to avoid
+    # building search_data with N+1 queries.
+    def preloaded(record)
+      return record unless record.class.respond_to?(:search_import)
+
+      record.class.search_import.find_by(id: record.id) || record
     end
 
     def tours_for(record)

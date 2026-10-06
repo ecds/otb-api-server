@@ -3,6 +3,7 @@
 module V4
   module Admin
     class ToursController < V4Controller
+      before_action :set_tour_set, only: [:update]
       def index
         if params[:all].present?
           render(
@@ -47,10 +48,32 @@ module V4
         end
       end
 
+      # Whole-document save. Reads and responds from the database, not the
+      # search index, so the client never gets back stale data.
+      def update
+        head(:not_found) and return if @record.nil?
+        render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless tour_editable?
+
+        TourDocumentUpdate.call(@record, params.require(:tour).to_unsafe_h)
+        render(json: Tour.search_import.find(@record.id).search_data, status: :ok)
+      rescue TourDocumentUpdate::Invalid => e
+        render(json: { errors: e.errors }, status: :unprocessable_entity)
+      end
+
       private
 
       def set_record
-        @record = Tour.search('*', load: false, limit: 1).where(id: params[:id]).first
+        @record = if action_name == 'update'
+          Tour.find_by(id: params[:id])
+        else
+          Tour.search('*', load: false, limit: 1).where(id: params[:id]).first
+        end
+      end
+
+      def tour_editable?
+        return false unless current_user
+
+        current_user.current_tenant_admin? || current_user.tours.include?(@record)
       end
 
       def allowed_params

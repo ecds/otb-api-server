@@ -42,7 +42,7 @@ Rails.application.routes.draw do
       namespace :admin do
         resources :crud
         resources :access_requests
-        resources :tours, only: [:index, :show, :create]
+        resources :tours, only: [:index, :show, :create, :update]
         resources :flat_pages, only: [:index]
         resources :tour_sets, only: [:index]
         resources :media, only: [:index]

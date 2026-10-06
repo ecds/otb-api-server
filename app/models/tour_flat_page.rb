@@ -5,9 +5,8 @@ class TourFlatPage < ApplicationRecord
   belongs_to :tour
   belongs_to :flat_page
 
-  after_create do
-    self.position = tour.tour_flat_pages.length + 1
-    save
+  before_validation do
+    self.position = position || tour.tour_flat_pages.count + 1
   end
 
   def search_data

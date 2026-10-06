@@ -297,4 +297,35 @@ RSpec.describe(Tour, type: :model) do
       expect(tour.published_on).to(be_nil)
     end
   end
+
+  context 'when updating tour icon_color' do
+    it 'creates new TourStop with Tour icon_color' do
+      tour = create(:tour_with_stops, icon_color: 'some color')
+      expect(tour.tour_stops.map(&:icon_color)).to(all(eq('some color')))
+    end
+
+    it 'correctly defaults the TourStop icon_color when new Stop added to Tour' do
+      tour = create(:tour, icon_color: 'matcha')
+      stop = create(:stop)
+      tour.stops << stop
+      expect(TourStop.find_by(tour: tour, stop: stop).icon_color).to(eq('matcha'))
+    end
+
+    it 'updates TourStop icon_color when Tour icon_color changes' do
+      tour = create(:tour_with_stops, icon_color: 'some color')
+      described_class.find(tour.id).update(icon_color: 'some other color')
+      tour_stops = TourStop.where(tour: tour)
+      expect(tour_stops.map(&:icon_color).count).to(eq(5))
+      expect(tour_stops.map(&:icon_color)).to(all(eq('some other color')))
+    end
+
+    it 'does not update TourStop icon if it already does not match the Tour icon_color' do
+      tour = create(:tour_with_stops, icon_color: 'some color')
+      TourStop.where(tour: tour).first.update(icon_color: 'custom color')
+      described_class.find(tour.id).update(icon_color: 'some other color')
+      tour_stops = TourStop.where(tour: tour)
+      expect(tour_stops.map(&:icon_color)).to(include('custom color'))
+      expect(tour_stops.map(&:icon_color)).to(include('some other color'))
+    end
+  end
 end

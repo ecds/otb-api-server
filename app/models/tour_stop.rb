@@ -4,11 +4,12 @@
 class TourStop < ApplicationRecord
   belongs_to :tour
   belongs_to :stop
+  belongs_to :map_icon, optional: true
 
   validates :position, presence: true
 
-  # before_save :_ensure_stop_slug
-  before_validation :_set_position
+  before_create :set_icon_color
+  before_validation :set_position
 
   delegate :slug, to: :stop
 
@@ -42,21 +43,28 @@ class TourStop < ApplicationRecord
       position:,
       previous: prev_stop && { id: prev_stop.id, slug: prev_stop.slug, title: prev_stop.title },
       relation_id: id,
+      icon_color:,
       **stop.search_data,
+      # After the stop's own data so these override it. A stop with no icon
+      # of its own in this tour falls back to the tour's icon.
+      map_icon: effective_map_icon&.original_image_url,
+      map_icon_custom: map_icon_id.present?,
     }
+  end
+
+  def effective_map_icon
+    map_icon || tour&.map_icon
   end
 
   private
 
-  def _set_position
+  def set_position
     return if tour.nil?
 
     self.position = position || tour.stops.length + 1
   end
 
-  # def _ensure_stop_slug
-  #   new_slug = StopSlug.find_or_create_by(slug: self.stop.slug, tour: self.tour)
-  #   new_slug.stop = self.stop
-  #   new_slug.save
-  # end
+  def set_icon_color
+    self.icon_color = tour.icon_color
+  end
 end

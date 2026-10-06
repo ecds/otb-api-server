@@ -34,8 +34,12 @@ module OpenTourApi
 
         return @app.call(env) unless tenant_name
 
-        redirect = renamed_tenant_redirect(tenant_name, request)
-        return redirect if redirect
+        unless tenant_name == 'public' || TourSet.exists?(subdir: tenant_name)
+          # Unknown first segment (crawlers probing /robots.txt, /careers, ...):
+          # answer cheaply instead of failing a schema switch and logging a
+          # full exception for every request.
+          return renamed_tenant_redirect(tenant_name, request) || [404, { 'Content-Type' => 'text/plain' }, ['Not Found']]
+        end
 
         Apartment::Tenant.switch(tenant_name) { @app.call(env) }
       end
@@ -57,8 +61,6 @@ module OpenTourApi
       # (and failing) to switch to a Postgres schema that no longer exists
       # under that name.
       def renamed_tenant_redirect(tenant_name, request)
-        return if TourSet.exists?(subdir: tenant_name)
-
         history = TourSetSubdirHistory.find_by(subdir: tenant_name)
         return unless history
 

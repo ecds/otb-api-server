@@ -26,7 +26,7 @@ class FlatPage < ContentBase
       slug:,
       body:,
       orphaned:,
-      tour_count: tours.count,
+      tour_count: tours.size,
     }
   end
 end

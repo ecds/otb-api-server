@@ -183,7 +183,7 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
     end
 
     def patch_tour(document)
-      patch :update, params: { tenant: tour_set.subdir, id: tour.id, tour: document }, as: :json
+      patch(:update, params: { tenant: tour_set.subdir, id: tour.id, tour: document }, as: :json)
     end
 
     it 'returns 401 when unauthenticated' do
@@ -217,7 +217,8 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       signed_cookie(create(:user, super: true))
       Apartment::Tenant.switch!(tour_set.subdir)
       stops = tour.tour_stops.order(:position).map { |ts| { relation_id: ts.id, id: ts.stop_id } }
-      patch_tour({ title: 'Saved', stops: stops.reverse })
+      reordered = stops.reverse.each_with_index.map { |entry, i| entry.merge(position: i + 1) }
+      patch_tour({ title: 'Saved', stops: reordered })
       expect(response.status).to(eq(200))
       expect(v4_json[:title]).to(eq('Saved'))
       expect(v4_json[:stops].map { |s| s[:relation_id] }).to(eq(stops.reverse.map { |s| s[:relation_id] }))
@@ -228,6 +229,16 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       patch_tour({ title: '' })
       expect(response.status).to(eq(422))
       expect(v4_json[:errors].first[:path]).to(eq('tour.title'))
+    end
+
+    it 'shows a tour straight from the database, without waiting for the index' do
+      signed_cookie(create(:user, super: true))
+      Apartment::Tenant.switch!(tour_set.subdir)
+      fresh = create(:tour, published: false, title: 'Not indexed yet')
+      get :show, params: { tenant: tour_set.subdir, id: fresh.id }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:title]).to(eq('Not indexed yet'))
+      expect(v4_json[:stops]).to(eq([]))
     end
   end
 end

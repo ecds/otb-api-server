@@ -38,25 +38,55 @@ RSpec.describe(TourDocumentUpdate) do
     expect { described_class.call(tour, { title: 'Only title' }) }.not_to(change { tour.tour_stops.count })
   end
 
-  it 'reorders stops by array position' do
-    reversed = stop_entries.reverse
-    described_class.call(tour, { stops: reversed })
+  it 'reorders stops by the positions given' do
+    entries = stop_entries.reverse.each_with_index.map { |e, i| e.merge(position: i + 1) }
+    described_class.call(tour, { stops: entries })
     expect(tour.reload.tour_stops.order(:position).map(&:stop_id)).to(eq(stops.map(&:id).reverse))
     expect(tour.saved_stop_order).to(eq(stops.map(&:id).reverse))
   end
 
-  it 'unlinks stops missing from the list without deleting the stop' do
-    described_class.call(tour, { stops: stop_entries.first(2) })
-    expect(tour.reload.tour_stops.count).to(eq(2))
+  it 'leaves positions alone when entries omit them' do
+    described_class.call(tour, { stops: stop_entries.reverse })
+    expect(tour.reload.tour_stops.order(:position).map(&:stop_id)).to(eq(stops.map(&:id)))
+  end
+
+  it 'leaves stops missing from the list untouched' do
+    described_class.call(tour, { stops: stop_entries.first(1).map { |e| e.merge(title: 'Only this') } })
+    expect(tour.reload.tour_stops.count).to(eq(3))
+    expect(stops.first.reload.title).to(eq('Only this'))
+  end
+
+  it 'unlinks a stop marked _destroy without deleting the stop' do
+    target = stop_entries.last
+    described_class.call(tour, { stops: [target.merge(_destroy: true)] })
+    expect(tour.reload.tour_stops.map(&:stop_id)).to(eq(stops.first(2).map(&:id)))
     expect(Stop.exists?(stops.last.id)).to(be(true))
   end
 
-  it 'links an existing stop given without a relation_id at its array position' do
+  it 'treats unlinking an already-removed join as a no-op' do
+    target = stop_entries.last
+    described_class.call(tour, { stops: [target.merge(_destroy: true)] })
+    expect { described_class.call(tour, { stops: [target.merge(_destroy: true)] }) }.not_to(raise_error)
+  end
+
+  it 'links an existing stop at the end by default' do
     extra = create(:stop)
-    described_class.call(tour, { stops: [{ id: extra.id }] + stop_entries })
+    described_class.call(tour, { stops: [{ id: extra.id }] })
     order = tour.reload.tour_stops.order(:position)
-    expect(order.map(&:stop_id)).to(eq([extra.id] + stops.map(&:id)))
-    expect(order.map(&:position)).to(eq([1, 2, 3, 4]))
+    expect(order.map(&:stop_id)).to(eq(stops.map(&:id) + [extra.id]))
+    expect(order.last.position).to(eq(4))
+  end
+
+  it 'links at a given position' do
+    extra = create(:stop)
+    described_class.call(tour, { stops: [{ id: extra.id, position: 0 }] })
+    expect(tour.reload.tour_stops.order(:position).first.stop_id).to(eq(extra.id))
+  end
+
+  it 'does not link the same stop twice when a request is retried' do
+    extra = create(:stop)
+    2.times { described_class.call(tour, { stops: [{ id: extra.id }] }) }
+    expect(tour.reload.tour_stops.where(stop_id: extra.id).count).to(eq(1))
   end
 
   it 'updates stop fields in place' do
@@ -94,34 +124,45 @@ RSpec.describe(TourDocumentUpdate) do
     joins = media.each_with_index.map { |m, i| create(:tour_medium, tour:, medium: m, position: i + 1) }
     described_class.call(tour, {
       media: [
-        { relation_id: joins[1].id, id: media[1].id, caption: 'Now first' },
-        { relation_id: joins[0].id, id: media[0].id },
+        { relation_id: joins[1].id, id: media[1].id, caption: 'Now first', position: 1 },
+        { relation_id: joins[0].id, id: media[0].id, position: 2 },
       ],
     })
     expect(tour.reload.tour_media.order(:position).map(&:medium_id)).to(eq([media[1].id, media[0].id]))
     expect(media[1].reload.caption).to(eq('Now first'))
   end
 
-  it 'syncs a stop\'s own media list' do
+  it "links and unlinks a stop's own media" do
     stop = stops.first
-    medium = create(:medium)
-    described_class.call(tour, { stops: stop_entries.each_with_index.map { |e, i| i.zero? ? e.merge(media: [{ id: medium.id }]) : e } })
-    expect(stop.reload.stop_media.map(&:medium_id)).to(eq([medium.id]))
+    keep, drop = create_list(:medium, 2)
+    dropped = create(:stop_medium, stop:, medium: drop, position: 1)
+    entry = stop_entries.first.merge(media: [{ id: keep.id }, { relation_id: dropped.id, _destroy: true }])
+    described_class.call(tour, { stops: [entry] })
+    expect(stop.reload.stop_media.map(&:medium_id)).to(eq([keep.id]))
+    expect(Medium.exists?(drop.id)).to(be(true))
   end
 
   it 'updates and unlinks flat pages' do
     pages = create_list(:flat_page, 2)
     joins = pages.each_with_index.map { |p, i| create(:tour_flat_page, tour:, flat_page: p, position: i + 1) }
-    described_class.call(tour, { flat_pages: [{ relation_id: joins[1].id, id: pages[1].id, title: 'About' }] })
+    described_class.call(tour, {
+      flat_pages: [
+        { relation_id: joins[0].id, _destroy: true },
+        { relation_id: joins[1].id, id: pages[1].id, title: 'About' },
+      ],
+    })
     expect(tour.reload.tour_flat_pages.map(&:flat_page_id)).to(eq([pages[1].id]))
     expect(pages[1].reload.title).to(eq('About'))
     expect(FlatPage.exists?(pages[0].id)).to(be(true))
   end
 
-  it 'sets the enabled travel modes' do
-    ids = Mode.limit(2).pluck(:id)
-    described_class.call(tour, { modes: ids.map { |id| { id: } } })
-    expect(tour.reload.mode_ids.sort).to(eq(ids.sort))
+  it 'enables and disables travel modes individually' do
+    keep, add = Mode.limit(2).to_a
+    tour.update!(mode_ids: [keep.id])
+    described_class.call(tour, { modes: [{ id: add.id }] })
+    expect(tour.reload.mode_ids).to(contain_exactly(keep.id, add.id))
+    described_class.call(tour, { modes: [{ id: keep.id, _destroy: true }] })
+    expect(tour.reload.mode_ids).to(eq([add.id]))
   end
 
   it 'updates the map overlay bounds only for the tour\'s own overlay' do

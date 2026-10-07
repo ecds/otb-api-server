@@ -29,7 +29,7 @@ module V4
       def show
         render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless crud_allowed?
 
-        render(json: @record, status: :ok) and return unless @record.nil?
+        render(json: @record.search_data, status: :ok) and return unless @record.nil?
 
         head(:not_found)
       end
@@ -48,7 +48,7 @@ module V4
         end
       end
 
-      # Whole-document save. Reads and responds from the database, not the
+      # Tour document save (partial documents are fine). Responds from the database, not the
       # search index, so the client never gets back stale data.
       def update
         head(:not_found) and return if @record.nil?
@@ -63,11 +63,9 @@ module V4
       private
 
       def set_record
-        @record = if action_name == 'update'
-          Tour.find_by(id: params[:id])
-        else
-          Tour.search('*', load: false, limit: 1).where(id: params[:id]).first
-        end
+        # Read from the database (with everything search_data needs preloaded)
+        # so a tour is available as soon as it's created or saved.
+        @record = Tour.search_import.find_by(id: params[:id])
       end
 
       def tour_editable?

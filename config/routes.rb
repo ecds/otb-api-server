@@ -52,6 +52,8 @@ Rails.application.routes.draw do
         get 'users/me', to: 'users#show'
         get 'tour_sets/:slug', to: 'tour_sets#show'
         get 'resolve_url', to: 'services#url_resolver'
+        get 'geocode', to: 'geocode#search'
+        get 'geocode/reverse', to: 'geocode#reverse'
       end
     end
   end

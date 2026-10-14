@@ -155,9 +155,14 @@ class Tour < ContentBase
         centerLat: box.center_y,
         centerLng: box.center_x,
       }
-    elsif ordered_stops.empty?
-      return
     end
+
+    stops_bounds
+  end
+
+  # Bounds around the tour's stops, padded by an eighth on each side.
+  def stops_bounds
+    return if ordered_stops.empty?
 
     points = ordered_stops.map { |stop| RGeo::Geographic.spherical_factory.point(stop.lng, stop.lat) }
     box = RGeo::Cartesian::BoundingBox.create_from_points(points.pop, points.pop)

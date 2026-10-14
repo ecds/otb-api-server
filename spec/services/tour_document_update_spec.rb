@@ -167,8 +167,9 @@ RSpec.describe(TourDocumentUpdate) do
 
   it 'updates the map overlay bounds only for the tour\'s own overlay' do
     overlay = create(:map_overlay, tour:)
-    described_class.call(tour, { map_overlay: { id: overlay.id, north: 1.5, south: 1, east: 2, west: 0 } })
+    described_class.call(tour, { map_overlay: { id: overlay.id, north: 1.5, south: 1, east: 2, west: 0, rotation: 15 } })
     expect(overlay.reload.north.to_f).to(eq(1.5))
+    expect(overlay.rotation).to(eq(15))
 
     described_class.call(tour, { map_overlay: { id: overlay.id + 1000, north: 9 } })
     expect(overlay.reload.north.to_f).to(eq(1.5))

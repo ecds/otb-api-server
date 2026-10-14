@@ -55,7 +55,7 @@ class TourDocumentUpdate
 
   MEDIUM_FIELDS = [:title, :caption].freeze
   FLAT_PAGE_FIELDS = [:title, :body].freeze
-  OVERLAY_FIELDS = [:north, :south, :east, :west].freeze
+  OVERLAY_FIELDS = [:north, :south, :east, :west, :rotation].freeze
 
   class << self
     def call(tour, document)

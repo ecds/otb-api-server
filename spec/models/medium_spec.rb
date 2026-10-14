@@ -216,4 +216,20 @@ RSpec.describe(Medium, type: :model) do
       expect(medium.file.blob.checksum).to(eq('4fqkSXu+qjQuQWCms8xBBQ=='))
     end
   end
+
+  it 'lists a unique list of associated tours - including tours where it is part of a stop' do
+    medium = create(:medium)
+    tour1 = create(:tour)
+    tour2 = create(:tour)
+    stop = create(:stop)
+    tour1.media << medium
+    stop.media << medium
+    tour2.media << medium
+    tour1.stops << stop
+    expect(medium.appears_in).to(contain_exactly(
+      { id: tour1.id, title: tour1.title },
+      { id: tour2.id, title: tour2.title },
+    ))
+    expect(medium.search_data).not_to(have_key(:appears_in))
+  end
 end

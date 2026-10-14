@@ -42,6 +42,14 @@ class Medium < MediumBaseRecord
   has_many :tour_media, dependent: :destroy
   has_many :tours, through: :tour_media
 
+  # Media used by the tour itself or by any of its stops. A subquery rather
+  # than joins, so it can be paginated without duplicate rows.
+  scope :used_in_tour, lambda { |tour_id|
+    stop_ids = TourStop.where(tour_id:).select(:stop_id)
+    where(id: TourMedium.where(tour_id:).select(:medium_id))
+      .or(where(id: StopMedium.where(stop_id: stop_ids).select(:medium_id)))
+  }
+
   enum :video_provider, { keiner: 0, vimeo: 1, youtube: 2, soundcloud: 3, sketchfab: 4, unknown: 5, matterport: 6, morphosource: 7 }
   attr_accessor :insecure
 
@@ -100,6 +108,12 @@ class Medium < MediumBaseRecord
 
   def orphaned
     tours.empty? && stops.empty?
+  end
+
+  # Tours that use this medium, directly or through one of their stops.
+  # Preload tours and stops: :tours when listing many media.
+  def appears_in
+    (tours + stops.flat_map(&:tours)).uniq(&:id).map { |tour| { id: tour.id, title: tour.title } }
   end
 
   def search_data

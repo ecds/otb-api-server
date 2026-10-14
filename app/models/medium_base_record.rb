@@ -3,6 +3,7 @@
 # Base class for models.
 class MediumBaseRecord < ApplicationRecord
   self.abstract_class = true
+  include CleansUploadedImage
   validate :check_content_type
 
   before_create :attach_file

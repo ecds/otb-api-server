@@ -39,9 +39,9 @@ RSpec.describe(CleansUploadedImage) do
   end
 
   it 'converts an iPhone HEIC photo to JPEG' do
-    heic = dir.join('IMG_0001.heic').to_s
-    Vips::Image.black(40, 20, bands: 3).copy(interpretation: :srgb).heifsave(heic, compression: :hevc)
-
+    # A committed file: CI's libheif can decode HEIC but has no encoder to
+    # make one, and decoding is all production needs.
+    heic = Rails.root.join('spec/fixtures/files/IMG_0001.heic').to_s
     medium = create_medium(upload(heic, 'image/heic'))
     expect(medium.file.content_type).to(eq('image/jpeg'))
     expect(medium.file.filename.to_s).to(eq('IMG_0001.jpg'))

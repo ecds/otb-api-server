@@ -4,6 +4,12 @@ require 'rails_helper'
 
 RSpec.describe(V4::Admin::FlatPagesController, type: :controller) do
   describe 'GET #index' do
+    it 'returns an empty array, not a JSON:API document, when there are no flat pages' do
+      signed_cookie(create(:user, super: true))
+      get :index, params: { tenant: Apartment::Tenant.current, exclude: '0' }
+      expect(JSON.parse(response.body)).to(be_a(Array))
+    end
+
     it 'returns 401 when unauthenticated' do
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to(eq(401))

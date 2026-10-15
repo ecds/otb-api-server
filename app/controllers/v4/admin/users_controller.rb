@@ -6,12 +6,7 @@ module V4
       def index
         head(:unauthorized) and return unless current_user&.super
 
-        render(
-          json: User.all.map(&:preview_data).sort_by do |u|
-            u[:email]
-          end,
-          status: :ok,
-        ) and return
+        render_json(User.all.map(&:preview_data).sort_by { |u| u[:email] }) and return
       end
 
       def show

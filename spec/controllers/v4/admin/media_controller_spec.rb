@@ -4,6 +4,12 @@ require 'rails_helper'
 
 RSpec.describe(V4::Admin::MediaController, type: :controller) do
   describe 'GET #index' do
+    it 'returns an empty array, not a JSON:API document, when there are no media' do
+      signed_cookie(create(:user, super: true))
+      get :index, params: { tenant: Apartment::Tenant.current, exclude: '0' }
+      expect(JSON.parse(response.body)).to(be_a(Array))
+    end
+
     it 'returns 401 when unauthenticated' do
       get :index, params: { tenant: Apartment::Tenant.current }
       expect(response.status).to(eq(401))
@@ -147,6 +153,12 @@ RSpec.describe(V4::Admin::MediaController, type: :controller) do
     it 'still applies exclude' do
       get :index, params: { tenant: Apartment::Tenant.current, tour_id: tour.id, exclude: on_tour.id.to_s }
       expect(v4_json.pluck(:id)).to(eq([on_stop.id]))
+    end
+
+    it 'returns empty list when tour has no media' do
+      tour = create(:tour, stops: [], media: [])
+      get :index, params: { tenant: Apartment::Tenant.current, tour_id: tour.id }
+      expect(v4_json).to(be_empty)
     end
   end
 end

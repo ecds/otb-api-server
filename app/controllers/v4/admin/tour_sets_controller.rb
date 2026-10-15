@@ -6,12 +6,7 @@ module V4
       def index
         render(json: { error: 'unauthorized' }, status: :unauthorized) and return if current_user.id.nil?
         if current_user.id
-          render(
-            json: TourSet.all.sort_by(&:name).map do |ts|
-              { name: ts.name, subdir: ts.subdir, id: ts.id }
-            end,
-            status: :ok,
-          ) and return
+          render_json(TourSet.all.sort_by(&:name).map { |ts| { name: ts.name, subdir: ts.subdir, id: ts.id } }) and return
         end
 
         render(json: current_user.tour_sets.sort_by(&:name), status: :ok)

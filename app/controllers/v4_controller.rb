@@ -8,7 +8,7 @@ class V4Controller < V3Controller
   end
 
   def render_json(data, status: :ok)
-    render(plain: data.to_json, content_type: 'application/json', status:)
+    render(plain: data.to_json, content_type: 'application/json', status:, serializer: false)
   end
 
   def index

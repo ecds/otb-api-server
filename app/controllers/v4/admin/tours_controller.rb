@@ -6,12 +6,7 @@ module V4
       before_action :set_tour_set, only: [:update]
       def index
         if params[:all].present?
-          render(
-            json: Tour.all.map do |tour|
-              { title: tour.title, slug: tour.slug, id: tour.id }
-            end,
-            status: :ok,
-          ) and return
+          render_json(Tour.all.map { |tour| { title: tour.title, slug: tour.slug, id: tour.id } }) and return
         end
         render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless crud_allowed?
 

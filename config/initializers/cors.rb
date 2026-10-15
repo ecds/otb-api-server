@@ -7,13 +7,22 @@
 
 # Read more: https://github.com/cyu/rack-cors
 
-Rails.application.config.middleware.insert_before 0, Rack::Cors do
+Rails.application.config.middleware.insert_before(0, Rack::Cors) do
   allow do
-    origins 'https://lvh.me:4200', 'https://otb.ecdsdev.org', 'https://opentour.site', /.*\.opentour.site/, /.*\.lvh.me:4200/, /.*localhost:3000/, /.*\.urbanspatialhistory.org/
-
+    origins 'https://lvh.me:4200',
+      'https://otb.ecdsdev.org',
+      'https://opentour.site',
+      /.*\.opentour.site/,
+      /.*\.dev\.opentour.site/,
+      /.*\.lvh.me:4200/,
+      /.*localhost:3000/,
+      /.*\.urbanspatialhistory.org/,
+      /.*\.otb\.ecdsdev.org/,
+      /.*\.openworldatlanta.org/
     resource '*',
-             headers: :any,
-             methods: [:get, :post, :put, :patch, :delete, :options, :head],
-             credentials: true
+      headers: :any,
+      methods: [:get, :post, :put, :patch, :delete, :options, :head],
+      credentials: true,
+      expose: ['Link']
   end
 end

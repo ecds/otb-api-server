@@ -16,6 +16,9 @@ require 'rails/test_unit/railtie'
 require 'apartment/elevators/generic'
 require 'active_storage/engine'
 require 'ipinfo-rails'
+require 'httparty'
+require 'http'
+require 'json'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -25,18 +28,48 @@ module OpenTourApi
   # Base class for the app.
   class Application < Rails::Application
     class DirectoryElevator < Apartment::Elevators::Generic
+      def call(env)
+        request = Rack::Request.new(env)
+        tenant_name = parse_tenant_name(request)
+
+        return @app.call(env) unless tenant_name
+
+        unless tenant_name == 'public' || TourSet.exists?(subdir: tenant_name)
+          # Unknown first segment (crawlers probing /robots.txt, /careers, ...):
+          # answer cheaply instead of failing a schema switch and logging a
+          # full exception for every request.
+          return renamed_tenant_redirect(tenant_name, request) || [404, { 'Content-Type' => 'text/plain' }, ['Not Found']]
+        end
+
+        Apartment::Tenant.switch(tenant_name) { @app.call(env) }
+      end
+
       def parse_tenant_name(request)
         # request is an instance of Rack::Request
         tenant_name = request.fullpath.split('/')[1]
+        tenants_to_ignore = ['auth', 'rails', 'sidekiq', 'favicon.ico', 'health']
 
-        if tenant_name == 'auth' || tenant_name == 'rails'
-          return nil
-        end
+        return 'public' if tenants_to_ignore.include?(tenant_name)
+
         tenant_name
+      end
+
+      private
+
+      # If `tenant_name` is a subdir a TourSet used to have (before a rename),
+      # redirect to the same path under its current subdir instead of trying
+      # (and failing) to switch to a Postgres schema that no longer exists
+      # under that name.
+      def renamed_tenant_redirect(tenant_name, request)
+        history = TourSetSubdirHistory.find_by(subdir: tenant_name)
+        return unless history
+
+        new_path = request.fullpath.sub("/#{tenant_name}", "/#{history.tour_set.subdir}")
+        [308, { 'Location' => new_path }, []]
       end
     end
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.1
+    config.load_defaults(7.0)
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -45,13 +78,16 @@ module OpenTourApi
     config.middleware.use(ActionDispatch::Cookies)
     config.middleware.use(ActionDispatch::Session::CookieStore)
     config.action_dispatch.cookies_serializer = :json
-    config.middleware.use(IPinfoMiddleware, { token: ENV['IPINFO_TOKEN'] || Rails.application.credentials.dig(:ipinfo) })
+    config.middleware.use(
+      IPinfoMiddleware,
+      { token: ENV['IPINFO_TOKEN'] || Rails.application.credentials.dig(:ipinfo) },
+    )
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
-    config.middleware.use DirectoryElevator
-    # config.relative_url_root = '/*'
+    config.middleware.use(DirectoryElevator)
+    config.active_job.queue_adapter = :sidekiq
     config
   end
 end

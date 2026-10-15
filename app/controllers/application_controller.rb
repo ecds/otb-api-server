@@ -5,9 +5,7 @@ class ApplicationController < ActionController::API
   include Response
   include ExceptionHandler
   include EcdsRailsAuthEngine::CurrentUser
-  if Rails.env == 'test'
-    include ActiveStorage::SetCurrent
-  end
+  include ActiveStorage::SetCurrent if Rails.env.test?
 
   before_action :set_no_cache_control, only: [:index, :show]
 
@@ -25,7 +23,7 @@ class ApplicationController < ActionController::API
     response.headers['Cache-Control'] = 'no-cache, no-store, max-age=0, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
-    expires_now()
+    expires_now
     stale?(SecureRandom.hex(10))
   end
 end

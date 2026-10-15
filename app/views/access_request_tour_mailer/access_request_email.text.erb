@@ -1,0 +1,5 @@
+Request for access to <%= @tour.title %> on Open Tour
+
+  <%= @access_request.user.display_name %> (<%= @access_request.user.email %>) has requested access to edit <%= @tour.title%>.
+
+  Use this link to view and approve the request: https://opentour.site/admin/approve/<%= @access_request.id %>

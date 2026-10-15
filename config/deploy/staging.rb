@@ -7,11 +7,9 @@ set :branch, 'develop'
 # Defines a single server with a list of roles and multiple properties.
 # You can define all roles on a single server, or split them:
 
-server "3.238.239.164", user: "deploy", roles: %w{app db web}, primary: :my_value
+server '3.238.239.164', user: 'deploy', roles: ['app', 'db', 'web'], primary: :my_value
 # server "otb.ecdsdev.org", user: "deploy", roles: %w{app web}, other_property: :other_value
 # server "db.otb.ecdsdev.org", user: "deploy", roles: %w{db}
-
-
 
 # role-based syntax
 # ==================
@@ -21,11 +19,9 @@ server "3.238.239.164", user: "deploy", roles: %w{app db web}, primary: :my_valu
 # property set. Specify the username and a domain or IP for the server.
 # Don't use `:all`, it's a meta role.
 
-role :app, %w{deploy@3.238.239.164}
-role :web, %w{user1@3.238.239.164}
-role :db,  %w{deploy@3.238.239.164}
-
-
+role :app, ['deploy@3.238.239.164']
+role :web, ['user1@3.238.239.164']
+role :db,  ['deploy@3.238.239.164']
 
 # Configuration
 # =============
@@ -35,8 +31,6 @@ role :db,  %w{deploy@3.238.239.164}
 # http://capistranorb.com/documentation/getting-started/configuration/
 # Feel free to add new variables to customise your setup.
 
-
-
 # Custom SSH Options
 # ==================
 # You may pass any option but keep in mind that net/ssh understands a
@@ -45,13 +39,13 @@ role :db,  %w{deploy@3.238.239.164}
 #
 # Global options
 # --------------
- set :ssh_options, {
-   forward_agent: false,
-   auth_methods: %w(publickey)
- }
+set :ssh_options, {
+  forward_agent: false,
+  auth_methods: ['publickey'],
+}
 
- set :branch, 'develop'
- set :deploy_to, '/data/otb-api'
+set :branch, 'develop'
+set :deploy_to, '/data/otb-api'
 #
 # The server-based syntax can be used to override options:
 # ------------------------------------

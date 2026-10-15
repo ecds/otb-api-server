@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class AddFilenameToMedia < ActiveRecord::Migration[6.0]
   def change
-    add_column :media, :filename, :string
+    add_column(:media, :filename, :string)
   end
 end

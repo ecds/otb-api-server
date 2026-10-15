@@ -3,4 +3,12 @@
 # Base class for models.
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
+
+  def mappings
+    {}
+  end
+
+  def search_data
+    {}
+  end
 end

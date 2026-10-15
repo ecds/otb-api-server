@@ -1,0 +1,1990 @@
+{
+  "_index": "open_geographies_v1_20260831093211268",
+  "_id": "13",
+  "_score": 1,
+  "uuid": "e0d9d15c-06f7-40c2-86a1-bf8b1df0b0d0",
+  "slug": "test-tour",
+  "slugs": ["test-tour"],
+  "project_id": "2",
+  "project": "historic-rural-churches-of-georgia",
+  "model_type": "tour",
+  "model_id": "62",
+  "model_name": "Tours",
+  "name": "Test Tour",
+  "visibility": "published",
+  "date_modified": "2026-05-21T12:43:21Z",
+  "identifiers": [],
+  "stops": [
+    {
+      "@context": "https://opengeographies.org/api/v1/context.json",
+      "uuid": "46149c73-1234-4362-bfea-b72a0481880e",
+      "slug": "antioch-baptist",
+      "slugs": ["antioch-baptist"],
+      "project_id": "2",
+      "project": "historic-rural-churches-of-georgia",
+      "model_type": "place",
+      "model_id": "20",
+      "model_name": "Churches",
+      "name": "Antioch Baptist",
+      "visibility": "published",
+      "date_modified": "2026-04-21T20:43:26Z",
+      "identifiers": [],
+      "geo": {
+        "point": {
+          "lat": 33.4680484,
+          "lon": -82.88327699999999
+        }
+      },
+      "administrative_area": [
+        {
+          "name": "Taliaferro",
+          "level": "ADM2",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "Georgia",
+          "level": "ADM1",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "US",
+          "level": "PCLI",
+          "geonames_id": null,
+          "geonames_url": null
+        }
+      ],
+      "legacy_id": {
+        "label": "Legacy ID",
+        "value": 8977
+      },
+      "slug_2": {
+        "label": "Slug",
+        "value": "antioch-baptist"
+      },
+      "short_description": "In November 1886, a group of formerly enslaved men and their children from Powelton New Hope Baptist Church, led by Deacons Willie Peak, Abe Frazier, and Philic Jones, founded Antioch Baptist Church. The deacons purchased two acres from the Veazey family estate, with an additional two acres donated for a cemetery. Soon after the church’s…",
+      "wordpress_link": {
+        "label": "WordPress Link",
+        "value": "https://www.hrcga.org/church/antioch-baptist-3/"
+      },
+      "address": "4136 Sparta Rd SE, Crawfordville, GA 30631",
+      "description": "<p data-start=\"165\" data-end=\"560\">In November 1886, a group of formerly enslaved men and their children from Powelton New Hope Baptist Church, led by Deacons Willie Peak, Abe Frazier, and Philic Jones, founded Antioch Baptist Church. The deacons purchased two acres from the Veazey family estate, with an additional two acres donated for a cemetery. Soon after the church’s dedication, a one-room school was built on the grounds.</p><p data-start=\"562\" data-end=\"1219\">Before integration, schools like these were often the only educational opportunity for rural African Americans. Until the mid-1950s, Black children in the area were not permitted to ride county school buses. Church-affiliated schools served these communities until the “equalization schools” of the 1950s, and it wasn’t until after the Civil Rights Act of 1964 that African American students began to gain access to equal facilities. Even then, the transition was far from smooth—nearby Crawfordville saw significant unrest in 1965, widely covered in national news. Sadly, the original Antioch school, once standing to the left of the church, is now gone.</p><p data-start=\"1221\" data-end=\"1746\">Though the sanctuary may appear abandoned, a dedicated group of descendants still gathers for an annual reunion every August. As seen in the gallery below, one such reunion brought together four generations from multiple states, touching their roots, sharing stories, and passing history to the young. For many years, these efforts were led by George Turner, whose father was Antioch’s last active deacon. Under his leadership, repairs were made and the grounds kept, but more support is needed to ensure Antioch’s survival.</p><p data-start=\"1748\" data-end=\"2073\">The cemetery holds at least 75 recorded burials. Before his passing, Deacon Turner documented 71 additional unmarked graves, common in early African American cemeteries, where headstones were often financially out of reach for farming families. His careful record-keeping preserves a vital piece of this community’s history.</p><p data-start=\"2075\" data-end=\"2486\">With renewed commitment, Antioch can once again serve its community, just as it has since 1886. Preserving this site honors the resilience of those who built it and ensures future generations can learn from its story.</p><h4 data-start=\"2075\" data-end=\"2486\"><em><strong><span style=\"font-size: medium;\">Please click the audio tour link to hear fascinating stories from Antioch.</span></strong></em></h4>",
+      "year": {
+        "label": "Year",
+        "value": 1886
+      },
+      "denomination": "Baptist",
+      "denomination_facet": "Baptist",
+      "types": ["Baptist Church"],
+      "works": [
+        {
+          "uuid": "d70323ef-1d17-4652-8e48-a5f3b0c3223f",
+          "slug": "antioch-baptist-cemetery",
+          "slugs": ["antioch-baptist-cemetery"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "work",
+          "model_id": "45",
+          "model_name": "Works",
+          "name": "Antioch Baptist - Cemetery",
+          "visibility": "published",
+          "date_modified": "2025-12-15T15:32:27Z",
+          "identifiers": [],
+          "link": {
+            "label": "Link",
+            "value": "https://www.findagrave.com/cemetery/32571/antioch-cemetery"
+          },
+          "url": "https://www.findagrave.com/cemetery/32571/antioch-cemetery",
+          "order": null
+        }
+      ],
+      "contained_in": {
+        "uuid": "918b3ac6-a265-4b5d-9a18-e0d3f360469a",
+        "slug": "taliaferro-county",
+        "slugs": ["taliaferro-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Taliaferro County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:22Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4225621"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 33.56609,
+            "lon": -82.87876
+          }
+        },
+        "administrative_area": [
+          {
+            "level": "PCLI",
+            "name": "United States",
+            "geonames_id": "6252001",
+            "geonames_url": "https://www.geonames.org/6252001"
+          },
+          {
+            "level": "ADM1",
+            "name": "Georgia",
+            "geonames_id": "4197000",
+            "geonames_url": "https://www.geonames.org/4197000"
+          },
+          {
+            "level": "ADM2",
+            "name": "Taliaferro",
+            "geonames_id": "4225621",
+            "geonames_url": "https://www.geonames.org/4225621"
+          }
+        ]
+      },
+      "contained_in_place": {
+        "uuid": "918b3ac6-a265-4b5d-9a18-e0d3f360469a",
+        "slug": "taliaferro-county",
+        "slugs": ["taliaferro-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Taliaferro County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:22Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4225621"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 33.56609,
+            "lon": -82.87876
+          }
+        },
+        "administrative_area": [
+          {
+            "level": "PCLI",
+            "name": "United States",
+            "geonames_id": "6252001",
+            "geonames_url": "https://www.geonames.org/6252001"
+          },
+          {
+            "level": "ADM1",
+            "name": "Georgia",
+            "geonames_id": "4197000",
+            "geonames_url": "https://www.geonames.org/4197000"
+          },
+          {
+            "level": "ADM2",
+            "name": "Taliaferro",
+            "geonames_id": "4225621",
+            "geonames_url": "https://www.geonames.org/4225621"
+          }
+        ]
+      },
+      "media": [
+        {
+          "uuid": "7f3828f0-121b-4689-8e8c-b320bfa7add9",
+          "slug": "antioch-baptist-3d-tour",
+          "slugs": ["antioch-baptist-3d-tour"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch Baptist - 3D Tour",
+          "visibility": "published",
+          "date_modified": "2026-08-28T17:01:21Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/eba2636f-01e6-405a-af8b-4cb432c51930/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/eba2636f-01e6-405a-af8b-4cb432c51930/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/eba2636f-01e6-405a-af8b-4cb432c51930/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/eba2636f-01e6-405a-af8b-4cb432c51930/manifest",
+          "embed_url": "https://my.matterport.com/show/?m=8QfqqRUffe1",
+          "media_type": "model3d",
+          "order": null
+        },
+        {
+          "uuid": "e7315a7a-1b9b-4b2b-a1e0-c5d18af01fdd",
+          "slug": "antioch-1-memories",
+          "slugs": ["antioch-1-memories"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch 1- Memories",
+          "visibility": "published",
+          "date_modified": "2026-08-28T17:20:21Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/0168359c-89c1-4c82-99a2-b85bdca25bb4/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/0168359c-89c1-4c82-99a2-b85bdca25bb4/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/0168359c-89c1-4c82-99a2-b85bdca25bb4/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/0168359c-89c1-4c82-99a2-b85bdca25bb4/manifest",
+          "media_type": "audio",
+          "order": null
+        },
+        {
+          "uuid": "8d135ab9-bb9b-424d-82f0-31eed4d60d2e",
+          "slug": "antioch-2-the-church",
+          "slugs": ["antioch-2-the-church"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch 2- The Church",
+          "visibility": "published",
+          "date_modified": "2026-08-28T17:20:22Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/8f1f581e-8bac-452f-a061-9a5529380ddf/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/8f1f581e-8bac-452f-a061-9a5529380ddf/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/8f1f581e-8bac-452f-a061-9a5529380ddf/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/8f1f581e-8bac-452f-a061-9a5529380ddf/manifest",
+          "media_type": "audio",
+          "order": null
+        },
+        {
+          "uuid": "325c5c16-f518-43c7-982e-7556b2e546f1",
+          "slug": "antioch-3-the-revival",
+          "slugs": ["antioch-3-the-revival"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch 3- The Revival",
+          "visibility": "published",
+          "date_modified": "2026-08-28T17:20:23Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/e5de15a1-3239-43ba-a5fd-788a52a2a253/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/e5de15a1-3239-43ba-a5fd-788a52a2a253/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/e5de15a1-3239-43ba-a5fd-788a52a2a253/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/e5de15a1-3239-43ba-a5fd-788a52a2a253/manifest",
+          "media_type": "audio",
+          "order": null
+        },
+        {
+          "uuid": "80505d8d-db3f-4d4c-ba10-f59b3946ecff",
+          "slug": "antioch-4-the-cemetery",
+          "slugs": ["antioch-4-the-cemetery"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch 4- The Cemetery",
+          "visibility": "published",
+          "date_modified": "2026-08-28T17:20:24Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/09ae3b90-d749-46bd-99e2-76416491b1d3/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/09ae3b90-d749-46bd-99e2-76416491b1d3/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/09ae3b90-d749-46bd-99e2-76416491b1d3/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/09ae3b90-d749-46bd-99e2-76416491b1d3/manifest",
+          "media_type": "audio",
+          "order": null
+        },
+        {
+          "uuid": "15f70a85-2123-4154-90c0-8c8f8089f11b",
+          "slug": "antiochehmqoy-1-scaled",
+          "slugs": ["antiochehmqoy-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochEhMqoY-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:21:06Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/1b23305a-9993-45eb-819a-640d8016f77c/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/1b23305a-9993-45eb-819a-640d8016f77c/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/1b23305a-9993-45eb-819a-640d8016f77c/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/1b23305a-9993-45eb-819a-640d8016f77c/manifest",
+          "order": null
+        },
+        {
+          "uuid": "e9c0e1bc-d5c2-4d17-a53b-87f8d99f1dd1",
+          "slug": "antioch8caolbec-3-scaled",
+          "slugs": ["antioch8caolbec-3-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch8cAoLBEc-3-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:55Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/2c5e719e-b47d-49d0-ac51-8104b89fb5eb/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/2c5e719e-b47d-49d0-ac51-8104b89fb5eb/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/2c5e719e-b47d-49d0-ac51-8104b89fb5eb/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/2c5e719e-b47d-49d0-ac51-8104b89fb5eb/manifest",
+          "caption": "<p>Here lies Dock Peek, born in 1852 and died in 1925 at the age of 72. At the end of the Civil War, he would have been about thirteen. We don&#8217;t know how many freed slaves are buried in the graveyard but we suspect there are a lot. Many of the early unmarked graves would have been formally enslaved people.</p>",
+          "order": null
+        },
+        {
+          "uuid": "446d493a-47ae-45b8-bf30-d669b480a176",
+          "slug": "antioch-solar-box1-scaled",
+          "slugs": ["antioch-solar-box1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch-solar-box1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:55Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/93233727-a2f5-488c-adff-53dca4dac848/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/93233727-a2f5-488c-adff-53dca4dac848/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/93233727-a2f5-488c-adff-53dca4dac848/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/93233727-a2f5-488c-adff-53dca4dac848/manifest",
+          "caption": "<p>In front of the church is a solar box containing very interesting aspects of Antioch history. It is well worth a visit and a listen. The four audio files can be accessed on the video virtual tour. THE CHURCH &#8211; THE CEMETERY &#8211; A REVIVAL &#8211; MEMORIES OF ANTIOCH</p>",
+          "order": null
+        },
+        {
+          "uuid": "01e8d257-0f3a-4ce2-a8b8-c324a3e1c590",
+          "slug": "antioch3r53htzt-scaled",
+          "slugs": ["antioch3r53htzt-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch3R53htzt-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:56Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/37b7b798-3884-44b4-8dec-7e85fb0387de/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/37b7b798-3884-44b4-8dec-7e85fb0387de/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/37b7b798-3884-44b4-8dec-7e85fb0387de/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/37b7b798-3884-44b4-8dec-7e85fb0387de/manifest",
+          "caption": "<p>As stated earlier, the Antioch Baptist church building is suffering significant damage from top to bottom. But, engineering analysis reveals that with money, time and local support it can be successfully restored. Though the damage to the brick corner foundation shown looks daunting, a local contractor declares that it can be repaired at a reasonable&#8230;</p>",
+          "order": null
+        },
+        {
+          "uuid": "19c732fd-cf49-49ba-85bb-3a5640fb25b9",
+          "slug": "antiochnxrd3r9w-scaled",
+          "slugs": ["antiochnxrd3r9w-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochnXRd3r9W-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:21:09Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/0fe0e950-13b6-400a-8e9e-6ae828273126/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/0fe0e950-13b6-400a-8e9e-6ae828273126/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/0fe0e950-13b6-400a-8e9e-6ae828273126/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/0fe0e950-13b6-400a-8e9e-6ae828273126/manifest",
+          "order": null
+        },
+        {
+          "uuid": "cc377ce1-7fdf-4d46-a973-1143b5bdda43",
+          "slug": "antioch6vmzkvxa-scaled",
+          "slugs": ["antioch6vmzkvxa-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch6VmZKvXa-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:56Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/16419836-2c0c-4958-b748-83befbe06825/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/16419836-2c0c-4958-b748-83befbe06825/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/16419836-2c0c-4958-b748-83befbe06825/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/16419836-2c0c-4958-b748-83befbe06825/manifest",
+          "caption": "This photo presents that significant repairs will be needed to stabilize and restore the building framing. However, most of the timbers remain sound and the building remains plumb and square after 120 years. Note the fieldstone footings. All the locals had to work with was wood, rocks and sometimes brick. They made great use of what was at hand.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "2a01c8af-911e-47ea-ad78-bae99f663aaa",
+          "slug": "antiochm4klx4ak-scaled",
+          "slugs": ["antiochm4klx4ak-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochM4KLX4AK-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:57Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/b95b6e7e-5ac1-4c77-9c8e-9fd158448b27/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/b95b6e7e-5ac1-4c77-9c8e-9fd158448b27/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/b95b6e7e-5ac1-4c77-9c8e-9fd158448b27/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/b95b6e7e-5ac1-4c77-9c8e-9fd158448b27/manifest",
+          "caption": "Though definitely compromised, the front steps and open vestibule entry area and its large support framing remains level and repairable. The siding, though rough and worn will, in most cases, not need to be replaced and can be repaired and painted along with the curved vestibule ceiling.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "dd7a5e01-4096-430b-826a-d3bc1df8334a",
+          "slug": "antiochwmrzjqx4-1-scaled",
+          "slugs": ["antiochwmrzjqx4-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochWmrZJqx4-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:57Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/6cab7e37-0e27-40f5-82e0-b7c7f41cc002/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/6cab7e37-0e27-40f5-82e0-b7c7f41cc002/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/6cab7e37-0e27-40f5-82e0-b7c7f41cc002/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/6cab7e37-0e27-40f5-82e0-b7c7f41cc002/manifest",
+          "caption": "Here we get a peek through the open front door into the sanctuary. Remarkably, the original heart pine floor boards, though neglected for decades, remain intact and can be brought to life with minimum effort. Isn’t the glimpse of the pulpit area and apse windows intriguing?",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "c8957c8b-c15e-497e-928b-25d6f22795aa",
+          "slug": "antiochl2bxugmq-scaled",
+          "slugs": ["antiochl2bxugmq-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochL2BxuGmq-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:58Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/67b78ce4-d39a-474c-af13-6788b0dd1056/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/67b78ce4-d39a-474c-af13-6788b0dd1056/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/67b78ce4-d39a-474c-af13-6788b0dd1056/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/67b78ce4-d39a-474c-af13-6788b0dd1056/manifest",
+          "caption": "This charming photo presents the Antioch sanctuary as it is today. We see over twenty of the original hand hewn, heart pine pews resting on the pine floor boards just as they have since the church’s 19th century beginning. The weight of each, solid wood pew is remarkable. Throughout the sanctuary, we see the signs of many restoration efforts. The original heart pine ceiling and walls has been covered and sheet rocked. Thankfully, all of the original elements of this period interior can be restored.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "2eb494d8-647d-42a2-8bcc-da3ed5823421",
+          "slug": "antioch7be8omn1-scaled",
+          "slugs": ["antioch7be8omn1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch7Be8oMN1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:58Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/672551ef-d2c1-47c0-87ad-58310d877b0b/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/672551ef-d2c1-47c0-87ad-58310d877b0b/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/672551ef-d2c1-47c0-87ad-58310d877b0b/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/672551ef-d2c1-47c0-87ad-58310d877b0b/manifest",
+          "caption": "Here we see a close up photograph of the chancel, pulpit area and apse. This church was built by and for former slaves and without the input of professional contractors and architects. We marvel at the creativity and cleverness exhibited in the design of gothic window frames created by placing triangular elements atop rectangular frames. We love these three windows and what they represent. All elements like these can be repaired and restored and remain available for all to see and enjoy for decades to come.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "c561b89f-a453-40dd-95ee-4c18355b8e2a",
+          "slug": "antioch2ewfzsdh-scaled",
+          "slugs": ["antioch2ewfzsdh-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch2EWFZSDh-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:59Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/d294afcd-4ce4-49e0-904d-647f35b13ab0/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/d294afcd-4ce4-49e0-904d-647f35b13ab0/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/d294afcd-4ce4-49e0-904d-647f35b13ab0/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/d294afcd-4ce4-49e0-904d-647f35b13ab0/manifest",
+          "caption": "In this photo we see how the builders created a charming apse at this simple church by kicking out its back wall to create a bay. We also see a decorative wainscot along the walls. These are just another example of the creative design talent and capability of these former slaves that is reflected in the construction of this old church.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "c4128f37-f898-40e9-8321-070acb850f6c",
+          "slug": "antiochu3qpkzfd-scaled",
+          "slugs": ["antiochu3qpkzfd-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochU3qpKzFD-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:59Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/4c9cc771-33b2-44bf-84c8-c645d0c96558/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/4c9cc771-33b2-44bf-84c8-c645d0c96558/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/4c9cc771-33b2-44bf-84c8-c645d0c96558/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/4c9cc771-33b2-44bf-84c8-c645d0c96558/manifest",
+          "caption": "According to George Turner, son of the last Antioch Baptist Bishop, congregational singing was a critical element of the worship services at the church. He also tells us that sometimes, the congregation would not sing but simply tap their feet in rhythm expressing elements of unity and community.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "d84c10b6-7ecb-43b1-9914-12ff536cdb17",
+          "slug": "antiochwokoxyen-scaled",
+          "slugs": ["antiochwokoxyen-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochwOkOxyen-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:55:59Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/039a6e2c-f309-49d2-8f10-f69b342beb34/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/039a6e2c-f309-49d2-8f10-f69b342beb34/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/039a6e2c-f309-49d2-8f10-f69b342beb34/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/039a6e2c-f309-49d2-8f10-f69b342beb34/manifest",
+          "caption": "We chose to present this photo of a hand hewn, un-planed heart pine pew back to provide an example of the authenticity of almost every element present at Antioch today. We believe that preservation of such treasures as these for the edification and enjoyment of future generations is critical.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "db49df4f-80d2-4415-8d21-6c44fcc22c6a",
+          "slug": "antiochxi7h9xma-scaled",
+          "slugs": ["antiochxi7h9xma-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antiochxi7H9XMa-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:56:00Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/c58b1ebd-a1ec-45e5-a2b2-1475eb6912d0/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/c58b1ebd-a1ec-45e5-a2b2-1475eb6912d0/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/c58b1ebd-a1ec-45e5-a2b2-1475eb6912d0/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/c58b1ebd-a1ec-45e5-a2b2-1475eb6912d0/manifest",
+          "caption": "This is a close up of one of the gothic window frames. Here we point out that these are handmade, sashed, 6 over 6 windows. None are from a factory. All were hand made, another example of the talents of the builders. We also want to point out again that the walls, ceilings etc. were sheet rocked in the 20th century. The plan is to see that all the significant, original sanctuary elements will be restored.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "e5dc5a26-3550-41fb-b930-b810ffeef945",
+          "slug": "antiochkercqhjl-scaled",
+          "slugs": ["antiochkercqhjl-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochKErcqHJl-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:56:00Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/8b4e9810-61a3-49e6-af56-ad9c8e12a5f1/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/8b4e9810-61a3-49e6-af56-ad9c8e12a5f1/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/8b4e9810-61a3-49e6-af56-ad9c8e12a5f1/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/8b4e9810-61a3-49e6-af56-ad9c8e12a5f1/manifest",
+          "caption": "In this view, we display some of the problems that must be addressed to breathe life back into Antioch. The roof is leaking as evidenced by the ceiling stains near the chancel and patched, damaged areas seen nearby. More serious leaks exist and will need to be addressed. On the other hand, isn’t the scene depicted charming and tranquil. We hope to bring you in the future pictures of the repaired church and the back story of its successful rejuvenation.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "93576c80-8684-45b6-b2e9-633744fddd3f",
+          "slug": "antioch-homecoming-scaled",
+          "slugs": ["antioch-homecoming-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antioch-homecoming-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:56:01Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/08f879f4-4ead-4fd0-959c-8d8357d5746a/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/08f879f4-4ead-4fd0-959c-8d8357d5746a/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/08f879f4-4ead-4fd0-959c-8d8357d5746a/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/08f879f4-4ead-4fd0-959c-8d8357d5746a/manifest",
+          "caption": "The tendency would be to think of Antioch as an abandoned church that has no support, but that is not the case. There is an annual homecoming that takes place each August, attended by family descendants from far and wide, who pay homage to their heritage and their roots. In this photo of a recent reunion are represented four generations of descendants from as far away as New York and Connecticut. They raise enough money to keep the grounds up and do some repairs but need help for the full renovation.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "e608421a-225f-4a0f-be5a-68152ee00dc6",
+          "slug": "antiochpxsxw77y-scaled",
+          "slugs": ["antiochpxsxw77y-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochpXsxW77Y-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:56:01Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/28d7eed3-57f6-4c01-811e-a92b7023f34c/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/28d7eed3-57f6-4c01-811e-a92b7023f34c/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/28d7eed3-57f6-4c01-811e-a92b7023f34c/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/28d7eed3-57f6-4c01-811e-a92b7023f34c/manifest",
+          "caption": "What a lovely shot from the church interior to the little graveyard outside. While there are 75 recorded interments, Deacon Turner, when he was still alive, identified 67 other graves that are unmarked. Gravestones and caskets were expensive for people making perhaps two dollars a day. They were buried with love and dignity but headstones were simply unaffordable.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "af3d6ab4-5393-40fc-8e5a-218780787d50",
+          "slug": "antiochoeg4l-3k-1-scaled",
+          "slugs": ["antiochoeg4l-3k-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochoeG4L-3K-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:56:02Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/1eeb0051-334c-4008-93c9-664b516f4160/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/1eeb0051-334c-4008-93c9-664b516f4160/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/1eeb0051-334c-4008-93c9-664b516f4160/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/1eeb0051-334c-4008-93c9-664b516f4160/manifest",
+          "caption": "The oldest interment in the cemetery is that of Rev. William H. Darden, who was born into slavery in 1856 and died in 1898, shortly after the congregation was formed. He lies at rest under the signature pine tree in front of the church.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "24e7a378-d64c-4d91-b708-37416c54fd79",
+          "slug": "antiochtoie3anh-scaled",
+          "slugs": ["antiochtoie3anh-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Antiochtoie3Anh-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:56:02Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/631c2152-23d9-4302-955e-fa210c34fcf1/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/631c2152-23d9-4302-955e-fa210c34fcf1/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/631c2152-23d9-4302-955e-fa210c34fcf1/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/631c2152-23d9-4302-955e-fa210c34fcf1/manifest",
+          "caption": "Here lies Deacon Turner, George Turner's father, his mother and her sister. Family roots run deep at Antioch and especially so for the Turner family.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "083e856b-dfb3-4fee-a28b-6dce2e3806de",
+          "slug": "antiochnxrd3r9w-2-scaled",
+          "slugs": ["antiochnxrd3r9w-2-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "AntiochnXRd3r9W-2-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-18T17:50:07Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/b0df9ca2-addd-4c03-b649-6e95a9f9e4c7/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/b0df9ca2-addd-4c03-b649-6e95a9f9e4c7/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/b0df9ca2-addd-4c03-b649-6e95a9f9e4c7/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/b0df9ca2-addd-4c03-b649-6e95a9f9e4c7/manifest",
+          "caption": "<p>Antioch is a very spiritual place that is difficult to describe. It is nestled in the trees beside the old graveyard and presents a very photogenic profile. There used to be a small one room schoolhouse to the left of the church but it was dismantled some years ago. Antioch can still be saved but time is running out.</p>",
+          "order": null
+        }
+      ],
+      "order": 50
+    },
+    {
+      "@context": "https://opengeographies.org/api/v1/context.json",
+      "uuid": "347ea1da-562c-4a67-8cf7-706a5ea882bf",
+      "slug": "hardison-baptist",
+      "slugs": ["hardison-baptist"],
+      "project_id": "2",
+      "project": "historic-rural-churches-of-georgia",
+      "model_type": "place",
+      "model_id": "20",
+      "model_name": "Churches",
+      "name": "Hardison Baptist",
+      "visibility": "published",
+      "date_modified": "2026-04-21T20:42:36Z",
+      "identifiers": [],
+      "geo": {
+        "point": {
+          "lat": 32.6648851,
+          "lon": -83.8150232
+        }
+      },
+      "administrative_area": [
+        {
+          "name": "Crawford",
+          "level": "ADM2",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "Georgia",
+          "level": "ADM1",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "US",
+          "level": "PCLI",
+          "geonames_id": null,
+          "geonames_url": null
+        }
+      ],
+      "legacy_id": {
+        "label": "Legacy ID",
+        "value": 18281
+      },
+      "slug_2": {
+        "label": "Slug",
+        "value": "hardison-baptist"
+      },
+      "short_description": "Hardison Baptist Church, established in 1902, is located in rural Crawford County, about four miles west of Byron. The county itself was created on December 9, 1822, from Houston County, which had been formed from land ceded by the Creek Indians in the 1821 Treaty of Indian Springs. It was named for statesman William Harris…",
+      "wordpress_link": {
+        "label": "WordPress Link",
+        "value": "https://www.hrcga.org/church/hardison-baptist/"
+      },
+      "address": "13845 GA-42, Byron, GA 31008",
+      "description": "<p data-start=\"168\" data-end=\"586\">Hardison Baptist Church, established in 1902, is located in rural Crawford County, about four miles west of Byron. The county itself was created on December 9, 1822, from Houston County, which had been formed from land ceded by the Creek Indians in the 1821 Treaty of Indian Springs. It was named for statesman William Harris Crawford, who served as a U.S. senator, minister to France, and secretary of the treasury.</p><p data-start=\"588\" data-end=\"974\">For the first two years, the Hardison congregation met in a tent while their permanent church was under construction. The completed sanctuary was dedicated in 1904 on land donated by Jeff Hardison, for whom the church is named. Unlike many rural congregations that have declined over time, Hardison Baptist has continued to grow, with several additions made to the original sanctuary. In its early years, baptisms were conducted in a pond at a nearby Boy Scout camp. That tradition continued until the 1960s, when the church built its own baptismal pool. Around the same time, the church’s front entrance was extended, and the ornate steeple seen today was added. Interestingly, the steeple was designed and built by a local company that normally constructed crates for the military. The bell was donated by Lester Almaroad with the stipulation that it would revert to the original donor if the building was ever used for anything other than a Baptist church.</p><p data-start=\"1554\" data-end=\"1720\">Today, Hardison Baptist Church is lovingly maintained by its dedicated congregation, who continue to preserve both its physical structure and its spiritual mission. Special thanks to Rev. Rick Odum, who served as pastor for twenty-two years, for sharing this history.</p>",
+      "year": {
+        "label": "Year",
+        "value": 1902
+      },
+      "denomination": "Baptist",
+      "denomination_facet": "Baptist",
+      "types": ["Baptist Church"],
+      "contained_in": {
+        "uuid": "65221348-aeb7-4812-95ec-3c0451941a98",
+        "slug": "crawford-county",
+        "slugs": ["crawford-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Crawford County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:14Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4189924"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 32.7145,
+            "lon": -83.98634
+          }
+        },
+        "administrative_area": [
+          {
+            "name": "United States",
+            "level": "PCLI",
+            "geonames_id": "6252001",
+            "geonames_url": "https://www.geonames.org/6252001"
+          },
+          {
+            "name": "Georgia",
+            "level": "ADM1",
+            "geonames_id": "4197000",
+            "geonames_url": "https://www.geonames.org/4197000"
+          },
+          {
+            "name": "Crawford",
+            "level": "ADM2",
+            "geonames_id": "4189924",
+            "geonames_url": "https://www.geonames.org/4189924"
+          }
+        ]
+      },
+      "contained_in_place": {
+        "uuid": "65221348-aeb7-4812-95ec-3c0451941a98",
+        "slug": "crawford-county",
+        "slugs": ["crawford-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Crawford County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:14Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4189924"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 32.7145,
+            "lon": -83.98634
+          }
+        },
+        "administrative_area": [
+          {
+            "name": "United States",
+            "level": "PCLI",
+            "geonames_id": "6252001",
+            "geonames_url": "https://www.geonames.org/6252001"
+          },
+          {
+            "name": "Georgia",
+            "level": "ADM1",
+            "geonames_id": "4197000",
+            "geonames_url": "https://www.geonames.org/4197000"
+          },
+          {
+            "name": "Crawford",
+            "level": "ADM2",
+            "geonames_id": "4189924",
+            "geonames_url": "https://www.geonames.org/4189924"
+          }
+        ]
+      },
+      "media": [
+        {
+          "uuid": "a7102171-f321-473c-9fe7-021b6844a4b3",
+          "slug": "img_5304",
+          "slugs": ["img_5304"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5304",
+          "visibility": "published",
+          "date_modified": "2026-04-20T19:23:41Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/27e9dab0-2f3b-42e5-9d68-1cd531be6a42/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/27e9dab0-2f3b-42e5-9d68-1cd531be6a42/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/27e9dab0-2f3b-42e5-9d68-1cd531be6a42/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/27e9dab0-2f3b-42e5-9d68-1cd531be6a42/manifest",
+          "order": null
+        },
+        {
+          "uuid": "321bddf8-9899-4df7-9b19-cf2babc61367",
+          "slug": "img_5304-scaled",
+          "slugs": ["img_5304-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5304-scaled",
+          "visibility": "published",
+          "date_modified": "2026-06-25T17:31:47Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/18001fb0-6b92-4f91-bb48-3d45bebce657/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/18001fb0-6b92-4f91-bb48-3d45bebce657/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/18001fb0-6b92-4f91-bb48-3d45bebce657/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/18001fb0-6b92-4f91-bb48-3d45bebce657/manifest",
+          "order": null
+        },
+        {
+          "uuid": "940f0bca-9682-4e51-aaa0-1220530378a2",
+          "slug": "img_5314",
+          "slugs": ["img_5314"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5314",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:37Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/0801995f-3560-484c-910e-434a1357edac/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/0801995f-3560-484c-910e-434a1357edac/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/0801995f-3560-484c-910e-434a1357edac/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/0801995f-3560-484c-910e-434a1357edac/manifest",
+          "caption": "An old church bell tower with intricate woodwork, showing signs of weathering and age, standing tall under a clear blue sky.  The steeple was designed and built locally.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "2410d04f-1d8b-4b3c-8f5d-9a7d12fc552c",
+          "slug": "img_5326-scaled",
+          "slugs": ["img_5326-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5326-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:37Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/b9a387dd-1407-4789-8ab2-7712e60ef879/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/b9a387dd-1407-4789-8ab2-7712e60ef879/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/b9a387dd-1407-4789-8ab2-7712e60ef879/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/b9a387dd-1407-4789-8ab2-7712e60ef879/manifest",
+          "caption": "A peaceful church sanctuary with neatly arranged pews, a central pulpit adorned with floral arrangements, and a serene backdrop painting, all illuminated by elegant chandeliers.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "3bc06dbe-7c85-408f-a8e3-764c1c7bb777",
+          "slug": "img_5323-1-scaled",
+          "slugs": ["img_5323-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5323-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:38Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/5c06d965-f76c-4b0c-a1fb-574ab4f24349/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/5c06d965-f76c-4b0c-a1fb-574ab4f24349/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/5c06d965-f76c-4b0c-a1fb-574ab4f24349/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/5c06d965-f76c-4b0c-a1fb-574ab4f24349/manifest",
+          "caption": "A close-up view of a church stage featuring a wooden pulpit, floral arrangement, comfortable chairs, and a piano, ready for a service or sermon.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "e35c2825-c653-47ec-9381-f22ab9462717",
+          "slug": "img_5319-scaled",
+          "slugs": ["img_5319-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5319-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:38Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/c4b3101a-6fb4-4f22-ba75-ca0e66718527/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/c4b3101a-6fb4-4f22-ba75-ca0e66718527/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/c4b3101a-6fb4-4f22-ba75-ca0e66718527/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/c4b3101a-6fb4-4f22-ba75-ca0e66718527/manifest",
+          "caption": "A serene view of a church interior from the pulpit, showcasing rows of neatly arranged pews, warm lighting from chandeliers, and a welcoming atmosphere.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "ef18eb0d-bd33-4dc5-afe0-b2caf1c7bcf4",
+          "slug": "img_5318-1-scaled",
+          "slugs": ["img_5318-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5318-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:39Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/7fea7928-84a6-424c-bb64-b8fdeee961cc/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/7fea7928-84a6-424c-bb64-b8fdeee961cc/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/7fea7928-84a6-424c-bb64-b8fdeee961cc/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/7fea7928-84a6-424c-bb64-b8fdeee961cc/manifest",
+          "caption": "Elegant leather chairs and a table with religious texts, set up on the church stage for clergy or guest speakers.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "2df63e56-5cac-4c48-ad1f-4f82f66d6892",
+          "slug": "img_5321-1-scaled",
+          "slugs": ["img_5321-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "IMG_5321-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:39Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/f95489aa-e01d-4630-982e-7fabde28fc82/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/f95489aa-e01d-4630-982e-7fabde28fc82/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/f95489aa-e01d-4630-982e-7fabde28fc82/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/f95489aa-e01d-4630-982e-7fabde28fc82/manifest",
+          "caption": "A baptismal pool with a serene mural of a flowing river and lush landscape in the background. Prior to the construction of this pool in the 1960s, the congregation used a pond nearby at a local Boy Scout camp.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        }
+      ],
+      "order": 20
+    },
+    {
+      "@context": "https://opengeographies.org/api/v1/context.json",
+      "uuid": "3c64edbd-54e4-4b97-a8ca-c2e1ed2bae28",
+      "slug": "oconee-baptist-2",
+      "slugs": ["oconee-baptist-2", "oconee-baptist"],
+      "project_id": "2",
+      "project": "historic-rural-churches-of-georgia",
+      "model_type": "place",
+      "model_id": "20",
+      "model_name": "Churches",
+      "name": "Oconee Baptist",
+      "visibility": "published",
+      "date_modified": "2026-04-21T20:42:36Z",
+      "identifiers": [],
+      "geo": {
+        "point": {
+          "lat": 33.8113142,
+          "lon": -83.2818954
+        }
+      },
+      "administrative_area": [
+        {
+          "name": "Oglethorpe",
+          "level": "ADM2",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "Georgia",
+          "level": "ADM1",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "US",
+          "level": "PCLI",
+          "geonames_id": null,
+          "geonames_url": null
+        }
+      ],
+      "legacy_id": {
+        "label": "Legacy ID",
+        "value": 18483
+      },
+      "slug_2": {
+        "label": "Slug",
+        "value": "oconee-baptist-2"
+      },
+      "short_description": "The church you see here was built in the late 1890s and was bricked over in 1970. The congregation remains very active but relocated to a more accessible location when ten acres were purchased in 2003 closer to the highway. This historic African American church is well maintained by the present congregation, who deeply appreciates…",
+      "wordpress_link": {
+        "label": "WordPress Link",
+        "value": "https://www.hrcga.org/church/oconee-baptist-2/"
+      },
+      "address": "wire bridge road oglethorpe county, georgia",
+      "description": "<p class=\"whitespace-pre-wrap break-words\">The church you see here was built in the late 1890s and was bricked over in 1970. The congregation remains very active but relocated to a more accessible location when ten acres were purchased in 2003 closer to the highway. This historic African American church is well maintained by the present congregation, who deeply appreciates its heritage on this remote dirt road in rural Oglethorpe County. Such churches are scattered throughout rural Georgia—appearing modest yet holding profound stories about Georgia&#8217;s history. Oconee Baptist stands as one such example.</p><p class=\"whitespace-pre-wrap break-words\">Among its notable congregants was Reverend Parker Poulain, the first minister of Oconee Baptist. Rev. Poulain served several churches in the area and, in 1884, converted and baptized A.D. (Adam) Williams at Bethabara Baptist church in nearby Greene County. A.D.&#8217;s father, Willis Williams, had been enslaved in Greene County and died there in 1874. A.D. moved to Atlanta in 1893, where he successfully built up the congregation of Ebenezer Baptist. His grandson was Martin Luther King, Jr., and Ebenezer later became Dr. King&#8217;s home church.</p><p class=\"whitespace-pre-wrap break-words\">The church cemetery appears unassuming at first glance, but closer examination reveals significant historical narratives. According to Find a Grave, there are 216 recorded interments, twelve of them born into slavery. However, older congregation members estimate there  are approximately 300 unmarked graves, many likely belonging to emancipated slaves.</p><p class=\"whitespace-pre-wrap break-words\">Of the 12 documented graves of people born into slavery, three have death certificates posted on Find a Grave. These certificates provide insights into 19th-century Georgia history. State law mandated statewide death registration in 1919, and county officials implemented this requirement gradually over several years. The death certificate process requests the name and birthplace of both parents of the deceased. All three certificates of these formerly enslaved people answer these requests with the designation &#8220;Unknown&#8221;—a poignant but common occurrence prior to 1865.</p><p class=\"whitespace-pre-wrap break-words\">James Sims&#8217; death certificate is particularly noteworthy, and is posted below. Born around 1828, he died in 1930 at the remarkable age of 102. The Oglethorpe County 1860 slave schedule records a large slave owner named Dr. James Sims (owning 52 slaves with 10 slave houses). James was likely enslaved by Dr. Sims, as the 1860 slave schedule lists a Black male belonging to Dr. Sims that matches his age. When emancipation came in 1865, James would have begun his life as a free man in rural Oglethorpe County at age 37—unable to read or write, without knowledge of his parents, and without a last name. The census of 1930, taken just before he died, confirms that he remained illiterate for life. </p><p class=\"whitespace-pre-wrap break-words\">Like many emancipated slaves, James adopted the surname of his former enslaver. From these humble beginnings in 1865, James and his contemporaries began to build new lives for themselves and their children.  Adjacent to the church once stood a church-sponsored school, now gone. These small schools often provided the only educational opportunities available to many of the first generation of freedmen and their children in rural Georgia. The freedmen may have been illiterate but they carried deep educational aspirations for their children. These church sponsored schools emerged throughout the state in the early 1900s, though few remain today. Today, 23 of the documented interments in the cemetery carry the Sims surname.  We honor Oconee Baptist&#8217;s history and its place in Georgia&#8217;s heritage, and we appreciate the congregation&#8217;s devoted stewardship of this important legacy.</p>",
+      "year": {
+        "label": "Year",
+        "value": 1891
+      },
+      "denomination": "Baptist",
+      "denomination_facet": "Baptist",
+      "types": ["Baptist Church"],
+      "works": [
+        {
+          "uuid": "6b496688-6575-4879-a86c-a43e01c4b337",
+          "slug": "oconee-baptist-cemetery",
+          "slugs": ["oconee-baptist-cemetery"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "work",
+          "model_id": "45",
+          "model_name": "Works",
+          "name": "Oconee Baptist - Cemetery",
+          "visibility": "published",
+          "date_modified": "2025-12-15T15:32:11Z",
+          "identifiers": [],
+          "link": {
+            "label": "Link",
+            "value": "https://www.findagrave.com/cemetery/1965028/memorial-search"
+          },
+          "url": "https://www.findagrave.com/cemetery/1965028/memorial-search",
+          "order": null
+        }
+      ],
+      "contained_in": {
+        "uuid": "c9e9ac65-6aa1-4ef8-a715-b68457427335",
+        "slug": "oglethorpe-county",
+        "slugs": ["oglethorpe-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Oglethorpe County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:20Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4213930"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 33.88065,
+            "lon": -83.0807
+          }
+        },
+        "administrative_area": [
+          {
+            "name": "Oglethorpe",
+            "level": "ADM2",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "Georgia",
+            "level": "ADM1",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "US",
+            "level": "PCLI",
+            "geonames_id": null,
+            "geonames_url": null
+          }
+        ]
+      },
+      "contained_in_place": {
+        "uuid": "c9e9ac65-6aa1-4ef8-a715-b68457427335",
+        "slug": "oglethorpe-county",
+        "slugs": ["oglethorpe-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Oglethorpe County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:20Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4213930"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 33.88065,
+            "lon": -83.0807
+          }
+        },
+        "administrative_area": [
+          {
+            "name": "Oglethorpe",
+            "level": "ADM2",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "Georgia",
+            "level": "ADM1",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "US",
+            "level": "PCLI",
+            "geonames_id": null,
+            "geonames_url": null
+          }
+        ]
+      },
+      "media": [
+        {
+          "uuid": "1323a8fe-a5da-4e76-bec3-4538e9bb0180",
+          "slug": "p5226589_4-scaled",
+          "slugs": ["p5226589_4-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226589_4-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/536c58fc-5474-4a80-b9ae-b32e84a974ce/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/536c58fc-5474-4a80-b9ae-b32e84a974ce/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/536c58fc-5474-4a80-b9ae-b32e84a974ce/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/536c58fc-5474-4a80-b9ae-b32e84a974ce/manifest",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": 10
+        },
+        {
+          "uuid": "c901b02c-bc80-4a46-a048-fc66d998316a",
+          "slug": "p5226581_3-scaled",
+          "slugs": ["p5226581_3-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226581_3-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:26Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/5c6ad96f-48b0-43a5-aab7-ae2798cbffa4/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/5c6ad96f-48b0-43a5-aab7-ae2798cbffa4/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/5c6ad96f-48b0-43a5-aab7-ae2798cbffa4/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/5c6ad96f-48b0-43a5-aab7-ae2798cbffa4/manifest",
+          "caption": "<p>Although, the church no longer meets here, the congregation takes care of the maintenance required out of respect for the history she represents.</p>",
+          "order": null
+        },
+        {
+          "uuid": "7a13c8f9-0ead-4ca9-9cbc-b5691661cfa5",
+          "slug": "p5226492_5-scaled",
+          "slugs": ["p5226492_5-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226492_5-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:26Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/f130d91c-54b9-4b2d-acad-c2f75d5f140a/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/f130d91c-54b9-4b2d-acad-c2f75d5f140a/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/f130d91c-54b9-4b2d-acad-c2f75d5f140a/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/f130d91c-54b9-4b2d-acad-c2f75d5f140a/manifest",
+          "caption": "<p>Here lies Lizzie Perry (1879 – 1920).  She died at the young age of 40.</p>",
+          "order": null
+        },
+        {
+          "uuid": "cb47582d-b3d6-4889-91ba-cd84e9cf16e7",
+          "slug": "p5226520_3-scaled",
+          "slugs": ["p5226520_3-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226520_3-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:27Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/28aad90e-d4d0-4e96-9642-6fb465c88247/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/28aad90e-d4d0-4e96-9642-6fb465c88247/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/28aad90e-d4d0-4e96-9642-6fb465c88247/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/28aad90e-d4d0-4e96-9642-6fb465c88247/manifest",
+          "caption": "<p>OLYMPUS DIGITAL CAMERA</p>",
+          "order": null
+        },
+        {
+          "uuid": "1a02341f-7c8e-43e5-a1cc-18be87088f64",
+          "slug": "p5226538_5-scaled",
+          "slugs": ["p5226538_5-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226538_5-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:27Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/19684dc4-a830-4eb4-a2f8-36289b162c1c/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/19684dc4-a830-4eb4-a2f8-36289b162c1c/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/19684dc4-a830-4eb4-a2f8-36289b162c1c/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/19684dc4-a830-4eb4-a2f8-36289b162c1c/manifest",
+          "caption": "<p>Oconee is located in a very remote part of Oglethorpe County. She has been at the center of the local community since he founding in 1891.  What a pleasant place for Dinner on the Grounds.</p>",
+          "order": null
+        },
+        {
+          "uuid": "ebb182c3-d9fc-47b2-b963-6749b0350b38",
+          "slug": "p5226428_8-1-scaled",
+          "slugs": ["p5226428_8-1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226428_8-1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:28Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/392760a2-3285-46da-bedd-a07091412eac/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/392760a2-3285-46da-bedd-a07091412eac/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/392760a2-3285-46da-bedd-a07091412eac/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/392760a2-3285-46da-bedd-a07091412eac/manifest",
+          "caption": "<p>OLYMPUS DIGITAL CAMERA</p>",
+          "order": null
+        },
+        {
+          "uuid": "03fff060-a7a7-4c5d-a0b2-2366b4cdd252",
+          "slug": "elbert_ruckersville_01",
+          "slugs": ["elbert_ruckersville_01"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Elbert_Ruckersville_01",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:11:52Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/1c3ab609-bd89-450d-9b30-309d82f60050/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/1c3ab609-bd89-450d-9b30-309d82f60050/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/1c3ab609-bd89-450d-9b30-309d82f60050/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/1c3ab609-bd89-450d-9b30-309d82f60050/manifest",
+          "order": null
+        },
+        {
+          "uuid": "dec6de70-1f9e-4b52-a3c5-b506a8e0e882",
+          "slug": "fannin_tarpley_01-scaled",
+          "slugs": ["fannin_tarpley_01-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Fannin_Tarpley_01-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:11:56Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/c8bec286-6d60-4c0b-af93-d5b3cdabb845/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/c8bec286-6d60-4c0b-af93-d5b3cdabb845/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/c8bec286-6d60-4c0b-af93-d5b3cdabb845/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/c8bec286-6d60-4c0b-af93-d5b3cdabb845/manifest",
+          "order": null
+        },
+        {
+          "uuid": "25280a8d-a654-446a-b051-d9b76675ae75",
+          "slug": "habersham_mt-airy_01",
+          "slugs": ["habersham_mt-airy_01"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Habersham_Mt.-Airy_01",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:29Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/03632f40-dbde-4de0-9338-ffeb3a9b9ec6/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/03632f40-dbde-4de0-9338-ffeb3a9b9ec6/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/03632f40-dbde-4de0-9338-ffeb3a9b9ec6/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/03632f40-dbde-4de0-9338-ffeb3a9b9ec6/manifest",
+          "caption": "<p>COPYRIGHT 2013 RANDY CLEGG</p>",
+          "order": null
+        },
+        {
+          "uuid": "2b5bc8bb-1857-456a-abaf-93c57d331917",
+          "slug": "jefferson_ways-grove_01",
+          "slugs": ["jefferson_ways-grove_01"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Jefferson_Ways-Grove_01",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:29Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/9ba33a16-5559-4128-9475-3850370d7bb0/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/9ba33a16-5559-4128-9475-3850370d7bb0/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/9ba33a16-5559-4128-9475-3850370d7bb0/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/9ba33a16-5559-4128-9475-3850370d7bb0/manifest",
+          "caption": "<p>Nikon D850</p>",
+          "order": null
+        },
+        {
+          "uuid": "e05118d5-82f8-45f0-b59e-7ed6f07a3bf5",
+          "slug": "and",
+          "slugs": ["and"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "And",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/9ba8570d-fc9a-421e-ab1a-548e131c6ab5/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/9ba8570d-fc9a-421e-ab1a-548e131c6ab5/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/9ba8570d-fc9a-421e-ab1a-548e131c6ab5/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/9ba8570d-fc9a-421e-ab1a-548e131c6ab5/manifest",
+          "caption": "<p>And</p>",
+          "order": null
+        },
+        {
+          "uuid": "e08796cc-88cd-404c-9065-8df81410a086",
+          "slug": "p5226559_7-scaled",
+          "slugs": ["p5226559_7-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226559_7-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/90d5b678-6d11-4e8f-b30e-d70bff7ccc2f/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/90d5b678-6d11-4e8f-b30e-d70bff7ccc2f/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/90d5b678-6d11-4e8f-b30e-d70bff7ccc2f/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/90d5b678-6d11-4e8f-b30e-d70bff7ccc2f/manifest",
+          "caption": "This is one of the most impressively constructed Baptismal pools we have seen in rural Georgia.  Immersion is central to the Baptist faith.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "f70803e2-de7c-4db3-98a2-4158841995f8",
+          "slug": "p5226403_4-scaled",
+          "slugs": ["p5226403_4-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226403_4-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:31Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/56cf4c16-4e37-496b-9a72-750236b1a0d9/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/56cf4c16-4e37-496b-9a72-750236b1a0d9/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/56cf4c16-4e37-496b-9a72-750236b1a0d9/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/56cf4c16-4e37-496b-9a72-750236b1a0d9/manifest",
+          "caption": "The bones of the church are original but many improvements s were made over the years. This view from the old chancel shots shows a drop ceiling, paneled walls and replacement window.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "207328bb-86cf-4717-b82b-40c9a95758c5",
+          "slug": "p5226418_6-scaled",
+          "slugs": ["p5226418_6-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226418_6-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:31Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/22bfe25e-fb72-4bba-973f-1b0b600408bb/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/22bfe25e-fb72-4bba-973f-1b0b600408bb/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/22bfe25e-fb72-4bba-973f-1b0b600408bb/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/22bfe25e-fb72-4bba-973f-1b0b600408bb/manifest",
+          "caption": "This view forward also shows many changes.  About the only original features appear the be the vertical wainscoting and chair rail.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "dd7fc20a-5bee-4734-b159-37a8fd8ba918",
+          "slug": "p5226532_4-scaled",
+          "slugs": ["p5226532_4-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226532_4-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:31Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/bef153a8-793e-44c1-8acf-6966f0a5b92a/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/bef153a8-793e-44c1-8acf-6966f0a5b92a/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/bef153a8-793e-44c1-8acf-6966f0a5b92a/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/bef153a8-793e-44c1-8acf-6966f0a5b92a/manifest",
+          "caption": "This the original cemetery and was used until very recently.  However, it is well maintained.  Some of the older church members say that there are approximately 300 unmarked graves locate here.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "633866c4-be8b-4c79-8970-a33cef64ec9e",
+          "slug": "p5226443_2-scaled",
+          "slugs": ["p5226443_2-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226443_2-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:32Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/87b5935c-1c7c-4273-8110-15af8e28286f/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/87b5935c-1c7c-4273-8110-15af8e28286f/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/87b5935c-1c7c-4273-8110-15af8e28286f/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/87b5935c-1c7c-4273-8110-15af8e28286f/manifest",
+          "caption": "In the late 19th century, field stone markers were very common.  They were readily available and they were free.  Proper headstones were just unaffordable for many of the members struggling to get by in a harsh environment.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "5fd77511-900e-46de-9caf-81630feccd9e",
+          "slug": "p5226454_1-scaled",
+          "slugs": ["p5226454_1-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "P5226454_1-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:32Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/887c19b1-6a26-412f-87bf-66187dc2357e/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/887c19b1-6a26-412f-87bf-66187dc2357e/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/887c19b1-6a26-412f-87bf-66187dc2357e/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/887c19b1-6a26-412f-87bf-66187dc2357e/manifest",
+          "caption": "More examples of unmarked graves among the more recent headstones.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        },
+        {
+          "uuid": "0543c7f4-d429-4da0-b76b-78c5649faf21",
+          "slug": "james-sims-death-certificate",
+          "slugs": ["james-sims-death-certificate"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "James-Sims-death-certificate",
+          "visibility": "published",
+          "date_modified": "2025-12-12T22:41:33Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/e5384c2d-d96f-4e42-8fe8-c6633927174d/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/e5384c2d-d96f-4e42-8fe8-c6633927174d/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/e5384c2d-d96f-4e42-8fe8-c6633927174d/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/e5384c2d-d96f-4e42-8fe8-c6633927174d/manifest",
+          "caption": "Here is the death certificate for James Maxey.  He is discussed more thoroughly in the general history at the beginning.  Note that his father and mother are unknown.  James is reported to be 102 years old, although his exact birthdate is unknown.  We think he was born on the plantation of Dr. James Sims sometime around 1828 to 1830.",
+          "gallery": {
+            "label": "Gallery",
+            "value": true
+          },
+          "order": null
+        }
+      ],
+      "order": 10
+    },
+    {
+      "@context": "https://opengeographies.org/api/v1/context.json",
+      "uuid": "54449ba8-e705-413a-8109-dffbddffcdd4",
+      "slug": "adgateville-baptist",
+      "slugs": ["adgateville-baptist"],
+      "project_id": "2",
+      "project": "historic-rural-churches-of-georgia",
+      "model_type": "place",
+      "model_id": "20",
+      "model_name": "Churches",
+      "name": "Adgateville Baptist",
+      "visibility": "published",
+      "date_modified": "2026-04-21T20:43:14Z",
+      "identifiers": [],
+      "geo": {
+        "point": {
+          "lat": 33.2223937,
+          "lon": -83.67214969999999
+        }
+      },
+      "administrative_area": [
+        {
+          "name": "Jasper",
+          "level": "ADM2",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "Georgia",
+          "level": "ADM1",
+          "geonames_id": null,
+          "geonames_url": null
+        },
+        {
+          "name": "US",
+          "level": "PCLI",
+          "geonames_id": null,
+          "geonames_url": null
+        }
+      ],
+      "legacy_id": {
+        "label": "Legacy ID",
+        "value": 1647
+      },
+      "slug_2": {
+        "label": "Slug",
+        "value": "adgateville-baptist"
+      },
+      "short_description": "Adgateville Baptist began as Hebron Primitive Baptist in 1812, on two acres of land donated by William Cleveland. At that time, Jasper County was still in its infancy, having been created in 1807 and renamed Jasper in 1812 in honor of Revolutionary War hero Sergeant William Jasper. Much of the church’s earliest history has been…",
+      "wordpress_link": {
+        "label": "WordPress Link",
+        "value": "https://www.hrcga.org/church/adgateville-baptist/"
+      },
+      "address": "37 Clay Tillman Rd, Hillsboro, GA 31038",
+      "description": "<p data-start=\"166\" data-end=\"450\">Adgateville Baptist began as Hebron Primitive Baptist in 1812, on two acres of land donated by William Cleveland. At that time, Jasper County was still in its infancy, having been created in 1807 and renamed Jasper in 1812 in honor of Revolutionary War hero Sergeant William Jasper.</p><p data-start=\"452\" data-end=\"854\">Much of the church’s earliest history has been lost, but we know it prospered during the 19th century, serving families in the surrounding community as well as those in nearby Hillsboro, a once-thriving town just down the road. Like many rural Georgia congregations, Hebron provided not only a place of worship but also a vital community center for spiritual life, social gatherings, and moral order.</p><p data-start=\"856\" data-end=\"1289\">In 1915, the congregation reorganized and took on a new name—Adgateville Baptist—reflecting the influence of the Adgate family, prominent agricultural leaders in the late 1800s. H. L. Adgate, patriarch of the family, became the namesake of the small settlement that grew around the church. That same year, the present sanctuary was constructed, replacing earlier structures that had served the congregation for more than a century.</p><p data-start=\"1291\" data-end=\"1724\">Today, the building stands as a modest but important reminder of the area’s history. Its survival tells the story not only of a church but of the shifting communities of Jasper County and the resilience of rural congregations that continued to adapt through war, agricultural changes, and population shifts. Though small in size, Adgateville Baptist connects us to more than 200 years of Georgia’s religious and community history.</p>",
+      "year": {
+        "label": "Year",
+        "value": 1812
+      },
+      "denomination": "Baptist",
+      "denomination_facet": "Baptist",
+      "types": ["Baptist Church"],
+      "contained_in": {
+        "uuid": "0a269aa1-b886-4a33-aaf0-bc553bf61871",
+        "slug": "jasper-county",
+        "slugs": ["jasper-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Jasper County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:17Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4202638"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 33.31643,
+            "lon": -83.68809
+          }
+        },
+        "administrative_area": [
+          {
+            "name": "Jasper",
+            "level": "ADM2",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "Georgia",
+            "level": "ADM1",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "US",
+            "level": "PCLI",
+            "geonames_id": null,
+            "geonames_url": null
+          }
+        ]
+      },
+      "contained_in_place": {
+        "uuid": "0a269aa1-b886-4a33-aaf0-bc553bf61871",
+        "slug": "jasper-county",
+        "slugs": ["jasper-county"],
+        "project_id": "7",
+        "project": "administrative-districts",
+        "model_type": "place",
+        "model_id": "63",
+        "model_name": "Counties",
+        "name": "Jasper County",
+        "visibility": "published",
+        "date_modified": "2026-08-27T17:39:17Z",
+        "identifiers": [
+          {
+            "authority": "geonames",
+            "identifier": "https://www.geonames.org/4202638"
+          }
+        ],
+        "geo": {
+          "point": {
+            "lat": 33.31643,
+            "lon": -83.68809
+          }
+        },
+        "administrative_area": [
+          {
+            "name": "Jasper",
+            "level": "ADM2",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "Georgia",
+            "level": "ADM1",
+            "geonames_id": null,
+            "geonames_url": null
+          },
+          {
+            "name": "US",
+            "level": "PCLI",
+            "geonames_id": null,
+            "geonames_url": null
+          }
+        ]
+      },
+      "media": [
+        {
+          "uuid": "bb4df2e7-9868-45f1-a831-9aa355fdf987",
+          "slug": "adgateville-baptist-3d-tour",
+          "slugs": ["adgateville-baptist-3d-tour"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Adgateville Baptist - 3D Tour",
+          "visibility": "published",
+          "date_modified": "2026-08-28T17:01:28Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/b0edaea6-4967-4564-bc50-4c621930a5cc/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/b0edaea6-4967-4564-bc50-4c621930a5cc/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/b0edaea6-4967-4564-bc50-4c621930a5cc/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/b0edaea6-4967-4564-bc50-4c621930a5cc/manifest",
+          "embed_url": "https://my.matterport.com/show/?m=eTtau15mrcK",
+          "media_type": "model3d",
+          "order": null
+        },
+        {
+          "uuid": "8bba2424-33b4-45e0-bda9-ffea4bdc9e49",
+          "slug": "1adgateville-baptist-2-topaz-upscale-4x",
+          "slugs": ["1adgateville-baptist-2-topaz-upscale-4x"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "1Adgateville-Baptist-2-topaz-upscale-4x",
+          "visibility": "published",
+          "date_modified": "2026-04-20T19:33:34Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/db444e9f-3779-406c-804d-781bddecd581/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/db444e9f-3779-406c-804d-781bddecd581/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/db444e9f-3779-406c-804d-781bddecd581/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/db444e9f-3779-406c-804d-781bddecd581/manifest",
+          "order": null
+        },
+        {
+          "uuid": "4a28160c-6f8b-4712-ac87-d86f4ab199d0",
+          "slug": "jasper-wall-photo-dsc05635",
+          "slugs": ["jasper-wall-photo-dsc05635"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Jasper-Wall-photo-DSC05635",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:26:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/7c9c47bf-eb09-4816-b116-86b6d871d1b9/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/7c9c47bf-eb09-4816-b116-86b6d871d1b9/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/7c9c47bf-eb09-4816-b116-86b6d871d1b9/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/7c9c47bf-eb09-4816-b116-86b6d871d1b9/manifest",
+          "order": null
+        },
+        {
+          "uuid": "91dc28a7-eb58-4137-bcb4-05ea9bb8b6db",
+          "slug": "jasper-holga-abc-1",
+          "slugs": ["jasper-holga-abc-1"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Jasper-Holga-ABC-1",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:26:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/bf88c78e-9b08-4818-829a-2fca247db973/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/bf88c78e-9b08-4818-829a-2fca247db973/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/bf88c78e-9b08-4818-829a-2fca247db973/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/bf88c78e-9b08-4818-829a-2fca247db973/manifest",
+          "order": null
+        },
+        {
+          "uuid": "b2ebf488-471b-4cff-b3cc-13d2041bcc15",
+          "slug": "jasper-1adgateville-baptist-4",
+          "slugs": ["jasper-1adgateville-baptist-4"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Jasper-1Adgateville-Baptist-4",
+          "visibility": "published",
+          "date_modified": "2025-12-12T23:02:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/af9fdde0-be05-451a-ba59-b435654db61e/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/af9fdde0-be05-451a-ba59-b435654db61e/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/af9fdde0-be05-451a-ba59-b435654db61e/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/af9fdde0-be05-451a-ba59-b435654db61e/manifest",
+          "caption": "<p>The Hebron Primitive Baptist church was once located across the road by the cemetery. The present building was constructed about 100 years ago. Church records have all the pastors (21 of them) recorded back to the original founding in 1812.</p>",
+          "order": null
+        },
+        {
+          "uuid": "f84e750c-29a1-4093-ba2e-a3e13a747c17",
+          "slug": "jasper-1adgateville-baptist-3",
+          "slugs": ["jasper-1adgateville-baptist-3"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Jasper-1Adgateville-Baptist-3",
+          "visibility": "published",
+          "date_modified": "2025-12-11T23:26:32Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/29bfd7b2-7e6d-4ad8-be0f-b2491b7d1186/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/29bfd7b2-7e6d-4ad8-be0f-b2491b7d1186/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/29bfd7b2-7e6d-4ad8-be0f-b2491b7d1186/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/29bfd7b2-7e6d-4ad8-be0f-b2491b7d1186/manifest",
+          "order": null
+        },
+        {
+          "uuid": "0f23ab4e-67d5-43db-aada-3b72e2028c0b",
+          "slug": "jasper-1adgateville-baptist-1",
+          "slugs": ["jasper-1adgateville-baptist-1"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "Jasper-1Adgateville-Baptist-1",
+          "visibility": "published",
+          "date_modified": "2025-12-12T23:02:30Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/c1b38031-769e-489c-bde2-23b2428d2192/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/c1b38031-769e-489c-bde2-23b2428d2192/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/c1b38031-769e-489c-bde2-23b2428d2192/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/c1b38031-769e-489c-bde2-23b2428d2192/manifest",
+          "caption": "<p>The village schoolhouse is located close to the church and served the community for many years. It is now used as a community center and is well maintained.</p>",
+          "order": null
+        },
+        {
+          "uuid": "efd64045-2d04-4726-985d-b2924a4ec094",
+          "slug": "1adgateville-baptist-2",
+          "slugs": ["1adgateville-baptist-2"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "1Adgateville-Baptist-2",
+          "visibility": "published",
+          "date_modified": "2025-12-12T23:02:31Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/9172763c-7457-4aec-8fde-80d40f712113/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/9172763c-7457-4aec-8fde-80d40f712113/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/9172763c-7457-4aec-8fde-80d40f712113/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/9172763c-7457-4aec-8fde-80d40f712113/manifest",
+          "alt_text": "Adgateville Baptist",
+          "order": null
+        },
+        {
+          "uuid": "5b671cca-4fd5-4171-8d38-062a71d3720d",
+          "slug": "1adgateville-baptist-2-topaz-upscale-4x-scaled",
+          "slugs": ["1adgateville-baptist-2-topaz-upscale-4x-scaled"],
+          "project_id": "2",
+          "project": "historic-rural-churches-of-georgia",
+          "model_type": "media",
+          "model_id": "22",
+          "model_name": "Media",
+          "name": "1Adgateville-Baptist-2-topaz-upscale-4x-scaled",
+          "visibility": "published",
+          "date_modified": "2025-12-18T17:51:09Z",
+          "identifiers": [],
+          "preview": "https://iiif-cloud.ecds.io/public/resources/cb7a71d2-6b00-454d-b0a6-7984e04ec22b/preview",
+          "thumbnail": "https://iiif-cloud.ecds.io/public/resources/cb7a71d2-6b00-454d-b0a6-7984e04ec22b/thumbnail",
+          "content_url": "https://iiif-cloud.ecds.io/public/resources/cb7a71d2-6b00-454d-b0a6-7984e04ec22b/iiif",
+          "manifest_url": "https://iiif-cloud.ecds.io/public/resources/cb7a71d2-6b00-454d-b0a6-7984e04ec22b/manifest",
+          "order": null
+        }
+      ],
+      "order": 40
+    }
+  ],
+  "id": "13"
+}

@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class SetGeoDefault < ActiveRecord::Migration[6.1]
   def change
-    change_column :tours, :is_geo, :boolean, default: true
+    change_column(:tours, :is_geo, :boolean, default: true)
   end
 end

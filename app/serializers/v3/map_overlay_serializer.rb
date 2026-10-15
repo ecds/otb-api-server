@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module V3
   class MapOverlaySerializer < ActiveModel::Serializer
     include Rails.application.routes.url_helpers

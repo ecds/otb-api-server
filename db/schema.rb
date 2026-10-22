@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_02_140000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_15_165559) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -315,6 +315,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_02_140000) do
     t.text "base_sixty_four"
     t.string "logo_title"
     t.text "description"
+    t.integer "matomo_id", default: 4, null: false
     t.index ["name"], name: "index_tour_sets_on_name", unique: true
     t.index ["subdir"], name: "index_tour_sets_on_subdir", unique: true
     t.index ["tour_id"], name: "index_tour_sets_on_tours_id"

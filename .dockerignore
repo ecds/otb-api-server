@@ -48,6 +48,7 @@ Thumbs.db
 /storage
 /public/storage
 /coverage
+/config/master.key
 
 # Docker
 Dockerfile*

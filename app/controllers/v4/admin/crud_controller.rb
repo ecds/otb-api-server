@@ -108,25 +108,26 @@ module V4
           params.require(:tour_mode).permit(:tour_id, :mode_id)
         when 'tour'
           params.require(:tour).permit(
-            :title,
-            :published,
-            :map_icon_id,
+            :blank_map,
             :default_lng,
-            :map_type,
-            :icon_color,
             :description,
-            :meta_description,
+            :icon_color,
+            :is_geo,
             :link_address,
             :link_text,
-            :is_geo,
-            :restrict_bounds,
-            :restrict_bounds_to_overlay,
-            :use_directions,
-            :blank_map,
+            :map_icon_id,
+            :map_type,
+            :meta_description,
             :mode_id,
+            :open_geographies_endpoint,
+            :published,
+            :restrict_bounds_to_overlay,
+            :restrict_bounds,
+            :title,
+            :use_directions,
           )
         when 'tour_set'
-          params.require(:tour_set).permit(:name, :logo, :description)
+          params.require(:tour_set).permit(:name, :logo, :description, :matomo_id)
         when 'tour_set_admin'
           params.require(:tour_set_admin).permit(:user_id, :tour_set_id)
         end

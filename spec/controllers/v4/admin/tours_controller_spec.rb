@@ -241,4 +241,39 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       expect(v4_json[:stops]).to(eq([]))
     end
   end
+
+  describe 'GET #open_geographies' do
+    let(:tour) { create(:tour, open_geographies_endpoint: 'http://og.ecds.io') }
+
+    it 'returns 401 for a user who cannot edit the tour' do
+      signed_cookie(create(:user, super: false))
+      get :open_geographies, params: { tenant: Apartment::Tenant.current, id: tour.id }
+      expect(response.status).to(eq(401))
+    end
+
+    it 'returns 404 for an unknown tour' do
+      signed_cookie(create(:user, super: true))
+      get :open_geographies, params: { tenant: Apartment::Tenant.current, id: 0 }
+      expect(response.status).to(eq(404))
+    end
+
+    it 'previews the stops from Open Geographies, even for an unpublished tour' do
+      signed_cookie(create(:user, super: true))
+      tour.update!(published: false)
+      get :open_geographies, params: { tenant: Apartment::Tenant.current, id: tour.id }
+      expect(response.status).to(eq(200))
+      body = JSON.parse(response.body)
+      expect(body['stop_count']).to(eq(4))
+      expect(body['version']).to(eq('v1'))
+      expect(body['problems']).to(be_an(Array))
+    end
+
+    it 'explains why a preview could not be made' do
+      signed_cookie(create(:user, super: true))
+      tour.update!(open_geographies_endpoint: nil)
+      get :open_geographies, params: { tenant: Apartment::Tenant.current, id: tour.id }
+      expect(response.status).to(eq(422))
+      expect(JSON.parse(response.body)['error']).to(match(/No Open Geographies URL/))
+    end
+  end
 end

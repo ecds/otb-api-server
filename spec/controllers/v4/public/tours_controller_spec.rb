@@ -126,6 +126,11 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
         centerLng: -83.3491501,
       }))
       expect(v4_json[:tour][:title]).to(eq(tour.title))
+      # Listed out of order in the fixture; shown in Open Geographies order.
+      expect(v4_json[:tour][:stops].pluck(:title)).to(eq([
+        'Oconee Baptist', 'Hardison Baptist', 'Adgateville Baptist', 'Antioch Baptist',
+      ]))
+      expect(v4_json[:tour][:stops].pluck(:position)).to(eq([1, 2, 3, 4]))
     end
 
     it 'includes durations for published tour' do

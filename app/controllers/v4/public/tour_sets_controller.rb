@@ -4,7 +4,11 @@ module V4
   module Public
     class TourSetsController < V4Controller
       def index
-        render(json: tour_sets.sort_by { |ts| ts[:name] })
+        if current_user.valid?
+          render(json: tour_sets.sort_by { |ts| ts[:name] })
+        else
+          render(json: TourSet.search('*', load: false, limit: TourSet.count).sort_by(&:name))
+        end
       end
 
       private
@@ -22,6 +26,7 @@ module V4
             subdir: ts.subdir,
             mapable_tours: ts.mapable_tours,
             published_tours: ts.published_tours.empty? ? [] : ts.published_tours.sort_by { |t| t[:title] },
+            matomo_id: ts.matomo_id,
           }
         end
       end

@@ -12,7 +12,7 @@ module OpenGeographies
     ].freeze
 
     def initialize(og_data)
-      @og_data = og_data
+      @og_data = og_data.merge(stops: sorted_stops(og_data[:stops]))
     end
 
     def call
@@ -24,6 +24,14 @@ module OpenGeographies
     end
 
     private
+
+    # Stops in their Open Geographies order. Stops without an order keep their
+    # listed position, after those that have one.
+    def sorted_stops(og_stops)
+      ordered, unordered = Array(og_stops).partition { |stop| stop[:order].is_a?(Numeric) }
+      # sort_by isn't stable, so ties fall back to the listed position.
+      ordered.each_with_index.sort_by { |stop, index| [stop[:order], index] }.map(&:first) + unordered
+    end
 
     def bounds
       factory = RGeo::Cartesian.factory

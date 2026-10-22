@@ -27,6 +27,7 @@ RSpec.describe(V4::Public::TourSetsController, type: :controller) do
       expect(v4_json.count).not_to(be_zero)
       expect(v4_json.count).to(eq(published_tour_sets.count))
       expect(TourSet.count).to(be > published_tour_sets.count)
+      expect(v4_json.first[:matomo_id]).to(eq(4))
       expect(response.status).to(eq(200))
     end
 

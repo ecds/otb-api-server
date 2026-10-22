@@ -75,6 +75,7 @@ class TourSet < ApplicationRecord
       footer_logo:,
       name:,
       logo_url:,
+      matomo_id:,
       notes:,
       subdir:,
     }

@@ -55,6 +55,20 @@ module V4
         render(json: { errors: e.errors }, status: :unprocessable_entity)
       end
 
+      # Read-only preview of the stops a tour gets from Open Geographies, with
+      # anything a curator should check. ?refresh=true skips the short cache.
+      def open_geographies
+        @record = Tour.find_by(id: params[:id])
+        head(:not_found) and return if @record.nil?
+        render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless tour_editable?
+
+        preview = OpenGeographies::Source.new(@record.open_geographies_endpoint)
+          .call(refresh: ActiveModel::Type::Boolean.new.cast(params[:refresh]))
+        render_json(preview)
+      rescue OpenGeographies::Source::Error => e
+        render(json: { error: e.message }, status: :unprocessable_entity)
+      end
+
       private
 
       def set_record

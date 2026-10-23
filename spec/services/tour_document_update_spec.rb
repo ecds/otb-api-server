@@ -174,4 +174,14 @@ RSpec.describe(TourDocumentUpdate) do
     described_class.call(tour, { map_overlay: { id: overlay.id + 1000, north: 9 } })
     expect(overlay.reload.north.to_f).to(eq(1.5))
   end
+
+  it "saves a medium's alt text and decorative setting" do
+    medium = create(:medium)
+    join = create(:tour_medium, tour:, medium:)
+    described_class.call(tour, { media: [{ relation_id: join.id, alt_text: 'The pulpit', decorative: false }] })
+    expect(medium.reload).to(have_attributes(alt_text: 'The pulpit', decorative: false))
+
+    described_class.call(tour, { media: [{ relation_id: join.id, alt_text: nil, decorative: true }] })
+    expect(medium.reload).to(have_attributes(alt_text: nil, decorative: true))
+  end
 end

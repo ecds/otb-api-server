@@ -2,15 +2,6 @@
 
 module OpenGeographies
   class DeserializerV1
-    PROVIDER_PATTERNS = [
-      { name: 'youtube',      pattern: /youtube\.com|youtu\.be/ },
-      { name: 'vimeo',        pattern: /vimeo\.com/ },
-      { name: 'soundcloud',   pattern: /soundcloud\.com/ },
-      { name: 'sketchfab',    pattern: /sketchfab\.com|skfb\.ly/ },
-      { name: 'matterport',   pattern: /matterport\.com/ },
-      { name: 'morphosource', pattern: /morphosource\.org/ },
-    ].freeze
-
     def initialize(og_data)
       @og_data = og_data.merge(stops: sorted_stops(og_data[:stops]))
     end
@@ -85,20 +76,43 @@ module OpenGeographies
 
     def media(og_media)
       og_media.map do |medium|
-        cached = MediaResolver.new(medium).call
+        # Only media that embed something, or come without a picture, need
+        # their thumbnail looked up; images use the one OG provides.
+        needs_lookup = medium[:embed_url].present? || (medium[:thumbnail].blank? && medium[:preview].blank?)
+        cached = MediaResolver.new(medium).call if needs_lookup
         thumbnail = cached&.thumbnail_url || medium[:thumbnail] || medium[:preview]
+        # Same embed fields a natively added medium has.
+        embed = Embed.call(medium[:embed_url])
+        alt_text = medium[:alt_text].presence
         {
           title: medium[:name],
-          provider: cached&.provider,
-          embed: medium[:embed_url],
-          files: {
-            original: medium[:content_url],
-            mobile: thumbnail,
-            tablet: medium[:preview] || thumbnail,
-            desktop: medium[:content_url],
-          },
+          alt_text:,
+          # Created outside OpenTour, so an image without alt text is published
+          # as decorative (empty alt) but still flagged for the curator.
+          decorative: alt_text.nil?,
+          missing_alt_text: alt_text.nil?,
+          provider: embed&.dig(:provider) || cached&.provider,
+          embed: embed&.dig(:embed),
+          embed_id: embed&.dig(:embed_id),
+          video: embed&.dig(:embed_id),
+          files: embed ? embed_files(thumbnail) : image_files(medium, thumbnail),
         }
       end
+    end
+
+    def image_files(medium, thumbnail)
+      {
+        original: medium[:content_url],
+        mobile: thumbnail,
+        tablet: medium[:preview] || thumbnail,
+        desktop: medium[:content_url],
+      }
+    end
+
+    # Like a natively added embed, every size is the thumbnail picture; the
+    # content itself (e.g. a 3D model) is only shown through the embed.
+    def embed_files(thumbnail)
+      { original: thumbnail, mobile: thumbnail, tablet: thumbnail, desktop: thumbnail }
     end
   end
 end

@@ -71,7 +71,7 @@ module V4
       def allowed_params
         case params[:model]
         when 'medium'
-          params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video, :embed_id, :title)
+          params.require(:medium).permit(:file, :filename, :embed, :video_provider, :video, :embed_id, :title, :alt_text, :decorative)
         when 'tour_medium'
           params.require(:tour_medium).permit(:medium_id, :tour_id, :position)
         when 'stop_medium'

@@ -4,47 +4,6 @@ module OpenGeographies
   # Resolves a thumbnail URL for a single OG media item, using a DB cache so
   # external API calls happen at most once per UUID per 30 days.
   class MediaResolver
-    # How to extract a provider-specific thumbnail URL from an embed URL.
-    # Each entry returns a URL string, or nil to fall through to the next step.
-    THUMBNAIL_FETCHERS = {
-      'youtube' => lambda { |embed_url|
-        id = embed_url.match(%r{(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([A-Za-z0-9_-]+)}i)&.captures&.first
-        "https://img.youtube.com/vi/#{id}/0.jpg" if id
-      },
-      'vimeo' => lambda { |embed_url|
-        id = embed_url.match(%r{vimeo\.com/(?:video/)?(\d+)})&.captures&.first
-        if id
-          data = HTTParty.get("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/video/#{id}")
-          data['thumbnail_url'] if data.success?
-        end
-      },
-      'soundcloud' => lambda { |embed_url|
-        id = embed_url.match(%r{api\.soundcloud\.com/tracks/(\d+)})&.captures&.first ||
-          embed_url.match(%r{soundcloud\.com/tracks/(\d+)})&.captures&.first
-        if id
-          data = HTTParty.get(
-            "https://soundcloud.com/oembed?url=https://api.soundcloud.com/tracks/#{id}&format=json",
-            format: :plain,
-          )
-          JSON.parse(data.body)['thumbnail_url'] if data.success?
-        end
-      },
-      'sketchfab' => lambda { |embed_url|
-        id = embed_url.match(%r{sketchfab\.com/models/([0-9a-f]{32})}i)&.captures&.first
-        if id
-          doc = Nokogiri::HTML(HTTParty.get("https://sketchfab.com/models/#{id}/embed").body)
-          doc.at_xpath('/html/head/meta[@property="og:image"]')&.[](:content)
-        end
-      },
-      'matterport' => lambda { |embed_url|
-        id = URI.parse(embed_url).query&.then { |q| URI.decode_www_form(q).to_h['m'] }
-        if id
-          doc = Nokogiri::HTML(HTTParty.get("https://my.matterport.com/show/?m=#{id}").body)
-          doc.at_xpath('/html/head/meta[@property="og:image"]')&.[](:content)
-        end
-      },
-    }.freeze
-
     def initialize(og_medium)
       @og_medium = og_medium
     end
@@ -74,25 +33,37 @@ module OpenGeographies
 
     def resolve
       provider = detect_provider(@og_medium[:embed_url])
-      thumbnail_url = working_content_url || provider_thumbnail(provider, @og_medium[:embed_url])
+      # For embedded media the provider's own thumbnail comes first: their
+      # content_url is often the media itself (e.g. a 3D model), not a picture.
+      thumbnail_url =
+        if provider
+          provider_thumbnail(provider, @og_medium[:embed_url]) || image_content_url
+        else
+          image_content_url
+        end
       { provider:, thumbnail_url: }
     end
 
-    def working_content_url
+    # content_url, if it's an image.
+    def image_content_url
       url = @og_medium[:content_url]
       return if url.blank?
 
-      response = HTTParty.head(url)
-      url if response.success?
+      response = HTTParty.head(url, timeout: 10)
+      url if response.success? && response.headers['content-type'].to_s.start_with?('image/')
     rescue StandardError
       nil
     end
 
+    # The provider's own thumbnail, the same one a natively added medium gets.
     def provider_thumbnail(provider, embed_url)
       return if provider.nil? || embed_url.blank?
 
-      fetcher = THUMBNAIL_FETCHERS[provider]
-      fetcher&.call(embed_url)
+      provider_class = VideoProviders.class_for(provider)
+      embed_id = provider_class.embed_id_from(embed_url)
+      return if embed_id.nil?
+
+      provider_class.new(VideoProviders::Item.new(embed_id)).thumbnail_url
     rescue StandardError => e
       Rails.logger.warn("OpenGeographies thumbnail fetch failed for #{embed_url}: #{e.message}")
       nil
@@ -101,7 +72,7 @@ module OpenGeographies
     def detect_provider(embed_url)
       return if embed_url.blank?
 
-      DeserializerV1::PROVIDER_PATTERNS.find { |p| p[:pattern].match?(embed_url) }&.dig(:name)
+      VideoProviders.detect(embed_url)
     end
   end
 end

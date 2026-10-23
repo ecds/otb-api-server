@@ -54,7 +54,7 @@ class TourDocumentUpdate
     :title,
   ].freeze
 
-  MEDIUM_FIELDS = [:title, :caption].freeze
+  MEDIUM_FIELDS = [:title, :caption, :alt_text, :decorative].freeze
   FLAT_PAGE_FIELDS = [:title, :body].freeze
   OVERLAY_FIELDS = [:north, :south, :east, :west, :rotation].freeze
 

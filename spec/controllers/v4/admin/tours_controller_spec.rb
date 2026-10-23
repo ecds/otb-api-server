@@ -268,6 +268,22 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       expect(body['problems']).to(be_an(Array))
     end
 
+    it 'checks a URL before it is saved to the tour' do
+      signed_cookie(create(:user, super: true))
+      tour.update!(open_geographies_endpoint: nil)
+      get :open_geographies, params: { tenant: Apartment::Tenant.current, id: tour.id, url: 'http://og.ecds.io' }
+      expect(response.status).to(eq(200))
+      expect(JSON.parse(response.body)['stop_count']).to(eq(4))
+      expect(tour.reload.open_geographies_endpoint).to(be_nil)
+    end
+
+    it 'refuses to check a URL on a host that is not allowed' do
+      signed_cookie(create(:user, super: true))
+      get :open_geographies, params: { tenant: Apartment::Tenant.current, id: tour.id, url: 'http://internal.test/admin' }
+      expect(response.status).to(eq(422))
+      expect(JSON.parse(response.body)['error']).to(eq("internal.test isn't an allowed Open Geographies host."))
+    end
+
     it 'explains why a preview could not be made' do
       signed_cookie(create(:user, super: true))
       tour.update!(open_geographies_endpoint: nil)

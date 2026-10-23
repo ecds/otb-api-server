@@ -87,6 +87,29 @@ RSpec.describe(OpenGeographies::Source) do
     expect(result[:problems]).to(include("#{stops[1][:name]} has no location, so it can't be shown."))
   end
 
+  it 'gives each stop a description that is safe to show as HTML' do
+    stops = fixture[:stops].dup
+    stops[0] = stops[0].merge(description: '<p onclick="steal()">Hi <a href="/x">there</a></p><script>steal()</script>')
+    respond_with(fixture.merge(stops:))
+    html = preview[:stops].find { |stop| stop[:id] == stops[0][:uuid] }[:description_html]
+    expect(html).to(include('<p>Hi <a href="/x">there</a></p>'))
+    expect(html).not_to(include('onclick'))
+    expect(html).not_to(include('<script'))
+  end
+
+  it 'counts images without alt text' do
+    stops = fixture[:stops].map { |stop| stop.merge(media: []) }
+    stops[0] = stops[0].merge(media: [{ uuid: 'a', name: 'A', thumbnail: 'https://example.org/a.jpg' }])
+    stops[1] = stops[1].merge(media: [
+      { uuid: 'b', name: 'B', thumbnail: 'https://example.org/b.jpg' },
+      { uuid: 'c', name: 'C', thumbnail: 'https://example.org/c.jpg', alt_text: 'Described' },
+    ])
+    respond_with(fixture.merge(stops:))
+    expect(preview[:problems]).to(include(
+      "2 images have no alt text, so they're shown as decorative. Add alt text in Open Geographies.",
+    ))
+  end
+
   it 'flags stops that share an id' do
     stops = fixture[:stops].dup
     stops[1] = stops[1].merge(uuid: stops[0][:uuid])
@@ -116,6 +139,51 @@ RSpec.describe(OpenGeographies::Source) do
 
   it 'requires a URL' do
     expect { described_class.new(nil).call }.to(raise_error(described_class::Error, /No Open Geographies URL/))
+  end
+
+  describe 'allowed hosts' do
+    around do |example|
+      original = ENV.fetch('OPEN_GEOGRAPHIES_HOSTS', nil)
+      example.run
+    ensure
+      ENV['OPEN_GEOGRAPHIES_HOSTS'] = original
+    end
+
+    def problem(url, hosts)
+      ENV['OPEN_GEOGRAPHIES_HOSTS'] = hosts
+      described_class.url_problem(url)
+    end
+
+    it 'accepts a listed host' do
+      expect(problem('https://og.example.org/tours/1', 'og.example.org')).to(be_nil)
+    end
+
+    it 'accepts subdomains of a wildcard entry, but not the bare domain' do
+      expect(problem('https://api.atlas.example/tours/1', '*.atlas.example')).to(be_nil)
+      expect(problem('https://atlas.example/tours/1', '*.atlas.example')).to(match(/isn't an allowed/))
+    end
+
+    it 'refuses look-alike hosts' do
+      expect(problem('https://og.example.org.evil.test/x', 'og.example.org')).to(match(/isn't an allowed/))
+      expect(problem('https://evilatlas.example/x', '*.atlas.example')).to(match(/isn't an allowed/))
+    end
+
+    it 'allows nothing when the list is unset' do
+      expect(problem('https://og.example.org/tours/1', '')).to(eq("og.example.org isn't an allowed Open Geographies host."))
+    end
+
+    it 'never fetches from a host that is not allowed' do
+      ENV['OPEN_GEOGRAPHIES_HOSTS'] = 'og.example.org'
+      internal = stub_request(:get, 'http://169.254.169.254/latest/meta-data')
+      expect { described_class.new('http://169.254.169.254/latest/meta-data').call }
+        .to(raise_error(described_class::Error, /isn't an allowed/))
+      expect(internal).not_to(have_been_requested)
+    end
+  end
+
+  it "doesn't follow redirects, which could lead to another host" do
+    stub_request(:get, url).to_return(status: 302, headers: { 'Location' => 'http://169.254.169.254/' })
+    expect(error_message).to(match(/redirected to another address/))
   end
 
   describe 'caching' do

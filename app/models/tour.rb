@@ -49,6 +49,7 @@ class Tour < ContentBase
     }
 
   validates :title, presence: true, uniqueness: { case_sensitive: false }
+  validate :open_geographies_endpoint_allowed, if: -> { open_geographies_endpoint.present? && will_save_change_to_open_geographies_endpoint? }
 
   before_validation -> { self.mode ||= Mode.last }
   before_validation -> { self.theme ||= Theme.first }
@@ -344,5 +345,10 @@ class Tour < ContentBase
         ts.update(icon_color: new_value)
       end
     end
+  end
+
+  def open_geographies_endpoint_allowed
+    problem = OpenGeographies::Source.url_problem(open_geographies_endpoint)
+    errors.add(:open_geographies_endpoint, problem) if problem
   end
 end

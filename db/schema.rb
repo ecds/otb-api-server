@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_15_165559) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_23_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -143,6 +143,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_15_165559) do
     t.integer "lqip_width"
     t.string "embed_id"
     t.text "lqip_data"
+    t.text "alt_text"
+    t.boolean "decorative", default: false, null: false
   end
 
   create_table "modes", force: :cascade do |t|

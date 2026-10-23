@@ -3,20 +3,11 @@
 module EmbedProps
   extend ActiveSupport::Concern
 
-  PROVIDERS = {
-    'youtube' => VideoProviders::Youtube,
-    'vimeo' => VideoProviders::Vimeo,
-    'soundcloud' => VideoProviders::Soundcloud,
-    'sketchfab' => VideoProviders::Sketchfab,
-    'matterport' => VideoProviders::Matterport,
-    'morphosource' => VideoProviders::Morphosource,
-  }.freeze
-
   class << self
     def props(medium)
       return if medium.embed_id.blank? || medium.video_provider == 'keiner'
 
-      provider_class = PROVIDERS.fetch(medium.video_provider, VideoProviders::Base)
+      provider_class = VideoProviders.class_for(medium.video_provider)
       downloaded_image = provider_class.new(medium).call
       return if downloaded_image.nil?
 

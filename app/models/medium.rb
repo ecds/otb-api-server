@@ -116,9 +116,17 @@ class Medium < MediumBaseRecord
     (tours + stops.flat_map(&:tours)).uniq(&:id).map { |tour| { id: tour.id, title: tour.title } }
   end
 
+  # No description for screen readers, and not marked decorative.
+  def missing_alt_text?
+    alt_text.blank? && !decorative?
+  end
+
   def search_data
     {
+      alt_text:,
       caption:,
+      decorative:,
+      missing_alt_text: missing_alt_text?,
       desktop_width:,
       embed:,
       embed_id:,

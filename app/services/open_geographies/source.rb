@@ -17,6 +17,34 @@ module OpenGeographies
 
     attr_reader :url
 
+    # Hosts the server may fetch Open Geographies documents from, set per
+    # deployment in OPEN_GEOGRAPHIES_HOSTS (comma separated). "og.example.org"
+    # matches that host; "*.example.org" matches its subdomains. Nothing is
+    # allowed when it's unset.
+    class << self
+      def allowed_hosts
+        ENV.fetch('OPEN_GEOGRAPHIES_HOSTS', '').split(',').map { |host| host.strip.downcase }.compact_blank
+      end
+
+      def allowed_host?(host)
+        host = host.to_s.downcase
+        host.present? && allowed_hosts.any? do |pattern|
+          pattern.start_with?('*.') ? host.end_with?(pattern.delete_prefix('*')) : host == pattern
+        end
+      end
+
+      # Why this URL can't be used, or nil when it can. Checked before
+      # anything is fetched, and when a tour is saved.
+      def url_problem(url)
+        uri = URI.parse(url.to_s.strip)
+        return 'The Open Geographies URL must start with http:// or https://.' unless uri.is_a?(URI::HTTP) && uri.host
+
+        "#{uri.host} isn't an allowed Open Geographies host." unless allowed_host?(uri.host)
+      rescue URI::InvalidURIError
+        "That isn't a valid URL."
+      end
+    end
+
     def initialize(url)
       @url = url.to_s.strip
     end
@@ -52,28 +80,36 @@ module OpenGeographies
       placeable = og_stops.select { |stop| version_of(stop) && point(stop) }
       result = placeable.any? ? DESERIALIZERS[version].new(document.merge(stops: placeable)).call : { stops: [], bounds: nil, stop_count: 0 }
 
+      result[:stops] = result[:stops].map { |stop| stop.merge(description_html: safe_html(stop[:description])) }
       result.merge(context:, version:, problems:, fetched_at: Time.current.iso8601)
     end
 
     def fetch
-      uri = URI.parse(url)
-      raise(Error, 'The Open Geographies URL must start with http:// or https://.') unless uri.is_a?(URI::HTTP)
+      problem = self.class.url_problem(url)
+      raise(Error, problem) if problem
 
-      response = HTTParty.get(url, timeout: TIMEOUT, headers: { 'Accept' => 'application/json' })
+      # Redirects aren't followed: they could lead to a host that isn't allowed.
+      response = HTTParty.get(url, timeout: TIMEOUT, follow_redirects: false, headers: { 'Accept' => 'application/json' })
+      raise(Error, 'Open Geographies redirected to another address. Use the final URL instead.') if response.code.between?(300, 399)
       raise(Error, "Open Geographies responded with #{response.code}.") unless response.success?
 
       document = JSON.parse(response.body, symbolize_names: true)
       raise(Error, 'The Open Geographies response is not a tour document.') unless document.is_a?(Hash)
 
       document
-    rescue URI::InvalidURIError
-      raise(Error, "That isn't a valid URL.")
     rescue JSON::ParserError
       raise(Error, 'The Open Geographies response is not valid JSON.')
     rescue Timeout::Error # includes Net::OpenTimeout and Net::ReadTimeout
       raise(Error, 'Open Geographies took too long to respond.')
     rescue SocketError, SystemCallError, OpenSSL::SSL::SSLError, HTTParty::Error => e
       raise(Error, "Couldn't reach Open Geographies (#{e.class.name.demodulize}).")
+    end
+
+    # The description is HTML from another site. This keeps formatting and
+    # links but drops scripts, event handlers and styles, so the admin can
+    # show it as HTML.
+    def safe_html(html)
+      Rails::Html::SafeListSanitizer.new.sanitize(html.to_s)
     end
 
     def version_of(stop)
@@ -100,6 +136,12 @@ module OpenGeographies
         problems << "#{label} has no images or media." if Array(stop[:media]).empty?
         repeated = Array(stop[:media]).group_by { |medium| medium[:uuid] }.count { |uuid, media| uuid && media.size > 1 }
         problems << "#{label} lists #{repeated == 1 ? "a medium" : "#{repeated} media"} more than once." if repeated.positive?
+      end
+
+      missing_alt = og_stops.sum { |stop| Array(stop[:media]).count { |medium| medium[:alt_text].blank? } }
+      if missing_alt.positive?
+        problems << "#{missing_alt} #{missing_alt == 1 ? "image has" : "images have"} no alt text, " \
+          "so #{missing_alt == 1 ? "it's" : "they're"} shown as decorative. Add alt text in Open Geographies."
       end
 
       og_stops.group_by { |stop| stop[:uuid] }.each do |uuid, stops|

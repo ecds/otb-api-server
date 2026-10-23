@@ -133,6 +133,31 @@ RSpec.describe(V4::Public::ToursController, type: :controller) do
       expect(v4_json[:tour][:stops].pluck(:position)).to(eq([1, 2, 3, 4]))
     end
 
+    it 'leaves admin-only Open Geographies details out of the public tour' do
+      tour = create(:tour, published: true, open_geographies: true, open_geographies_endpoint: 'http://og.ecds.io')
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
+      expect(v4_json[:tour]).not_to(include(:problems, :context, :version, :fetched_at))
+      expect(v4_json[:tour][:stops].first).not_to(have_key(:description_html))
+    end
+
+    it 'still serves the tour when Open Geographies is unavailable' do
+      stub_request(:get, 'https://og.example.org/down').to_return(status: 503)
+      tour = create(:tour, published: true, open_geographies: true, open_geographies_endpoint: 'https://og.example.org/down')
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
+      expect(response.status).to(eq(200))
+      expect(v4_json[:tour][:title]).to(eq(tour.title))
+    end
+
+    it 'still serves the tour when Open Geographies times out' do
+      stub_request(:get, 'https://og.example.org/slow').to_timeout
+      tour = create(:tour, published: true, open_geographies: true, open_geographies_endpoint: 'https://og.example.org/slow')
+      clean_reindex
+      get :show, params: { tenant: tour_set.subdir, slug: tour.slugs.first.slug }
+      expect(response.status).to(eq(200))
+    end
+
     it 'includes durations for published tour' do
       tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 5), published: false)
       tour.stops.each { |stop| stop.update(description: Faker::Lorem.words(number: 400).join(' ')) }

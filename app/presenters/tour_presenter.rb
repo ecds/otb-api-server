@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class TourPresenter
-  DESERIALIZERS = {
-    'v1' => OpenGeographies::DeserializerV1,
-  }.freeze
+  # The parts of an Open Geographies preview the public tour uses. The rest
+  # (problems, context, sanitized HTML, ...) is for the admin.
+  OPEN_GEOGRAPHIES_FIELDS = [:bounds, :stops, :stop_count].freeze
 
   def initialize(record, tour_set)
     @record = record
@@ -13,28 +13,22 @@ class TourPresenter
   def as_json(*)
     @data = @record.to_h
 
-    fetch_geography_stops if @record['open_geographies_endpoint'].present?
+    merge_open_geographies_stops if @record['open_geographies_endpoint'].present?
 
     { tour: @data.as_json, tour_set: @tour_set.as_json }
   end
 
   private
 
-  def fetch_geography_stops
-    response = HTTParty.get(@record['open_geographies_endpoint'])
-    return unless response.success?
-
-    og_data = JSON.parse(response.body, symbolize_names: true)
-    version = detect_version(og_data)
-    deserializer_class = DESERIALIZERS.fetch(version, OpenGeographies::DeserializerV1)
-    @data = @data.as_json.merge(deserializer_class.new(og_data).call.stringify_keys)
-  rescue HTTP::TimeoutError, HTTP::Error => e
-    Rails.logger.error("Geography #{@record["open_geographies_endpoint"]} API failed: #{e.message}")
-    nil
-  end
-
-  def detect_version(og_data)
-    context = og_data.dig(:stops, 0, :'@context').to_s
-    context.match(%r{/api/(v\d+)/})&.captures&.first || 'v1'
+  # Fetched (and cached briefly) by OpenGeographies::Source, which the admin
+  # preview shares. If the source can't be read, the tour is served without
+  # its Open Geographies stops rather than failing.
+  def merge_open_geographies_stops
+    preview = OpenGeographies::Source.new(@record['open_geographies_endpoint']).call
+    og_data = preview.slice(*OPEN_GEOGRAPHIES_FIELDS)
+    og_data[:stops] = og_data[:stops].map { |stop| stop.except(:description_html) }
+    @data = @data.as_json.merge(og_data.deep_stringify_keys)
+  rescue OpenGeographies::Source::Error => e
+    Rails.logger.error("Open Geographies #{@record["open_geographies_endpoint"]} failed: #{e.message}")
   end
 end

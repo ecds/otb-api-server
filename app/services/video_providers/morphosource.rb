@@ -6,6 +6,11 @@ module VideoProviders
       "//www.morphosource.org/uv.html#?manifest=/manifests/#{@medium.embed_id}&c=0&m=0&cv=0"
     end
 
+    # MorphoSource manifests have no picture; callers fall back to their own.
+    def thumbnail_url
+      nil
+    end
+
     def call
       @medium.embed = embed_url
       manifest = HTTParty.get("https://www.morphosource.org/manifests/#{@medium.embed_id}.json")

@@ -74,6 +74,9 @@ def reset_test_db!
   end
 end
 
+# Hosts the Open Geographies specs fetch from (stubbed with WebMock).
+ENV['OPEN_GEOGRAPHIES_HOSTS'] = 'og.ecds.io,og.example.org'
+
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [Rails.root.join('spec/fixtures').to_s]
@@ -165,6 +168,13 @@ RSpec.configure do |config|
       .to_return(body: File.open(Rails.root + 'spec/factories/images/0.jpg'), status: 200)
 
     # Sketchfab embed page — matches any model ID
+    stub_request(:get, %r{https://my\.matterport\.com/show/})
+      .to_return(
+        status: 200,
+        body: '<html><head><meta property="og:image" content="https://my.matterport.com/api/v2/player/models/x/thumb/"></head></html>',
+        headers: { 'Content-Type' => 'text/html' },
+      )
+
     stub_request(:get, %r{https://sketchfab\.com/models/.+/embed})
       .to_return(
         status: 200,

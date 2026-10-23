@@ -8,6 +8,7 @@ class MediumBaseRecord < ApplicationRecord
 
   before_create :attach_file
   before_destroy :purge
+  after_commit :drop_base_sixty_four, on: [:create, :update]
 
   validates :filename, presence: true
 
@@ -81,6 +82,16 @@ class MediumBaseRecord < ApplicationRecord
   end
 
   private
+
+  # Once the image is attached the Base64 copy is redundant, and leaving it
+  # means every query that loads these rows carries the whole image (some
+  # paths, e.g. video thumbnails, set it after attach_file has run).
+  def drop_base_sixty_four
+    return if self[:base_sixty_four].blank? || !file.attached?
+
+    # Without callbacks, so it doesn't start another commit (and reindex).
+    update_column(:base_sixty_four, nil) # rubocop:disable Rails/SkipsModelValidations
+  end
 
   def parse_base64
     if base_sixty_four.include?('data:')

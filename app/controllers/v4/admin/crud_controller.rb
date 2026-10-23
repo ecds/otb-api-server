@@ -57,7 +57,7 @@ module V4
       end
 
       def update_index
-        ReindexService.call(@record)
+        ReindexService.enqueue(@record)
       end
 
       def update_params

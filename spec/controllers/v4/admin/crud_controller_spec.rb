@@ -302,4 +302,20 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
       expect(response.status).to(eq(401))
     end
   end
+
+  describe 'reindexing' do
+    it "queues the tour's reindex rather than rebuilding it during the request" do
+      signed_cookie(create(:user, super: true))
+      tour = create(:tour)
+      medium = create(:medium)
+      allow(ReindexService).to(receive(:call).and_call_original)
+      allow(ReindexJob).to(receive(:perform_later))
+
+      post :create, params: { tenant: Apartment::Tenant.current, model: 'tour_medium', tour_medium: { tour_id: tour.id, medium_id: medium.id } }
+
+      expect(response.status).to(eq(201))
+      expect(ReindexService).not_to(have_received(:call))
+      expect(ReindexJob).to(have_received(:perform_later).with(hash_including(class_name: 'TourMedium')))
+    end
+  end
 end

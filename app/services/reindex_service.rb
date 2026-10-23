@@ -5,6 +5,26 @@
 # record itself isn't Searchkick-indexed (e.g. join models like StopMedium).
 class ReindexService
   class << self
+    # For requests: queue the reindexing instead of doing it inline, since
+    # rebuilding a tour loads every stop and medium in it. Searchable records
+    # already queue their own job after commit (see Searchable); join records
+    # need their tours queued here.
+    def enqueue(record)
+      return unless record
+
+      tenant = Apartment::Tenant.current
+      if record.destroyed?
+        # Cheap for a deleted record: it's only removed from the index. Its
+        # tours are found now, while the join still knows them.
+        record.reindex if record.respond_to?(:reindex)
+        tours_for(record).each { |tour| ReindexJob.perform_later(tenant:, class_name: 'Tour', id: tour.id) }
+      elsif !record.class.include?(Searchable)
+        ReindexJob.perform_later(tenant:, class_name: record.class.name, id: record.id)
+      end
+    rescue StandardError => e
+      Rails.logger.error("ReindexService could not queue #{record.class}##{record.id}: #{e.message}")
+    end
+
     def call(record)
       return unless record
 

@@ -19,6 +19,21 @@ RSpec.describe(V4::Public::MediaController, type: :controller) do
       expect(response).to(have_http_status(:redirect))
     end
 
+    it "returns 404, not an error, for a size that hasn't been made yet" do
+      medium = create(:medium)
+      # rubocop:disable RSpec/AnyInstance
+      allow_any_instance_of(Medium).to(receive(:files).and_return({ mobile: nil }))
+      # rubocop:enable RSpec/AnyInstance
+      get :show, params: { tenant: tour_set.subdir, key: medium.file.blob.key, variant: 'mobile' }
+      expect(response).to(have_http_status(:not_found))
+    end
+
+    it 'returns 404 for a size that does not exist' do
+      medium = create(:medium)
+      get :show, params: { tenant: tour_set.subdir, key: medium.file.blob.key, variant: 'enormous' }
+      expect(response).to(have_http_status(:not_found))
+    end
+
     it 'redirects to variant url when variant param is given' do
       medium = create(:medium)
       # rubocop:disable RSpec/AnyInstance

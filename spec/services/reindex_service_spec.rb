@@ -37,4 +37,39 @@ RSpec.describe(ReindexService) do
     stop = create(:stop)
     expect(described_class.preloaded(stop)).to(equal(stop))
   end
+
+  describe '.enqueue' do
+    include ActiveJob::TestHelper
+
+    def queued_reindexes
+      enqueued_jobs.select { |job| job[:job] == ReindexJob }.map { |job| job[:args].first.slice('class_name', 'id') }
+    end
+
+    before { clear_enqueued_jobs }
+
+    it "queues a join record's tours instead of rebuilding them in the request" do
+      tour = create(:tour, published: false)
+      join = create(:tour_stop, tour:, stop: create(:stop), position: 1)
+      clear_enqueued_jobs
+      described_class.enqueue(join)
+      expect(queued_reindexes).to(eq([{ 'class_name' => 'TourStop', 'id' => join.id }]))
+      expect(reindexed).to(be_empty)
+    end
+
+    it 'adds nothing for a searchable record, which queues its own job' do
+      tour = create(:tour, published: false)
+      clear_enqueued_jobs
+      described_class.enqueue(tour)
+      expect(queued_reindexes).to(be_empty)
+    end
+
+    it "queues the tours of a deleted join, which a job couldn't look up later" do
+      tour = create(:tour, published: false)
+      join = create(:tour_stop, tour:, stop: create(:stop), position: 1)
+      join.destroy!
+      clear_enqueued_jobs
+      described_class.enqueue(join)
+      expect(queued_reindexes).to(eq([{ 'class_name' => 'Tour', 'id' => tour.id }]))
+    end
+  end
 end

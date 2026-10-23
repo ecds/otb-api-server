@@ -6,11 +6,12 @@ module V4
       def show
         return head(:not_found) if @record.nil?
 
-        if params[:variant]
-          redirect_to(@record.files[params[:variant].to_sym], allow_other_host: true)
-        else
-          redirect_to(@record.file.blob.url, allow_other_host: true)
-        end
+        url = params[:variant] ? @record.files[params[:variant].to_sym] : @record.file.blob.url
+        # A size that isn't made yet (the variants job runs after upload) or
+        # doesn't exist. The admin retries a 404 until it's ready.
+        return head(:not_found) if url.blank?
+
+        redirect_to(url, allow_other_host: true)
       end
 
       private

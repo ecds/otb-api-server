@@ -51,8 +51,18 @@ class Medium < MediumBaseRecord
       .where.not(id: Stop.where.not(medium_id: nil).select(:medium_id))
   }
 
-  # No alt text, and not marked decorative.
-  scope :missing_alt_text, -> { where(decorative: false).where("coalesce(trim(alt_text), '') = ''") }
+  # Alt text shorter than this doesn't describe anything; "pic" or "x" counts
+  # as missing.
+  MIN_ALT_TEXT_WORDS = 3
+
+  # Too little alt text, and not marked decorative.
+  scope :missing_alt_text, lambda {
+    where(decorative: false).where(
+      "coalesce(trim(alt_text), '') = '' OR " \
+        "coalesce(array_length(regexp_split_to_array(trim(alt_text), '\\s+'), 1), 0) < ?",
+      MIN_ALT_TEXT_WORDS,
+    )
+  }
 
   # Media used by the tour itself or by any of its stops. A subquery rather
   # than joins, so it can be paginated without duplicate rows.
@@ -128,9 +138,9 @@ class Medium < MediumBaseRecord
     (tours + stops.flat_map(&:tours)).uniq(&:id).map { |tour| { id: tour.id, title: tour.title } }
   end
 
-  # No description for screen readers, and not marked decorative.
+  # Too little description for screen readers, and not marked decorative.
   def missing_alt_text?
-    alt_text.blank? && !decorative?
+    !decorative? && alt_text.to_s.split.size < MIN_ALT_TEXT_WORDS
   end
 
   def search_data

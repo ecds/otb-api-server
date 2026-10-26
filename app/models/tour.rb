@@ -366,7 +366,7 @@ class Tour < ContentBase
 
     errors.add(
       :published,
-      "can't be turned on until every image has alt text or is marked decorative " \
+      "can't be turned on until every image has alt text of at least #{Medium::MIN_ALT_TEXT_WORDS} words or is marked decorative " \
         "(#{missing} #{missing == 1 ? "image needs" : "images need"} it).",
     )
   end

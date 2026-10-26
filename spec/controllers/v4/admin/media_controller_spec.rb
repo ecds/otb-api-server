@@ -167,7 +167,7 @@ RSpec.describe(V4::Admin::MediaController, type: :controller) do
 
     it 'lists only images missing alt text when asked' do
       missing = create(:medium, alt_text: nil)
-      create(:medium, alt_text: 'Described')
+      create(:medium, alt_text: 'The church front')
       create(:medium, alt_text: nil, decorative: true)
       get :index, params: { tenant: Apartment::Tenant.current, missing_alt_text: 'true' }
       expect(v4_json.pluck(:id)).to(eq([missing.id]))

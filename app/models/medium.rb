@@ -42,6 +42,18 @@ class Medium < MediumBaseRecord
   has_many :tour_media, dependent: :destroy
   has_many :tours, through: :tour_media
 
+  # Not in any tour's or stop's media, and not a tour's or stop's main image.
+  scope :unused, lambda {
+    where.not(id: TourMedium.select(:medium_id))
+      .where.not(id: StopMedium.select(:medium_id))
+      .where.not(id: Tour.where.not(medium_id: nil).select(:medium_id))
+      .where.not(id: Tour.where.not(splash_image_medium_id: nil).select(:splash_image_medium_id))
+      .where.not(id: Stop.where.not(medium_id: nil).select(:medium_id))
+  }
+
+  # No alt text, and not marked decorative.
+  scope :missing_alt_text, -> { where(decorative: false).where("coalesce(trim(alt_text), '') = ''") }
+
   # Media used by the tour itself or by any of its stops. A subquery rather
   # than joins, so it can be paginated without duplicate rows.
   scope :used_in_tour, lambda { |tour_id|

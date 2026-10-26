@@ -184,4 +184,13 @@ RSpec.describe(TourDocumentUpdate) do
     described_class.call(tour, { media: [{ relation_id: join.id, alt_text: nil, decorative: true }] })
     expect(medium.reload).to(have_attributes(alt_text: nil, decorative: true))
   end
+
+  it 'refuses to publish a tour with images missing alt text' do
+    tour.update!(published: false)
+    create(:tour_medium, tour:, medium: create(:medium, alt_text: nil))
+    expect { described_class.call(tour, { published: true }) }.to(raise_error(described_class::Invalid) do |error|
+      expect(error.errors).to(include(a_hash_including(path: 'tour.published')))
+    end)
+    expect(tour.reload.published).to(be(false))
+  end
 end

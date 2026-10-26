@@ -161,4 +161,110 @@ RSpec.describe(V4::Admin::MediaController, type: :controller) do
       expect(v4_json).to(be_empty)
     end
   end
+
+  describe 'GET #index for cleaning up alt text' do
+    before { signed_cookie(create(:user, super: true)) }
+
+    it 'lists only images missing alt text when asked' do
+      missing = create(:medium, alt_text: nil)
+      create(:medium, alt_text: 'Described')
+      create(:medium, alt_text: nil, decorative: true)
+      get :index, params: { tenant: Apartment::Tenant.current, missing_alt_text: 'true' }
+      expect(v4_json.pluck(:id)).to(eq([missing.id]))
+    end
+
+    it 'gives the total across all pages' do
+      create_list(:medium, 3)
+      get :index, params: { tenant: Apartment::Tenant.current, page: 1, per: 2 }
+      expect(v4_json.size).to(eq(2))
+      expect(response.headers['X-Total-Count']).to(eq(Medium.count.to_s))
+    end
+  end
+
+  describe 'GET #index for unused media' do
+    before { signed_cookie(create(:user, super: true)) }
+
+    it "lists only media that isn't used anywhere" do
+      unused = create(:medium)
+      create(:tour_medium, tour: create(:tour), medium: create(:medium))
+      stop = create(:stop)
+      create(:stop_medium, stop:, medium: create(:medium))
+      create(:tour, medium: create(:medium))
+      create(:stop, medium: create(:medium))
+      get :index, params: { tenant: Apartment::Tenant.current, unused: 'true' }
+      expect(v4_json.pluck(:id)).to(eq([unused.id]))
+    end
+  end
+
+  describe 'DELETE #destroy_unused' do
+    include ActiveJob::TestHelper
+
+    let!(:unused) { create(:medium) }
+
+    # Used in a tour, so it's never queued.
+    before { create(:tour_medium, tour: create(:tour), medium: create(:medium)) }
+
+    it 'is refused when signed out' do
+      delete :destroy_unused, params: { tenant: Apartment::Tenant.current }
+      expect(response.status).to(eq(401))
+    end
+
+    it "is refused for a tour author who isn't a site admin" do
+      author = create(:user, super: false)
+      author.tours << create(:tour)
+      signed_cookie(author)
+      delete :destroy_unused, params: { tenant: Apartment::Tenant.current }
+      expect(response.status).to(eq(401))
+    end
+
+    it 'queues the unused media for deletion for a site admin' do
+      signed_cookie(create(:user, super: true))
+      expect { delete(:destroy_unused, params: { tenant: Apartment::Tenant.current }) }
+        .to(have_enqueued_job(DeleteUnusedMediaJob).with(tenant: Apartment::Tenant.current, ids: [unused.id]))
+      expect(response.status).to(eq(202))
+      expect(JSON.parse(response.body)).to(eq({ 'deleting' => 1 }))
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    let(:unused) { create(:medium) }
+    let(:used) { create(:medium) }
+
+    before { create(:tour_medium, tour: create(:tour), medium: used) }
+
+    it 'is refused when signed out' do
+      delete :destroy, params: { tenant: Apartment::Tenant.current, id: unused.id }
+      expect(response.status).to(eq(401))
+      expect(Medium.exists?(unused.id)).to(be(true))
+    end
+
+    it "is refused for a tour author who isn't a site admin" do
+      author = create(:user, super: false)
+      author.tours << create(:tour)
+      signed_cookie(author)
+      delete :destroy, params: { tenant: Apartment::Tenant.current, id: unused.id }
+      expect(response.status).to(eq(401))
+      expect(Medium.exists?(unused.id)).to(be(true))
+    end
+
+    it 'deletes an unused medium for a site admin' do
+      signed_cookie(create(:user, super: true))
+      delete :destroy, params: { tenant: Apartment::Tenant.current, id: unused.id }
+      expect(response.status).to(eq(204))
+      expect(Medium.exists?(unused.id)).to(be(false))
+    end
+
+    it 'keeps a medium that is in use' do
+      signed_cookie(create(:user, super: true))
+      delete :destroy, params: { tenant: Apartment::Tenant.current, id: used.id }
+      expect(response.status).to(eq(409))
+      expect(Medium.exists?(used.id)).to(be(true))
+    end
+
+    it "is not found when the medium doesn't exist" do
+      signed_cookie(create(:user, super: true))
+      delete :destroy, params: { tenant: Apartment::Tenant.current, id: 0 }
+      expect(response.status).to(eq(404))
+    end
+  end
 end

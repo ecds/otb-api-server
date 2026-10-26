@@ -49,6 +49,9 @@ class Tour < ContentBase
     }
 
   validates :title, presence: true, uniqueness: { case_sensitive: false }
+  # Only when a tour is being published, so tours that are already
+  # published stay published and can still be edited.
+  validate :images_have_alt_text, if: :publishing?
   validate :open_geographies_endpoint_allowed, if: -> { open_geographies_endpoint.present? && will_save_change_to_open_geographies_endpoint? }
 
   before_validation -> { self.mode ||= Mode.last }
@@ -345,6 +348,27 @@ class Tour < ContentBase
         ts.update(icon_color: new_value)
       end
     end
+  end
+
+  # Images in the tour and its stops with no alt text that aren't decorative.
+  def media_missing_alt_text
+    via_stops = StopMedium.where(stop_id: tour_stops.select(:stop_id)).select(:medium_id)
+    Medium.where(id: tour_media.select(:medium_id)).or(Medium.where(id: via_stops)).missing_alt_text
+  end
+
+  def publishing?
+    will_save_change_to_published? && published? && !published_in_database
+  end
+
+  def images_have_alt_text
+    missing = media_missing_alt_text.count
+    return if missing.zero?
+
+    errors.add(
+      :published,
+      "can't be turned on until every image has alt text or is marked decorative " \
+        "(#{missing} #{missing == 1 ? "image needs" : "images need"} it).",
+    )
   end
 
   def open_geographies_endpoint_allowed

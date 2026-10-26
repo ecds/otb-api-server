@@ -45,7 +45,8 @@ Rails.application.routes.draw do
         resources :tours, only: [:index, :show, :create, :update]
         resources :flat_pages, only: [:index]
         resources :tour_sets, only: [:index]
-        resources :media, only: [:index]
+        delete 'media/unused', to: 'media#destroy_unused'
+        resources :media, only: [:index, :destroy]
         resources :stops, only: [:index]
         resources :tour_authors, only: [:index, :create, :destroy]
         get 'users', to: 'users#index'

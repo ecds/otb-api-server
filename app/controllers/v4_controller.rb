@@ -42,6 +42,8 @@ class V4Controller < V3Controller
     links << build_link(base_url, scope.total_pages, 'last') if scope.total_pages > 1 && !scope.last_page?
 
     headers['Link'] = links.join(', ') if links.any?
+    # How many records match across all pages, e.g. for "236 images".
+    headers['X-Total-Count'] = scope.total_count.to_s
   end
 
   private

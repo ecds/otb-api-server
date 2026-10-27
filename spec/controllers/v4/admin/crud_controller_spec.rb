@@ -161,6 +161,22 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
   end
 
   describe 'PUT #update' do
+    it 'lets a new user accept the terms on their own account' do
+      user = create(:user, super: false, terms_accepted: false)
+      signed_cookie(user)
+      put :update, params: { tenant: 'public', id: user.id, model: 'user', user: { terms_accepted: true } }
+      expect(response).to(have_http_status(:ok))
+      expect(user.reload.terms_accepted).to(be(true))
+    end
+
+    it "doesn't let a user change someone else's account" do
+      other = create(:user, super: false, terms_accepted: false)
+      signed_cookie(create(:user, super: false))
+      put :update, params: { tenant: 'public', id: other.id, model: 'user', user: { terms_accepted: true } }
+      expect(response).to(have_http_status(:unauthorized))
+      expect(other.reload.terms_accepted).to(be(false))
+    end
+
     it 'returns 401 when unauthenticated' do
       post :create, params: { tenant: TourSet.last.subdir, data: { model: 'tour', title: Faker::Book.title } }
       expect(response.status).to(eq(401))

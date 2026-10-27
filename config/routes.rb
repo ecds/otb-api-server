@@ -52,6 +52,7 @@ Rails.application.routes.draw do
         resources :tour_authors, only: [:index, :create, :update, :destroy]
         get 'users', to: 'users#index'
         get 'users/me', to: 'users#show'
+        delete 'users/me', to: 'users#destroy_me'
         get 'tour_sets/:slug', to: 'tour_sets#show'
         get 'resolve_url', to: 'services#url_resolver'
         get 'tours/:id/open_geographies', to: 'tours#open_geographies'

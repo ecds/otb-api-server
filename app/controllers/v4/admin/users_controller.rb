@@ -11,6 +11,20 @@ module V4
         render_json(users.sort_by { |u| u[:email] }) and return
       end
 
+      # The signed-in user deleting their own account.
+      def destroy_me
+        head(:unauthorized) and return unless current_user&.persisted?
+
+        if current_user.last_super?
+          render(json: { error: "You're the only super user, so your account can't be deleted." }, status: :unprocessable_entity)
+          return
+        end
+
+        current_user.delete_account!
+        cookies.delete(:auth)
+        head(:no_content)
+      end
+
       def show
         render(json: User.new.search_data, status: :unauthorized) and return if current_user.id.nil?
 

@@ -84,6 +84,29 @@ class User < ApplicationRecord
     EcdsRailsAuthEngine::Login.find_by(user_id: id)
   end
 
+  # The only super user can't delete their account, or nobody could manage
+  # the platform.
+  def last_super?
+    self.super && User.where(super: true).where.not(id:).none?
+  end
+
+  # Deletes the account and everything that only gives it access: sign-ins,
+  # site roles, tour authorships on every site, and access requests. What the
+  # user made (tours, stops, media, ...) is left as it is.
+  def delete_account!
+    transaction do
+      TourSet.find_each do |tour_set|
+        Apartment::Tenant.switch(tour_set.subdir) { TourAuthor.where(user_id: id).delete_all }
+      rescue Apartment::TenantNotFound
+        next
+      end
+      logins = EcdsRailsAuthEngine::Login.where(user_id: id)
+      EcdsRailsAuthEngine::Token.where(login_id: logins.select(:id)).delete_all
+      logins.delete_all
+      destroy!
+    end
+  end
+
   private
 
   def as_author

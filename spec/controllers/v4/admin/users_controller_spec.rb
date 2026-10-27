@@ -89,4 +89,44 @@ RSpec.describe(V4::Admin::UsersController, type: :controller) do
       expect(response.status).to(eq(401))
     end
   end
+
+  describe 'DELETE #destroy_me' do
+    it 'returns 401 when signed out' do
+      delete :destroy_me, params: { tenant: 'public' }
+      expect(response).to(have_http_status(:unauthorized))
+    end
+
+    it 'deletes the account and its access, but not what the user made' do
+      tour_set = create(:tour_set)
+      user = create(:user, super: false, tour_sets: [tour_set])
+      signed_cookie(user)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      stop = create(:stop, created_by_id: user.id)
+      create(:tour_author, tour:, user:)
+      create(:access_request, user:, tour_set: create(:tour_set))
+      Apartment::Tenant.reset
+
+      delete :destroy_me, params: { tenant: 'public' }
+
+      expect(response).to(have_http_status(:no_content))
+      expect(User.exists?(user.id)).to(be(false))
+      expect(EcdsRailsAuthEngine::Login.where(user_id: user.id)).to(be_empty)
+      expect(TourSetAdmin.where(user_id: user.id)).to(be_empty)
+      expect(AccessRequest.where(user_id: user.id)).to(be_empty)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      expect(TourAuthor.where(user_id: user.id)).to(be_empty)
+      expect(Tour.exists?(tour.id)).to(be(true))
+      expect(Stop.exists?(stop.id)).to(be(true))
+    end
+
+    it 'does not delete the only super user' do
+      User.where(super: true).update_all(super: false) # rubocop:disable Rails/SkipsModelValidations
+      only_super = create(:user, super: true)
+      signed_cookie(only_super)
+      delete :destroy_me, params: { tenant: 'public' }
+      expect(response).to(have_http_status(:unprocessable_entity))
+      expect(User.exists?(only_super.id)).to(be(true))
+    end
+  end
 end

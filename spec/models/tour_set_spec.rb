@@ -58,6 +58,19 @@ RSpec.describe(TourSet, type: :model) do
       expect(tour_set.errors[:subdir]).to(be_present)
     end
 
+    it 'does not create a site with a reserved subdir' do
+      tour_set = build(:tour_set, name: 'WWW')
+      expect(tour_set.save).to(be(false))
+      expect(tour_set.errors.full_messages.first).to(start_with('The address "'))
+    end
+
+    it 'rejects a reserved subdir' do
+      tour_set = create(:tour_set)
+      tour_set.name = 'Docs'
+      expect(tour_set.save).to(be(false))
+      expect(tour_set.errors.full_messages.first).to(start_with('The address "'))
+    end
+
     it 'rejects reusing a subdir that used to belong to another tenant' do
       renamed_away = create(:tour_set)
       old_subdir = renamed_away.subdir

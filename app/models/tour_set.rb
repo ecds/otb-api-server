@@ -4,6 +4,11 @@
 class TourSet < ApplicationRecord
   include Searchable
 
+  # Subdomains of opentour.site that point somewhere other than a tour
+  # site, or that the app uses itself. A site's address comes from its
+  # name, so these names can't be used for one.
+  RESERVED_SUBDIRS = ['admin', 'api', 'dev', 'docs', 'mail', 'public', 'staging', 'static', 'www'].freeze
+
   before_validation :compute_subdir
   validate :subdir_available, if: :will_save_change_to_subdir?
   before_save :rename_tenant_schema, if: :renaming_tenant?
@@ -104,6 +109,11 @@ class TourSet < ApplicationRecord
   end
 
   def subdir_available
+    if RESERVED_SUBDIRS.include?(subdir)
+      errors.add(:base, "The address \"#{subdir}\" is reserved for OpenTour itself. Choose a different site name.")
+      return
+    end
+
     return unless TourSet.where(subdir:).where.not(id:).exists? ||
       TourSetSubdirHistory.where(subdir:).exists?
 

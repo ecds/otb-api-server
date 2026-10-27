@@ -198,6 +198,18 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       expect(tour.reload.title).not_to(eq('Nope'))
     end
 
+    it "reports the legs Google couldn't time when the tour is published" do
+      signed_cookie(create(:user, super: true))
+      Apartment::Tenant.switch!(tour_set.subdir)
+      walking = create(:tour, published: false, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 3))
+      patch(:update, params: { tenant: tour_set.subdir, id: walking.id, tour: { published: true } }, as: :json)
+      expect(response.status).to(eq(200))
+      problems = JSON.parse(response.body)['duration_problems']
+      expect(problems.size).to(eq(2))
+      expect(problems).to(all(start_with('Google Maps found no walking route')))
+      expect(walking.reload.published).to(be(true))
+    end
+
     describe 'as a student author' do
       let(:student) { create(:user, super: false) }
 

@@ -72,18 +72,54 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.saved_change_to_attribute?(:duration)).to(be(true))
   end
 
-  it 'gets no duration whin invalid request is made to Google' do
+  it 'says so once when Google turns the request down' do
     tour = create(:tour, mode: Mode.find_by(title: 'DRIVING'), stops: create_list(:stop, 5), published: false)
     tour.update(published: true)
-    tour.save
     expect(tour.travel_duration).to(be_zero)
+    expect(tour.duration_problems).to(eq([
+      'Google Maps turned down the request (INVALID_REQUEST), so some of the travel time is missing. ' \
+        'Save the tour again to retry; if it keeps happening, contact ECDS.',
+    ]))
   end
 
-  it 'gets no duration whin response has ZERO_RESULTS' do
-    tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 4), published: false)
+  it 'names each pair of stops Google found no route between' do
+    tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 3), published: false)
     tour.update(published: true)
-    tour.save
     expect(tour.travel_duration).to(be_zero)
+    titles = tour.tour_stops.order(:position).map { |ts| ts.stop.title }
+    expect(tour.duration_problems).to(eq([
+      "Google Maps found no walking route from #{titles[0]} to #{titles[1]}. Check both stops' locations, or try another travel mode.",
+      "Google Maps found no walking route from #{titles[1]} to #{titles[2]}. Check both stops' locations, or try another travel mode.",
+    ]))
+  end
+
+  it 'still publishes when Google can\'t be reached, and says so' do
+    stub_request(:get, %r{maps\.googleapis\.com/maps/api/.*bicycling.*}).to_timeout
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 3), published: false)
+    expect(tour.update(published: true)).to(be(true))
+    expect(tour.reload.published).to(be(true))
+    expect(tour.duration_problems).to(eq([
+      "Google Maps couldn't be reached, so some of the travel time is missing. Save the tour again to retry.",
+    ]))
+  end
+
+  it 'tries again on the next save while there are problems, and clears them once it works' do
+    stub = stub_request(:get, %r{maps\.googleapis\.com/maps/api/.*bicycling.*}).to_timeout
+    tour = create(:tour, mode: Mode.find_by(title: 'BICYCLING'), stops: create_list(:stop, 3), published: false)
+    tour.update(published: true)
+    expect(tour.duration_problems).not_to(be_empty)
+
+    remove_request_stub(stub)
+    tour.update(title: 'Retried')
+    expect(tour.duration_problems).to(be_empty)
+    expect(tour.travel_duration).to(be_positive)
+  end
+
+  it 'clears the problems when the tour is unpublished' do
+    tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 2), published: false)
+    tour.update(published: true)
+    tour.update(published: false)
+    expect(tour.duration_problems).to(be_empty)
   end
 
   it 'does not update the duration when other attributes are updated' do

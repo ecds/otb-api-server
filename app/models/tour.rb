@@ -182,8 +182,15 @@ class Tour < ContentBase
     }
   end
 
+  # Works out how long the tour takes, leg by leg, when it's published or its
+  # stops or travel mode change, and again on any save while some legs
+  # couldn't be worked out. Legs Google can't time are left out and listed in
+  # duration_problems for the admin; the tour still saves.
   def calculate_duration
-    return unless published
+    unless published
+      self.duration_problems = []
+      return
+    end
 
     return if stops.count < 2
 
@@ -191,20 +198,57 @@ class Tour < ContentBase
 
     return if mode.title.nil?
 
-    unless will_save_change_to_published? || will_save_change_to_saved_stop_order? || will_save_change_to_mode_id?
+    retrying = duration_problems.present?
+    unless will_save_change_to_published? || will_save_change_to_saved_stop_order? || will_save_change_to_mode_id? || retrying
       return
     end
 
-    waypoints = tour_stops.order(:position).map { |tour_stop| [tour_stop.stop.lat, tour_stop.stop.lng] }
+    mode_name = mode.title.downcase
+    legs = tour_stops.order(:position).map(&:stop).each_cons(2).map do |from, to|
+      [from, to, leg_between(from, to, mode_name)]
+    end
 
-    self.travel_duration = waypoints.each_cons(2).map do |origin, destination|
-      GoogleDirections.new(origin, [destination], 1, mode.title.downcase).durations&.sum
-    end.compact.sum
+    self.travel_duration = legs.sum { |_, _, leg| leg.seconds.to_i }
 
     # 3.3 is ~ 200 words per-minute, but we need it in seconds, so 200 / 60 = 3.3
     self.read_duration = stops.map { |stop| (stop.sanitized_description.split.size / 3.3).to_i }.sum
 
     self.duration = travel_duration + read_duration if travel_duration
+    self.duration_problems = duration_problems_for(legs, mode_name)
+  end
+
+  def leg_between(from, to, mode_name)
+    if [from.lat, from.lng, to.lat, to.lng].any?(&:blank?)
+      return GoogleDirections::Leg.new(problem: :no_location)
+    end
+
+    GoogleDirections.new([from.lat, from.lng], [[to.lat, to.lng]], 1, mode_name).leg
+  end
+
+  # One line per leg Google couldn't time, except that Google refusing or not
+  # answering is said once, since it's the same for every leg.
+  def duration_problems_for(legs, mode_name)
+    problems = []
+    legs.each do |from, to, leg|
+      case leg.problem
+      when :no_location
+        problems << "#{from.title} or #{to.title} has no location, so the time between them is missing."
+      when :no_route
+        problems << "Google Maps found no #{mode_name} route from #{from.title} to #{to.title}. " \
+          "Check both stops' locations, or try another travel mode."
+      end
+    end
+
+    refused = legs.map { |_, _, leg| leg }.find { |leg| leg.problem == :refused }
+    if refused
+      problems << "Google Maps turned down the request (#{refused.status}), so some of the travel time is missing. " \
+        'Save the tour again to retry; if it keeps happening, contact ECDS.'
+    end
+    if legs.any? { |_, _, leg| leg.problem == :unreachable }
+      problems << "Google Maps couldn't be reached, so some of the travel time is missing. Save the tour again to retry."
+    end
+
+    problems
   end
 
   def check_published

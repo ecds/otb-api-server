@@ -85,9 +85,10 @@ module V4
         TourAccess.new(current_user, @record).edit?
       end
 
-      # What the signed-in user may do to this tour, for the admin.
+      # What the signed-in user may do to this tour, and why parts of its
+      # travel time are missing, for the admin only.
       def with_access(data, tour = @record)
-        data.merge(access: TourAccess.new(current_user, tour).as_json)
+        data.merge(access: TourAccess.new(current_user, tour).as_json, duration_problems: tour.duration_problems)
       end
 
       def allowed_params

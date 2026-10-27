@@ -30,4 +30,29 @@ RSpec.describe(GoogleDirections) do
       expect(directions.matrix).to(be_nil)
     end
   end
+
+  describe '#leg' do
+    it 'gives the time when Google has a route' do
+      leg = described_class.new(origin, destinations, stops_count, 'bicycling').leg
+      expect(leg.seconds).to(be_positive)
+      expect(leg.problem).to(be_nil)
+    end
+
+    it 'says there is no route for ZERO_RESULTS' do
+      leg = described_class.new(origin, destinations, stops_count, 'walking').leg
+      expect(leg.problem).to(eq(:no_route))
+    end
+
+    it 'says Google turned it down, and why' do
+      leg = described_class.new(origin, destinations, stops_count, 'driving').leg
+      expect([leg.problem, leg.status]).to(eq([:refused, 'INVALID_REQUEST']))
+    end
+
+    it "says Google couldn't be reached on a timeout or a non-JSON answer" do
+      stub_request(:get, /bicycling/).to_timeout
+      expect(described_class.new(origin, destinations, stops_count, 'bicycling').leg.problem).to(eq(:unreachable))
+      stub_request(:get, /bicycling/).to_return(status: 502, body: '<html>Bad gateway</html>', headers: { 'Content-Type' => 'text/html' })
+      expect(described_class.new(origin, destinations, stops_count, 'bicycling').leg.problem).to(eq(:unreachable))
+    end
+  end
 end

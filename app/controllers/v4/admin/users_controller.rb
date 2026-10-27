@@ -6,7 +6,9 @@ module V4
       def index
         head(:unauthorized) and return unless current_user&.super
 
-        render_json(User.all.map(&:preview_data).sort_by { |u| u[:email] }) and return
+        tours = tours_by_user
+        users = User.all.map { |user| user.preview_data.merge(authored_tours: tours[user.id] || []) }
+        render_json(users.sort_by { |u| u[:email] }) and return
       end
 
       def show
@@ -16,6 +18,32 @@ module V4
       end
 
       private
+
+      # Each user's tours, grouped by site, from one pass through each site's
+      # schema rather than one per user.
+      def tours_by_user
+        current = Apartment::Tenant.current
+        by_user = Hash.new { |hash, id| hash[id] = [] }
+        TourSet.find_each do |tour_set|
+          begin
+            Apartment::Tenant.switch!(tour_set.subdir)
+          rescue Apartment::TenantNotFound
+            next
+          end
+          TourAuthor.includes(:tour).group_by(&:user_id).each do |user_id, authorships|
+            by_user[user_id] << {
+              site: tour_set.name,
+              subdir: tour_set.subdir,
+              tours: authorships.filter_map do |authorship|
+                { id: authorship.tour.id, title: authorship.tour.title, student: authorship.student } if authorship.tour
+              end.sort_by { |tour| tour[:title].to_s.downcase },
+            }
+          end
+        end
+        by_user
+      ensure
+        Apartment::Tenant.switch!(current)
+      end
 
       def set_record
         return unless current_user.id

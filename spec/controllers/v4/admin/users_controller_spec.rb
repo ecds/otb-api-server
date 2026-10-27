@@ -27,6 +27,29 @@ RSpec.describe(V4::Admin::UsersController, type: :controller) do
       expect(response).to(have_http_status(:unauthorized))
     end
 
+    it "includes each user's tours, by site, with whether they're a student author" do
+      signed_cookie(create(:user, super: true))
+      tour_set = create(:tour_set)
+      author = create(:user)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      quad = create(:tour, title: 'Quad Walk')
+      library = create(:tour, title: 'Library Tour')
+      create(:tour_author, tour: quad, user: author)
+      create(:tour_author, tour: library, user: author, student: true)
+
+      get :index, params: { tenant: tour_set.subdir }
+
+      entry = v4_json.find { |user| user[:id] == author.id }
+      expect(entry[:authored_tours]).to(eq([{
+        site: tour_set.name,
+        subdir: tour_set.subdir,
+        tours: [
+          { id: library.id, title: 'Library Tour', student: true },
+          { id: quad.id, title: 'Quad Walk', student: false },
+        ],
+      }]))
+    end
+
     it 'returns 200 and list of users when authenticated as super' do
       create(:user, display_name: nil) # Ensures the sort_by works
       user = create(:user, super: true)

@@ -23,8 +23,12 @@ module V4
         @record = AccessRequest.new(create_params)
         if @record.save
           mailer = AccessRequestMailer.with(access_request: @record)
-          mailer.access_request_email.deliver_later if params[:tour_ids].nil?
-          mailer.access_request_tour_email.deliver_later if params[:tour_ids].present?
+          # No tours listed (left out, or an empty list) is a request for the whole site.
+          if @record.tour_ids.empty?
+            mailer.access_request_email.deliver_later
+          else
+            mailer.access_request_tour_email.deliver_later
+          end
           render(json: @record, status: :created) and return
         else
           render(json: serialize_errors, status: :unprocessable_entity)

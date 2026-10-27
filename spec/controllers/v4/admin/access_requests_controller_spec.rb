@@ -107,6 +107,16 @@ RSpec.describe(V4::Admin::AccessRequestsController, type: :controller) do
       end.to(have_enqueued_mail(AccessRequestMailer, :access_request_email))
     end
 
+    it 'emails about a whole-site request sent with an empty tour list, as the admin sends it' do
+      user = create(:user, super: false, tour_sets: [])
+      signed_cookie(user)
+      tour_set = create(:tour_set)
+      Apartment::Tenant.switch!(tour_set.subdir)
+      expect do
+        post(:create, params: { tenant: tour_set.subdir, user: user.id, tour_ids: [] }, as: :json)
+      end.to(have_enqueued_mail(AccessRequestMailer, :access_request_email))
+    end
+
     it 'sends an email when access request to tour is created' do
       user = create(:user, super: false, tour_sets: [])
       signed_cookie(user)
@@ -119,6 +129,8 @@ RSpec.describe(V4::Admin::AccessRequestsController, type: :controller) do
     end
 
     it 'sends an email to only the admins for that site and super admins' do
+      # Counts what's sent here, not what earlier examples sent.
+      ActionMailer::Base.deliveries.clear
       user = create(:user, super: false, tour_sets: [])
       random_user = create(:user, super: false, tour_sets: [create(:tour_set)])
       super_user = create(:user, super: true)
@@ -133,6 +145,7 @@ RSpec.describe(V4::Admin::AccessRequestsController, type: :controller) do
       expect(ActionMailer::Base.deliveries.map(&:to).flatten).not_to(include(random_user.email))
       expect(ActionMailer::Base.deliveries.map(&:to).flatten).to(include(super_user.email))
       expect(ActionMailer::Base.deliveries.map(&:to).flatten).to(include(*site_admins.map(&:email)))
+      expect(ActionMailer::Base.deliveries.map(&:to).flatten.count).to(eq(User.where(super: true).count + site_admins.count))
     end
   end
 

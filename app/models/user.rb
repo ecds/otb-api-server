@@ -43,7 +43,9 @@ class User < ApplicationRecord
       display_name:,
       email:,
       super:,
-      tour_sets: tour_set_admins.map { |tsa| { id: tsa.id, name: tsa.tour_set.name, subdir: tsa.tour_set.subdir } },
+      tour_sets: tour_set_admins.map do |tsa|
+        { id: tsa.id, name: tsa.tour_set.name, subdir: tsa.tour_set.subdir, role: tsa.role&.title }
+      end,
       terms_accepted:,
       access_requests: access_requests.map(&:search_data),
       date_joined: created_at&.strftime('%b %d, %Y'),
@@ -93,8 +95,9 @@ class User < ApplicationRecord
       next if tour_sets.include?(ts)
 
       Apartment::Tenant.switch!(ts.subdir)
-      tours = TourAuthor.where(user: self).map(&:tour)
-      { tour_set: ts, tours: } unless tours.empty?
+      authorships = TourAuthor.where(user: self).includes(:tour)
+      tours = authorships.map(&:tour)
+      { tour_set: ts, tours:, student_tour_ids: authorships.select(&:student).map(&:tour_id) } unless tours.empty?
     end.flatten.compact
     # return to initial tenant
     Apartment::Tenant.switch!(current)

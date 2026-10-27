@@ -3,15 +3,18 @@
 module V4
   module Admin
     class CrudController < V4Controller
+      # Before V3Controller's set_record, which would look up any model.
+      prepend_before_action :check_model
       after_action :update_index
 
       def create
-        head(:unauthorized) and return unless crud_allowed?
-
         render(json: { error: 'Cannot create tour using this endpoint.' }, status: :unauthorized) and return if params[:model] == 'tour'
 
         model = params[:model].camelize.constantize
         @record = model.new(allowed_params)
+        head(:unauthorized) and return unless crud_access.create?(@record)
+
+        @record.created_by_id = current_user.id if @record.has_attribute?(:created_by_id)
 
         if @record.save
           render(json: @record.search_data, status: :created) and return
@@ -21,9 +24,9 @@ module V4
       end
 
       def update
-        head(:unauthorized) and return unless crud_allowed?
-
         set_record
+        head(:unauthorized) and return unless crud_access.update?(@record, update_params.to_h)
+
         if @record.update(update_params)
           @record.reload
           render(json: @record.search_data, status: :ok)
@@ -33,7 +36,7 @@ module V4
       end
 
       def destroy
-        head(:unauthorized) and return unless crud_allowed?
+        head(:unauthorized) and return unless @record && crud_access.destroy?(@record)
 
         if @record.destroy
           head(:no_content) and return
@@ -43,6 +46,17 @@ module V4
       end
 
       private
+
+      # Signed-out requests get a 401 whatever they ask for.
+      def check_model
+        return head(:unauthorized) unless current_user&.persisted?
+
+        render(json: { error: 'Unknown model.' }, status: :unprocessable_entity) unless CrudAccess.model?(params[:model])
+      end
+
+      def crud_access
+        @crud_access ||= CrudAccess.new(current_user)
+      end
 
       def set_record
         id = params[:id]
@@ -57,7 +71,7 @@ module V4
       end
 
       def update_index
-        ReindexService.enqueue(@record)
+        ReindexService.enqueue(@record) if @record&.persisted? || @record&.destroyed?
       end
 
       def update_params
@@ -130,6 +144,10 @@ module V4
           params.require(:tour_set).permit(:name, :logo, :description, :matomo_id)
         when 'tour_set_admin'
           params.require(:tour_set_admin).permit(:user_id, :tour_set_id)
+        when 'tour_author'
+          params.require(:tour_author).permit(:student)
+        when 'user'
+          params.require(:user).permit(:terms_accepted)
         end
       end
 

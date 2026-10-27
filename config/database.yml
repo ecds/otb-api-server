@@ -31,8 +31,6 @@ production:
 
 development:
   <<: *default
-  database: <%= Rails.application.credentials.dig(:rdsProduction, :db) %>
-  username: <%= Rails.application.credentials.dig(:rdsProduction, :user) %>
-  password: <%= Rails.application.credentials.dig(:rdsProduction, :pw) %>
-  host: <%= Rails.application.credentials.dig(:rdsProduction, :host) %>
+  password: <%= Rails.application.credentials.dig(:dbTest, :postgres, :pw) %>
+  username: <%= Rails.application.credentials.dig(:dbTest, :postgres, :user) %>
   

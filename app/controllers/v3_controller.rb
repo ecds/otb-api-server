@@ -2,6 +2,7 @@
 
 class V3Controller < ApplicationController
   include EcdsRailsAuthEngine::CurrentUser
+  before_action :refuse_student_writes, only: [:create, :update, :destroy]
   before_action :allowed?, only: [:show, :create, :update, :destroy]
   before_action :set_record, only: [:show, :update, :destroy]
 
@@ -50,6 +51,15 @@ class V3Controller < ApplicationController
   end
 
   private
+
+  # The v3 API doesn't check student authors' limits, and the admin no
+  # longer uses it, so student authors can't write through it at all.
+  def refuse_student_writes
+    return if current_user.nil? || current_user.current_tenant_admin?
+    return unless TourAuthor.exists?(user: current_user, student: true)
+
+    render(json: {}, status: :unauthorized)
+  end
 
   def allowed?
     @allowed = @record&.published || crud_allowed?

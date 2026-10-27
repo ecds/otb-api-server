@@ -48,7 +48,8 @@ Rails.application.routes.draw do
         delete 'media/unused', to: 'media#destroy_unused'
         resources :media, only: [:index, :destroy]
         resources :stops, only: [:index]
-        resources :tour_authors, only: [:index, :create, :destroy]
+        get 'tour_authors/candidates', to: 'tour_authors#candidates'
+        resources :tour_authors, only: [:index, :create, :update, :destroy]
         get 'users', to: 'users#index'
         get 'users/me', to: 'users#show'
         get 'tour_sets/:slug', to: 'tour_sets#show'

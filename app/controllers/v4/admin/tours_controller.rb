@@ -24,7 +24,7 @@ module V4
       def show
         render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless crud_allowed?
 
-        render(json: @record.search_data, status: :ok) and return unless @record.nil?
+        render(json: with_access(@record.search_data), status: :ok) and return unless @record.nil?
 
         head(:not_found)
       end
@@ -49,8 +49,11 @@ module V4
         head(:not_found) and return if @record.nil?
         render(json: { error: 'unauthorized' }, status: :unauthorized) and return unless tour_editable?
 
-        TourDocumentUpdate.call(@record, params.require(:tour).to_unsafe_h)
-        render(json: Tour.search_import.find(@record.id).search_data, status: :ok)
+        TourDocumentUpdate.call(@record, params.require(:tour).to_unsafe_h, user: current_user)
+        saved = Tour.search_import.find(@record.id)
+        render(json: with_access(saved.search_data, saved), status: :ok)
+      rescue TourDocumentUpdate::Forbidden => e
+        render(json: { errors: e.errors }, status: :forbidden)
       rescue TourDocumentUpdate::Invalid => e
         render(json: { errors: e.errors }, status: :unprocessable_entity)
       end
@@ -79,9 +82,12 @@ module V4
       end
 
       def tour_editable?
-        return false unless current_user
+        TourAccess.new(current_user, @record).edit?
+      end
 
-        current_user.current_tenant_admin? || current_user.tours.include?(@record)
+      # What the signed-in user may do to this tour, for the admin.
+      def with_access(data, tour = @record)
+        data.merge(access: TourAccess.new(current_user, tour).as_json)
       end
 
       def allowed_params

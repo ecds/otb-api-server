@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_23_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_27_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "shared_extensions.pgcrypto"
@@ -145,6 +145,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_23_120000) do
     t.text "lqip_data"
     t.text "alt_text"
     t.boolean "decorative", default: false, null: false
+    t.bigint "created_by_id"
+    t.index ["created_by_id"], name: "index_media_on_created_by_id"
   end
 
   create_table "modes", force: :cascade do |t|
@@ -214,6 +216,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_23_120000) do
     t.string "parking_address"
     t.string "icon_color", default: "#D32F2F"
     t.bigint "map_icon_id"
+    t.bigint "created_by_id"
+    t.index ["created_by_id"], name: "index_stops_on_created_by_id"
     t.index ["map_icon_id"], name: "index_stops_on_map_icon_id"
     t.index ["medium_id"], name: "index_stops_on_medium_id"
   end
@@ -246,6 +250,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_23_120000) do
   create_table "tour_authors", force: :cascade do |t|
     t.bigint "tour_id"
     t.bigint "user_id"
+    t.boolean "student", default: false, null: false
     t.index ["tour_id", "user_id"], name: "index_tour_authors_on_tour_id_and_user_id", unique: true
     t.index ["tour_id"], name: "index_tour_authors_on_tour_id"
     t.index ["user_id"], name: "index_tour_authors_on_user_id"

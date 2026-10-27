@@ -11,6 +11,9 @@
 # entry includes it. Linking an already-linked record and unlinking a missing
 # join are no-ops, so retrying a request is safe. Creating new records and
 # uploads stay on their own endpoints.
+#
+# With a user, changes they aren't allowed to make (see TourAccess) raise
+# Forbidden and nothing is saved.
 class TourDocumentUpdate
   class Invalid < StandardError
     attr_reader :errors
@@ -18,6 +21,15 @@ class TourDocumentUpdate
     def initialize(errors)
       @errors = errors
       super('invalid tour document')
+    end
+  end
+
+  class Forbidden < StandardError
+    attr_reader :errors
+
+    def initialize(errors)
+      @errors = errors
+      super('not allowed to change this tour that way')
     end
   end
 
@@ -59,25 +71,29 @@ class TourDocumentUpdate
   OVERLAY_FIELDS = [:north, :south, :east, :west, :rotation].freeze
 
   class << self
-    def call(tour, document)
-      new(tour, document).call
+    def call(tour, document, user: nil)
+      new(tour, document, user:).call
     end
   end
 
-  def initialize(tour, document)
+  def initialize(tour, document, user: nil)
     @tour = tour
     @doc = document.to_h.deep_symbolize_keys
+    @access = user && TourAccess.new(user, tour)
     @errors = []
+    @forbidden = []
   end
 
   def call
     Tour.transaction do
+      check_published
       sync_stops if @doc.key?(:stops)
       sync_flat_pages if @doc.key?(:flat_pages)
       sync_tour_media if @doc.key?(:media)
       sync_modes if @doc.key?(:modes)
       update_overlay if @doc[:map_overlay].is_a?(Hash)
       assign_tour_fields
+      raise Forbidden, @forbidden if @forbidden.any?
       raise Invalid, @errors if @errors.any?
 
       # Saved last: update_saved_stop_order reads stop order from the DB.
@@ -88,6 +104,24 @@ class TourDocumentUpdate
   end
 
   private
+
+  def check_published
+    return if @access.nil? || !@doc.key?(:published) || @access.publish?
+    return if ActiveModel::Type::Boolean.new.cast(@doc[:published]) == @tour.published
+
+    @forbidden << { path: 'published', detail: "Student authors can't publish or unpublish a tour." }
+  end
+
+  # Unlinking a stop or medium counts as removing it from the tour.
+  def removal_allowed?(join)
+    return true if @access.nil?
+
+    case join
+    when TourStop then @access.remove?(join.stop)
+    when TourMedium, StopMedium then @access.remove?(join.medium)
+    else @access.edit?
+    end
+  end
 
   def assign_tour_fields
     @tour.assign_attributes(@doc.slice(*TOUR_FIELDS))
@@ -163,6 +197,13 @@ class TourDocumentUpdate
       if entry[:relation_id]
         join = by_id[entry[:relation_id].to_i]
         if entry[:_destroy]
+          if join && !removal_allowed?(join)
+            @forbidden << {
+              path: entry_path,
+              detail: 'Student authors can only remove what they added, and only before the tour is published.',
+            }
+            next
+          end
           join&.destroy!
           next
         end

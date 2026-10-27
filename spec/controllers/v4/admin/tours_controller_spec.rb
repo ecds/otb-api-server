@@ -198,6 +198,43 @@ RSpec.describe(V4::Admin::ToursController, type: :controller) do
       expect(tour.reload.title).not_to(eq('Nope'))
     end
 
+    describe 'as a student author' do
+      let(:student) { create(:user, super: false) }
+
+      before do
+        create(:tour_author, tour:, user: student, student: true)
+        signed_cookie(student)
+      end
+
+      it "can't publish the tour" do
+        patch_tour({ published: true })
+        expect(response.status).to(eq(403))
+        expect(tour.reload.published).to(be(false))
+      end
+
+      it "can't remove a stop someone else added" do
+        join = tour.tour_stops.first
+        patch_tour({ stops: [{ relation_id: join.id, _destroy: true }] })
+        expect(response.status).to(eq(403))
+        expect(TourStop.exists?(join.id)).to(be(true))
+      end
+
+      it 'removes a stop they added, and is told what they may remove' do
+        mine = create(:stop, created_by_id: student.id)
+        join = create(:tour_stop, tour:, stop: mine)
+        patch_tour({ stops: [{ relation_id: join.id, _destroy: true }] })
+        expect(response.status).to(eq(200))
+        expect(TourStop.exists?(join.id)).to(be(false))
+        expect(JSON.parse(response.body)['access']).to(include('student' => true, 'publish' => false))
+      end
+
+      it 'edits the tour like any author' do
+        patch_tour({ title: 'Student edit' })
+        expect(response.status).to(eq(200))
+        expect(tour.reload.title).to(eq('Student edit'))
+      end
+    end
+
     it 'allows an author of the tour' do
       user = create(:user, super: false)
       Apartment::Tenant.switch!(tour_set.subdir)

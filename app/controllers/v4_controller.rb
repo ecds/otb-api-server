@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class V4Controller < V3Controller
+  # V4 actions check student authors' limits themselves.
+  skip_before_action :refuse_student_writes
   before_action :set_tour_set, only: [:index, :show]
 
   def default_serializer_options

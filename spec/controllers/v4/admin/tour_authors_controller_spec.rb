@@ -367,4 +367,59 @@ RSpec.describe(V4::Admin::TourAuthorsController, type: :controller) do
       expect(response).to(have_http_status(:not_found))
     end
   end
+
+  describe 'student authors' do
+    let(:tour_set) { create(:tour_set) }
+    let(:admin) { create(:user, super: false, tour_sets: [tour_set]) }
+
+    before { signed_cookie(admin) }
+
+    it 'lists whether each author is a student' do
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      student = create(:user)
+      create(:tour_author, tour:, user: student, student: true)
+      get :index, params: { tenant: tour_set.subdir, tour_id: tour.id }
+      expect(v4_json.first).to(include(id: student.id, student: true))
+    end
+
+    it 'adds an author as a student' do
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      user = create(:user)
+      post :create, params: { tenant: tour_set.subdir, tour_id: tour.id, user_id: user.id, student: true }
+      expect(TourAuthor.find_by(tour:, user:).student).to(be(true))
+    end
+
+    it 'changes whether an author is a student' do
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      user = create(:user)
+      create(:tour_author, tour:, user:)
+      patch :update, params: { tenant: tour_set.subdir, id: user.id, tour_id: tour.id, student: true }
+      expect(response).to(have_http_status(:ok))
+      expect(TourAuthor.find_by(tour:, user:).student).to(be(true))
+    end
+
+    it "doesn't let tour authors change it" do
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      author = create(:user, super: false)
+      create(:tour_author, tour:, user: author)
+      signed_cookie(author)
+      patch :update, params: { tenant: tour_set.subdir, id: author.id, tour_id: tour.id, student: true }
+      expect(response).to(have_http_status(:unauthorized))
+    end
+
+    it "offers the site's other authors who aren't on this tour yet" do
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      on_tour = create(:user)
+      elsewhere = create(:user)
+      create(:tour_author, tour:, user: on_tour)
+      create(:tour_author, tour: create(:tour), user: elsewhere)
+      get :candidates, params: { tenant: tour_set.subdir, tour_id: tour.id }
+      expect(v4_json.map { |u| u[:id] }).to(eq([elsewhere.id]))
+    end
+  end
 end

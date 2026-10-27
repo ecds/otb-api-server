@@ -209,6 +209,7 @@ class TourSet < ApplicationRecord
         id: ta.id,
         user:,
         tour: ta.tour.title,
+        student: ta.student,
         may_create_tour: ta.user.current_tenant_tour_creator?,
       }
     end.sort_by { |ta| ta[:user] }

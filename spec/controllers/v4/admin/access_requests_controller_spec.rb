@@ -117,6 +117,23 @@ RSpec.describe(V4::Admin::AccessRequestsController, type: :controller) do
         post(:create, params: { tenant: tour_set.subdir, user: user.id, tour_ids: [tour.id] })
       end.to(have_enqueued_mail(AccessRequestMailer, :access_request_tour_email))
     end
+
+    it 'sends an email to only the admins for that site and super admins' do
+      user = create(:user, super: false, tour_sets: [])
+      random_user = create(:user, super: false, tour_sets: [create(:tour_set)])
+      super_user = create(:user, super: true)
+      signed_cookie(user)
+      tour_set = create(:tour_set)
+      site_admins = create_list(:user, 2, tour_sets: [tour_set])
+      Apartment::Tenant.switch!(tour_set.subdir)
+      tour = create(:tour)
+      perform_enqueued_jobs do
+        post(:create, params: { tenant: tour_set.subdir, user: user.id, tour_ids: [tour.id] })
+      end
+      expect(ActionMailer::Base.deliveries.map(&:to).flatten).not_to(include(random_user.email))
+      expect(ActionMailer::Base.deliveries.map(&:to).flatten).to(include(super_user.email))
+      expect(ActionMailer::Base.deliveries.map(&:to).flatten).to(include(*site_admins.map(&:email)))
+    end
   end
 
   describe 'PUT #update' do

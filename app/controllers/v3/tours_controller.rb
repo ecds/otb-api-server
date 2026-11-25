@@ -41,6 +41,7 @@ module V3
     def create
       if crud_allowed?
         @record = Tour.new(tour_params)
+        @record.skip_alt_text_check = from_production_admin?
         if @record.save
           render(json: @record, status: :created, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}")
         else
@@ -54,6 +55,7 @@ module V3
     # PATCH/PUT /tours/1
     def update
       if crud_allowed?
+        @record.skip_alt_text_check = from_production_admin?
         if @record.update(tour_params)
           render(json: @record, location: "/#{Apartment::Tenant.current}/tours/#{@record.id}")
         else
@@ -65,6 +67,15 @@ module V3
     end
 
     private
+
+    # The production admin has no way to add alt text yet, so tours published
+    # from it skip that check. dev.opentour.site is still held to it.
+    # TODO: remove once production runs the admin with alt text editing.
+    PRODUCTION_ADMIN_ORIGIN = 'https://opentour.site'
+
+    def from_production_admin?
+      request.origin == PRODUCTION_ADMIN_ORIGIN
+    end
 
     # Only allow a trusted parameter "white list" through.
     def tour_params

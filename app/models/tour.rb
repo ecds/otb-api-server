@@ -48,10 +48,14 @@ class Tour < ContentBase
       'ko-KR': 16,
     }
 
+  # Set for requests from the production admin, which can't add alt text yet.
+  # TODO: remove once production runs the admin with alt text editing.
+  attr_accessor :skip_alt_text_check
+
   validates :title, presence: true, uniqueness: { case_sensitive: false }
   # Only when a tour is being published, so tours that are already
   # published stay published and can still be edited.
-  validate :images_have_alt_text, if: :publishing?
+  validate :images_have_alt_text, if: -> { publishing? && !skip_alt_text_check }
   validate :open_geographies_endpoint_allowed, if: -> { open_geographies_endpoint.present? && will_save_change_to_open_geographies_endpoint? }
 
   before_validation -> { self.mode ||= Mode.last }

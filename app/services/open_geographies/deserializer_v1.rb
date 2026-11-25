@@ -62,6 +62,7 @@ module OpenGeographies
           slug: og_stop[:slug],
           slugs: og_stop[:slugs],
           title: og_stop[:name],
+          type: 'stop',
         }
       end
     end
@@ -76,6 +77,8 @@ module OpenGeographies
 
     def media(og_media)
       og_media.map do |medium|
+        next audio(medium) if medium[:media_type] == 'audio'
+
         # Only media that embed something, or come without a picture, need
         # their thumbnail looked up; images use the one OG provides.
         needs_lookup = medium[:embed_url].present? || (medium[:thumbnail].blank? && medium[:preview].blank?)
@@ -98,6 +101,26 @@ module OpenGeographies
           files: embed ? embed_files(thumbnail) : image_files(medium, thumbnail),
         }
       end
+    end
+
+    # Audio plays from content_url. Its picture is OG's thumbnail when there
+    # is one; without one, the files are empty and the player stands alone.
+    # Alt text describes pictures, so audio is never flagged for missing it.
+    def audio(medium)
+      picture = medium[:thumbnail] || medium[:preview]
+      {
+        title: medium[:name],
+        alt_text: medium[:alt_text].presence,
+        decorative: medium[:alt_text].blank?,
+        missing_alt_text: false,
+        audio: medium[:content_url],
+        manifest: medium[:manifest_url],
+        provider: nil,
+        embed: nil,
+        embed_id: nil,
+        video: nil,
+        files: { original: picture, mobile: picture, tablet: picture, desktop: picture },
+      }
     end
 
     def image_files(medium, thumbnail)

@@ -33,6 +33,7 @@ RSpec.describe(OpenGeographies::Source) do
     expect(result[:stop_count]).to(eq(4))
     # Sorted by each stop's Open Geographies order, not the listed order.
     expect(result[:stops].first).to(include(title: 'Oconee Baptist', position: 1))
+    expect(result[:stops]).to(all(include(type: 'stop')))
     expect(result[:bounds]).to(include(:north, :south, :east, :west))
     expect(result[:fetched_at]).to(be_present)
   end

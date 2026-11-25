@@ -5,7 +5,9 @@ class ApplicationController < ActionController::API
   include Response
   include ExceptionHandler
   include EcdsRailsAuthEngine::CurrentUser
-  include ActiveStorage::SetCurrent if Rails.env.test?
+  # The disk storage service used in tests and the Docker stack builds file
+  # URLs from the current request.
+  include ActiveStorage::SetCurrent unless Rails.env.production?
 
   before_action :set_no_cache_control, only: [:index, :show]
 

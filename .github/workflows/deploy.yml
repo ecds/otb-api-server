@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [develop, main]
+    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # A manual dispatch could otherwise pick "production" while running
       # against a non-main branch, silently deploying untested branch code

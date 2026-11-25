@@ -78,7 +78,7 @@ class Stop < ContentBase
       id:,
       lat: lat&.to_f,
       lng: lng&.to_f,
-      map_icon: map_icon&.original_image_url || nil,
+      map_icon: map_icon.present? ? map_icon.search_data[:url] : nil,
       media: media_search_data(stop_media),
       meta_description:,
       orphaned:,

@@ -13,7 +13,7 @@ class MapIcon < MediumBaseRecord
   end
 
   def search_data
-    { id: }
+    { id:, url: http_path }
   end
 
   def check_dimensions

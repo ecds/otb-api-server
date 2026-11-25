@@ -232,7 +232,7 @@ RSpec.describe(V4::Admin::CrudController, type: :controller) do
         value: icon.id,
       }
       put :update, params: { id: stop.id, tenant: Apartment::Tenant.current, **request_body }
-      expect(v4_json[:map_icon]).to(include(icon.filename))
+      expect(v4_json[:map_icon]).to(include(icon.search_data[:url]))
     end
 
     it 'uploads and replaces file' do

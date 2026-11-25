@@ -182,9 +182,15 @@ class Tour < ContentBase
     }
   end
 
+  # Shown when Google couldn't be reached. Only this problem is retried on the
+  # next save: the others won't change until the stops or mode do, which
+  # already triggers a new calculation.
+  UNREACHABLE_PROBLEM = "Google Maps couldn't be reached, so some of the travel time is missing. " \
+    'Save the tour again to retry.'
+
   # Works out how long the tour takes, leg by leg, when it's published or its
-  # stops or travel mode change, and again on any save while some legs
-  # couldn't be worked out. Legs Google can't time are left out and listed in
+  # stops or travel mode change, and again on the next save if Google
+  # couldn't be reached. Legs Google can't time are left out and listed in
   # duration_problems for the admin; the tour still saves.
   def calculate_duration
     unless published
@@ -198,7 +204,7 @@ class Tour < ContentBase
 
     return if mode.title.nil?
 
-    retrying = duration_problems.present?
+    retrying = duration_problems.include?(UNREACHABLE_PROBLEM)
     unless will_save_change_to_published? || will_save_change_to_saved_stop_order? || will_save_change_to_mode_id? || retrying
       return
     end
@@ -242,10 +248,10 @@ class Tour < ContentBase
     refused = legs.map { |_, _, leg| leg }.find { |leg| leg.problem == :refused }
     if refused
       problems << "Google Maps turned down the request (#{refused.status}), so some of the travel time is missing. " \
-        'Save the tour again to retry; if it keeps happening, contact ECDS.'
+        'Contact ECDS.'
     end
     if legs.any? { |_, _, leg| leg.problem == :unreachable }
-      problems << "Google Maps couldn't be reached, so some of the travel time is missing. Save the tour again to retry."
+      problems << UNREACHABLE_PROBLEM
     end
 
     problems
@@ -271,7 +277,7 @@ class Tour < ContentBase
       is_geo:,
       link_address:,
       link_text:,
-      map_icon: map_icon&.original_image_url || nil,
+      map_icon: map_icon.present? ? map_icon.search_data[:url] : nil,
       map_overlay: map_overlay&.search_data,
       map_type: map_type || 'hybrid',
       media: media_search_data(tour_media),

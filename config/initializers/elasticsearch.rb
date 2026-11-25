@@ -13,7 +13,7 @@ Searchkick.client = if ENV.fetch('RAILS_ENV', nil) == 'production'
   )
 else
   Elasticsearch::Client.new(
-    host: 'localhost',
+    host: ENV.fetch('ELASTICSEARCH_URL', 'localhost'),
     transport_options: { request: { timeout: }, headers: { content_type: 'application/json' } },
   )
 end

@@ -8,6 +8,10 @@ class GoogleDirections
 
   TIMEOUT = 10
 
+  # Refusals that can go away on their own, so they're treated like Google
+  # not answering and retried on the next save.
+  TRANSIENT_STATUSES = ['OVER_QUERY_LIMIT', 'UNKNOWN_ERROR'].freeze
+
   def initialize(origin, destinations, stops_count, mode)
     google_key = ENV['RAILS_ENV'] == 'test' ? 'FAkeFaK-E_fAkeChv-P3nchtQYHoCLfFzn9ylr8' : Rails.application.credentials.dig(:g_maps_key)
     @query = {
@@ -23,7 +27,7 @@ class GoogleDirections
   # From the origin to the destinations, added up, as `durations` does.
   def leg
     response = fetch
-    return Leg.new(problem: :unreachable) if response.nil?
+    return Leg.new(problem: :unreachable) if response.nil? || TRANSIENT_STATUSES.include?(response[:status])
     return Leg.new(problem: :refused, status: response[:status]) unless response[:status] == 'OK'
 
     elements = Array(response.dig(:rows, 0, :elements))

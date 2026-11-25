@@ -31,6 +31,6 @@ production:
 
 development:
   <<: *default
-  password: <%= Rails.application.credentials.dig(:dbTest, :postgres, :pw) %>
-  username: <%= Rails.application.credentials.dig(:dbTest, :postgres, :user) %>
+  password: <%= ENV['DB_PASSWORD'] || Rails.application.credentials.dig(:dbTest, :postgres, :pw) %>
+  username: <%= ENV['DB_USERNAME'] || Rails.application.credentials.dig(:dbTest, :postgres, :user) %>
   

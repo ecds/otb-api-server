@@ -78,7 +78,7 @@ RSpec.describe(Tour, type: :model) do
     expect(tour.travel_duration).to(be_zero)
     expect(tour.duration_problems).to(eq([
       'Google Maps turned down the request (INVALID_REQUEST), so some of the travel time is missing. ' \
-        'Save the tour again to retry; if it keeps happening, contact ECDS.',
+        'Contact ECDS.',
     ]))
   end
 
@@ -113,6 +113,16 @@ RSpec.describe(Tour, type: :model) do
     tour.update(title: 'Retried')
     expect(tour.duration_problems).to(be_empty)
     expect(tour.travel_duration).to(be_positive)
+  end
+
+  it 'does not ask Google again on unrelated saves when the problem is lasting' do
+    tour = create(:tour, mode: Mode.find_by(title: 'WALKING'), stops: create_list(:stop, 3), published: false)
+    tour.update(published: true)
+    expect(tour.duration_problems).not_to(be_empty)
+
+    WebMock.reset_executed_requests!
+    tour.update(title: 'Renamed')
+    expect(a_request(:get, /maps\.googleapis\.com/)).not_to(have_been_made)
   end
 
   it 'clears the problems when the tour is unpublished' do

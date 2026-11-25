@@ -3,7 +3,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
   config.hosts << 'otb.org'
-  Rails.application.routes.default_url_options[:host] = 'https://otb.org:3000'
+  # Extra hosts, comma separated, such as the Docker stack's api.lvh.me.
+  config.hosts.concat(ENV.fetch('RAILS_HOSTS', '').split(','))
+  Rails.application.routes.default_url_options[:host] = ENV.fetch('BASE_URL', 'https://otb.org:3000')
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
@@ -16,7 +18,7 @@ Rails.application.configure do
   config.consider_all_requests_local = true
 
   # Active Storage
-  config.active_storage.service = :production
+  config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 'production').to_sym
 
   # Enable/disable caching. By default caching is disabled.
   if Rails.root.join('tmp/caching-dev.txt').exist?
@@ -51,6 +53,6 @@ Rails.application.configure do
   # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
   config.file_watcher = ActiveSupport::FileUpdateChecker
 
-  ENV['BASE_URL'] = 'https://otb.org:3000'
-  ENV['INSECURE_IMAGE_BASE_URL'] = 'http://otb.org:8080'
+  ENV['BASE_URL'] ||= 'https://otb.org:3000'
+  ENV['INSECURE_IMAGE_BASE_URL'] ||= 'http://otb.org:8080'
 end

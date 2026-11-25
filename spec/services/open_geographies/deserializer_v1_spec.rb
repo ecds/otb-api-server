@@ -65,6 +65,47 @@ RSpec.describe(OpenGeographies::DeserializerV1) do
     expect(medium).to(include(embed: nil, embed_id: nil))
   end
 
+  describe 'audio' do
+    def og_audio(**extra)
+      {
+        uuid: 'e7315a7a-1b9b-4b2b-a1e0-c5d18af01fdd',
+        name: 'Antioch 1- Memories',
+        content_url: 'https://iiif.example.org/resources/abc/inline',
+        manifest_url: 'https://iiif.example.org/resources/abc/manifest',
+        media_type: 'audio',
+      }.merge(extra)
+    end
+
+    def deserialize(medium)
+      described_class.new(stops: [og_stop('Antioch').merge(media: [medium])]).call[:stops].first[:media].first
+    end
+
+    it 'plays from content_url and keeps the manifest' do
+      expect(deserialize(og_audio)).to(include(
+        title: 'Antioch 1- Memories',
+        audio: 'https://iiif.example.org/resources/abc/inline',
+        manifest: 'https://iiif.example.org/resources/abc/manifest',
+        embed: nil,
+        video: nil,
+      ))
+    end
+
+    it "doesn't treat the audio file as a picture or look one up" do
+      allow(OpenGeographies::MediaResolver).to(receive(:new).and_call_original)
+      expect(deserialize(og_audio)[:files].values).to(all(be_nil))
+      expect(OpenGeographies::MediaResolver).not_to(have_received(:new))
+    end
+
+    it "uses OG's thumbnail as its picture when there is one" do
+      expect(deserialize(og_audio(thumbnail: 'https://example.org/t.jpg'))[:files].values.uniq)
+        .to(eq(['https://example.org/t.jpg']))
+    end
+
+    it "isn't flagged for missing alt text" do
+      expect(deserialize(og_audio)).to(include(missing_alt_text: false))
+    end
+  end
+
   it 'shows OG images without alt text as decorative, but flags them' do
     stop = og_stop('Academy').merge(media: [
       { uuid: 'a', name: 'Front', thumbnail: 'https://example.org/a.jpg', alt_text: 'Academy Baptist from the road' },

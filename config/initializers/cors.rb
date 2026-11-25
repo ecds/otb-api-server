@@ -15,6 +15,7 @@ Rails.application.config.middleware.insert_before(0, Rack::Cors) do
       /.*\.opentour.site/,
       /.*\.dev\.opentour.site/,
       /.*\.lvh.me:4200/,
+      %r{\Ahttps://([a-z0-9-]+\.)?lvh\.me\z},
       /.*localhost:3000/,
       /.*\.urbanspatialhistory.org/,
       /.*\.otb\.ecdsdev.org/,
